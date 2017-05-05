@@ -1,3 +1,9 @@
+# ×Ô¶¨Òå
+debug/
+release/
+*.csv
+*.xls
+
 # Compiled Object files
 *.slo
 *.lo
