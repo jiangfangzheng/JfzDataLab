@@ -24,6 +24,7 @@ void MainWindow::on_pushButton_DS18B20_clicked()
     // 载入成功操作
     if(!dir.isEmpty())
     {
+        QTime time;time.start(); // 计时
         // 指定文件名
         QString CH1 = dir + "/通道1.csv";
         QString CH2 = dir + "/通道2.csv";
@@ -40,7 +41,10 @@ void MainWindow::on_pushButton_DS18B20_clicked()
         // 保存文件
         int b = saveStandData("Data-DS18B20",DataName_DS18B20,Time, MatDS18B20);
         if( b == 0 )
-            ui->label_3->setText("电类保存成功！");
+        {
+            QString timecost = QString::number(time.elapsed()/1000.0);
+            ui->label_3->setText("FBG应力保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+        }
     }
 }
 
@@ -53,6 +57,7 @@ void MainWindow::on_pushButton_CCD_clicked()
     // 载入成功操作
     if(!dir.isEmpty())
     {
+        QTime time;time.start(); // 计时
         // 指定文件名
         QString CH1 = dir + "/CCD数据值.csv";
         QString  DataName_CCD= "X,Y,Z";
@@ -63,7 +68,10 @@ void MainWindow::on_pushButton_CCD_clicked()
         // 保存文件
         int b = saveStandData("Data-CCD",DataName_CCD,Time, MatCCD);
         if( b == 0 )
-            ui->label_3->setText("CCD保存成功！");
+        {
+            QString timecost = QString::number(time.elapsed()/1000.0);
+            ui->label_3->setText("FBG应力保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+        }
     }
 }
 
@@ -76,6 +84,7 @@ void MainWindow::on_pushButton_FBGT_clicked()
     // 载入成功操作
     if(!dir.isEmpty())
     {
+        QTime time;time.start(); // 计时
         // 指定文件名
         QString CH08 = dir + "/通道8.csv";
         QString CH09 = dir + "/通道9.csv";
@@ -106,14 +115,17 @@ void MainWindow::on_pushButton_FBGT_clicked()
         QString  DataName_FBGT= "CH08-01,CH08-02,CH08-03,CH08-04,CH08-05,CH08-06,CH08-07,CH08-08,CH08-09,CH08-10,CH08-11,CH08-12,CH08-13,CH08-14,CH08-15,CH09-01,CH09-02,CH09-03,CH09-04,CH09-05,CH09-06,CH09-07,CH09-08,CH10-01,CH10-02,CH10-03,CH10-04,CH10-05,CH10-06,CH10-07,CH11-01,CH11-02,CH11-03,CH11-04,CH11-05,CH11-06,CH11-07,CH11-08,CH11-09,CH11-10,CH11-11,CH11-12,CH11-13,CH11-14,CH11-15,CH12-01,CH12-02,CH12-03,CH12-04,CH12-05,CH12-06,CH12-07,CH12-08,CH12-09,CH12-10,CH12-11,CH12-12,CH12-13,CH12-14,CH12-15,CH13-01,CH13-02,CH13-03,CH13-04,CH13-05,CH13-06,CH13-07,CH13-08,CH13-09,CH13-10,CH13-11,CH13-12,CH13-13,CH13-14,CH13-15,CH14-01,CH14-02,CH14-03,CH14-04,CH14-05,CH14-06,CH14-07,CH15-01,CH15-02,CH15-03,CH15-04,CH15-05,CH15-06,CH15-07,CH15-08,CH16-01,CH16-02,CH16-03,CH16-04,CH16-05,CH16-06,CH16-07,CH16-08,CH17-01,CH17-02,CH17-03,CH17-04,CH17-05,CH17-06,CH17-07,CH17-08,CH18-01,CH18-02,CH18-03,CH18-04,CH18-05,CH18-06,CH18-07,CH18-08,CH19-01,CH19-02,CH19-03,CH19-04,CH19-05,CH19-06,CH19-07,CH19-08,CH19-09,CH19-10,CH20-01,CH20-02,CH20-03,CH20-04,CH20-05,CH20-06,CH20-07,CH20-08,CH20-09,CH20-10,CH21-01,CH21-02,CH21-03,CH21-04,CH21-05,CH21-06,CH21-07,CH22-01,CH22-02,CH22-03,CH22-04,CH22-05,CH22-06,CH22-07,CH22-08,CH22-09,CH22-10,CH23-01,CH23-02,CH23-03,CH23-04,CH24-01,CH24-02,CH24-03,CH24-04,CH24-05,CH24-06,CH24-07,CH24-08,CH24-09,CH24-10,CH25-01,CH25-02,CH25-03,CH25-04,CH25-05,CH25-06,CH25-07,CH25-08,CH25-09,CH25-10,CH26-01,CH26-02,CH26-03,CH26-04,CH27-01,CH27-02,CH27-03,CH27-04,CH27-05,CH27-06,CH27-07,CH27-08,CH27-09,CH28-01,CH28-02,CH28-03,CH28-04,CH28-05,CH28-06,CH28-07,CH28-08,CH28-09,CH28-10,CH29-01,CH29-02,CH29-03,CH29-04,CH29-05,CH29-06,CH29-07,CH29-08,CH29-09,CH29-10,CH30-01,CH30-02,CH30-03,CH30-04,CH30-05,CH30-06,CH30-07,CH30-08,CH30-09,CH30-10,CH31-01,CH31-02,CH31-03,CH31-04,CH31-05,CH31-06,CH31-07,CH31-08,CH31-09,CH31-10,CH32-01,CH32-02,CH32-03";
         QStringList Time;
         int a = Stand_FBGT( CH08,  CH09,  CH10,  CH11,  CH12,  CH13,  CH14,  CH15,  CH16, \
-                        CH17,  CH18,  CH19,  CH20,  CH21,  CH22,  CH23,  CH24,  CH25, \
-                        CH26,  CH27,  CH28,  CH29,  CH30,  CH31,  CH32, MatFBGT, Time);
+                            CH17,  CH18,  CH19,  CH20,  CH21,  CH22,  CH23,  CH24,  CH25, \
+                            CH26,  CH27,  CH28,  CH29,  CH30,  CH31,  CH32, MatFBGT, Time);
         if( a == 0 )
             ui->label_3->setText("拟载入成功！");
         // 保存文件
         int b = saveStandData("Data-FBGTemperature",DataName_FBGT,Time, MatFBGT);
         if( b == 0 )
-            ui->label_3->setText("FBG温度保存成功！");
+        {
+            QString timecost = QString::number(time.elapsed()/1000.0);
+            ui->label_3->setText("FBG应力保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+        }
     }
 }
 
@@ -126,6 +138,7 @@ void MainWindow::on_pushButton_FBGS_clicked()
     // 载入成功操作
     if(!dir.isEmpty())
     {
+        QTime time;time.start(); // 计时
         // 指定文件名
         QString CH01 = dir + "/通道1.csv";
         QString CH02 = dir + "/通道2.csv";
@@ -143,26 +156,136 @@ void MainWindow::on_pushButton_FBGS_clicked()
         // 保存文件
         int b = saveStandData("Data-FBGStress",DataName_FBGS,Time, MatFBGS);
         if( b == 0 )
-            ui->label_3->setText("FBG应力保存成功！");
+        {
+            QString timecost = QString::number(time.elapsed()/1000.0);
+            ui->label_3->setText("FBG应力保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+        }
     }
 }
 
 // 环境温度标准化
 void MainWindow::on_pushButton_ENV_clicked()
 {
-    ui->label_3->setText("调用Excel，请等待以免卡死！");
+    ui->label_3->setText("<span style='color: rgb(255, 0, 0);'>读取xls文件比较花时间，请耐心等待，请勿操作其它以免卡死^_^  正在处理...</span>");
     ui->pushButton_ENV->setEnabled(false);
+    QStringList EnvFileNameList = QFileDialog::getOpenFileNames(this, tr("打开环境温度数据"), " ", tr("textfile(*.xls);"));
+    if(EnvFileNameList.size() != 4)
+    {
+        ui->label_3->setText("请选择环境温度4个文件！");
+        QMessageBox::critical(NULL, "注意", "请选择环境温度的4个文件！", QMessageBox::Yes, QMessageBox::Yes);
+        ui->pushButton_ENV->setEnabled(true);
+    }
+    else
+    {
+        QTime time;time.start(); // 计时
+        // 从xls中读取文件到map
+        QMap<QString,float> mapA;
+        QMap<QString,float> mapB;
+        QMap<QString,float> mapC;
+        QMap<QString,float> mapD;
 
-    QString FileName = "E:\\Programming\\Coding\\JfzDataLab\\WHUT-A_2017-05-02.xls";
-    QMap<QString,float> map;
+        for(int i=0; i<EnvFileNameList.size(); i++)
+        {
+            QString FileName = EnvFileNameList[i];
+            QString ID = FileName.right(16).left(1); // 提取文件名中的ABCD以区分，例如“WHUT-A_2017-05-02.xls”
+            if(ID == "A") readEnvXlsFile(FileName, mapA);
+            if(ID == "B") readEnvXlsFile(FileName, mapB);
+            if(ID == "C") readEnvXlsFile(FileName, mapC);
+            if(ID == "D") readEnvXlsFile(FileName, mapD);
+        }
+        //        qDebug()<<"mapA.size："<<mapA.size();
+        //        qDebug()<<"mapB.size："<<mapB.size();
+        //        qDebug()<<"mapC.size："<<mapC.size();
+        //        qDebug()<<"mapD.size："<<mapD.size();
 
-    QTime time;time.start();
-    readEnvXlsFile(FileName, map);
-    qDebug()<<"读取xls时间："<<time.elapsed()/1000.0<<"s";
-    qDebug()<<"map.size："<<map.size();
+        // 找出共有的【最晚开始时间】和【最早结束时间】
+        QString startDate;
+        QString endDate;
+        QMap<QString, float>::const_iterator i;
+        for (i = mapA.constBegin(); i != mapA.constEnd(); ++i)
+        {
+            if( i == mapA.constBegin() )  startDate = i.key();
+            if( i+1 == mapA.constEnd() )  endDate   = i.key();
+        }
+        for (i = mapB.constBegin(); i != mapB.constEnd(); ++i)
+        {
+            if( i == mapB.constBegin() )  startDate = QString::compare(i.key(),startDate)>=0?i.key():startDate;
+            if( i+1 == mapB.constEnd() )  endDate   = QString::compare(i.key(),endDate  )<=0?i.key():endDate;
+        }
+        for (i = mapC.constBegin(); i != mapC.constEnd(); ++i)
+        {
+            if( i == mapC.constBegin() )  startDate = QString::compare(i.key(),startDate)>=0?i.key():startDate;
+            if( i+1 == mapC.constEnd() )  endDate   = QString::compare(i.key(),endDate  )<=0?i.key():endDate;
+        }
+        for (i = mapD.constBegin(); i != mapD.constEnd(); ++i)
+        {
+            if( i == mapD.constBegin() )  startDate = QString::compare(i.key(),startDate)>=0?i.key():startDate;
+            if( i+1 == mapD.constEnd() )  endDate   = QString::compare(i.key(),endDate  )<=0?i.key():endDate;
+        }
+        qDebug() <<"公共开始时间:" <<startDate << " 公共结束时间:" << endDate;
 
+        // 制作整合的数据（Key为时间，value为,分隔4个值）例如："2017-04-25 13:23"、"19.6,19.4,19.3,19.5"
+        QMap<QString,QString> mapAll;
+        for (i = mapA.constBegin(); i != mapA.constEnd(); ++i)
+        {
+            if( QString::compare(i.key(),startDate)>=0 && QString::compare(i.key(),endDate)<=0)
+            {
+                QString value = QString::number(i.value());
+                mapAll.insert(i.key(), value);
+            }
+        }
+        for (i = mapB.constBegin(); i != mapB.constEnd(); ++i)
+        {
+            if( QString::compare(i.key(),startDate)>=0 && QString::compare(i.key(),endDate)<=0)
+            {
+                QString value = "," + QString::number(i.value());
+                mapAll.insert(i.key(), mapAll[i.key()] + value);
+            }
+        }
+        for (i = mapC.constBegin(); i != mapC.constEnd(); ++i)
+        {
+            if( QString::compare(i.key(),startDate)>=0 && QString::compare(i.key(),endDate)<=0)
+            {
+                QString value = "," + QString::number(i.value());
+                mapAll.insert(i.key(), mapAll[i.key()] + value);
+            }
+        }
+        for (i = mapD.constBegin(); i != mapD.constEnd(); ++i)
+        {
+            if( QString::compare(i.key(),startDate)>=0 && QString::compare(i.key(),endDate)<=0)
+            {
+                QString value = "," + QString::number(i.value());
+                mapAll.insert(i.key(), mapAll[i.key()] + value);
+            }
+        }
 
-    ui->pushButton_ENV->setEnabled(true);
+        // 保存文件
+        QString Text = "EnvTemperature,Back,Right,Left,Front\r\n";
+        QString SaveFileName = startDate.left(10) +"~" + endDate.left(10) +"-Data-EnvTemperature.csv";
+        //QString SaveFileName = "Data-EnvTemperature.csv";
+        QFile file(SaveFileName); // 实例 QFile
+        file.open(QIODevice::ReadWrite | QIODevice::Append); // 存在打开，不存在创建
+        // 写抬头
+        QByteArray str = Text.toUtf8();// 写入内容，这里需要转码，否则报错。
+        file.write(str); // 写入内容,这里需要转码，否则报错。
+        // 写数据
+        Text = "";
+        QMap<QString, QString>::const_iterator ii;
+        for (ii = mapAll.constBegin(); ii != mapAll.constEnd(); ++ii)
+        {
+            Text = ii.key() + ":00," +ii.value() + "\r\n";// 时间还原到秒
+            str = Text.toUtf8();
+            file.write(str);
+            //qDebug()<< "Key:"<< ii.key() << " Value:" << ii.value();
+        }
+        file.close();
+
+        // 计算花费时间
+        QString timecost = QString::number(time.elapsed()/1000.0);
+        qDebug()<<"读取xls时间："<<timecost<<"s";
+        ui->label_3->setText("转换完成！读取xls文件总共时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+        ui->pushButton_ENV->setEnabled(true);
+    }
 }
 
 // 载入标准化FBG文件
@@ -179,16 +302,17 @@ void MainWindow::on_pushButton_LoadFBGT_clicked()
     {
         ui->pushButton_wave2temp->setEnabled(false);
     }
-    ui->label_10->setText("未转换...");
 }
 
 // 波长转温度
 void MainWindow::on_pushButton_wave2temp_clicked()
 {
-    ui->label_10->setText("正在转换...");
-    double WaveAndTemp[231][2] = {{8.4,1535.91}, {8.5,1537.892}, {8.5,1539.88}, {8.5,1541.928}, {8.6,1543.865}, {8.7,1545.865}, {8.7,1547.871}, {8.9,1549.925}, {8.9,1552.03}, {9,1554.058}, {9.1,1555.991}, {9.1,1557.835}, {9.2,1559.858}, {9.3,1561.989}, {9.3,1563.91}, {8.4,1549.888}, {8.4,1551.923}, {8.5,1554.003}, {8.6,1556.046}, {8.6,1558.072}, {8.6,1559.968}, {8.6,1561.973}, {8.7,1563.921}, {8.5,1551.908}, {8.6,1553.899}, {8.6,1555.256}, {8.6,1557.897}, {8.6,1559.862}, {8.7,1561.929}, {8.7,1563.863}, {8.4,1535.919}, {8.4,1537.952}, {8.4,1539.937}, {8.5,1541.986}, {8.7,1543.934}, {8.8,1545.927}, {8.6,1547.917}, {9.4,1549.915}, {9.4,1551.867}, {9.5,1553.893}, {9.6,1555.976}, {9.7,1557.97}, {9.6,1559.93}, {9.7,1561.868}, {9.6,1563.824}, {8.5,1535.883}, {8.4,1537.887}, {8.4,1539.876}, {8.4,1541.944}, {8.6,1543.916}, {8.6,1545.887}, {8.6,1547.862}, {9.3,1549.875}, {9.4,1551.882}, {9.4,1553.864}, {9.8,1555.933}, {9.6,1557.929}, {9.6,1559.979}, {9.6,1562.067}, {9.7,1564.0866}, {8.4,1535.887}, {8.3,1537.895}, {8.4,1539.878}, {8.5,1541.909}, {8.5,1543.891}, {8.4,1545.846}, {8.5,1547.85}, {9.2,1549.849}, {9.3,1551.913}, {9.3,1553.89}, {9.4,1555.283}, {9.4,1557.986}, {9.5,1559.922}, {9.5,1561.974}, {9.5,1563.944}, {9.4,1535.917}, {9.4,1537.936}, {9.2,1539.924}, {9.2,1541.964}, {9.2,1543.869}, {9.1,1545.864}, {9.1,1547.86}, {9.3,1535.953}, {9.3,1538.018}, {9.2,1539.972}, {9.3,1542.003}, {9.3,1544.001}, {9.3,1545.952}, {9.2,1547.968}, {9.1,1550.004}, {8.6,1556.886}, {8.7,1559.866}, {8.7,1552.842}, {8.8,1549.983}, {8.9,1546.884}, {8.9,1537.916}, {9,1543.933}, {9.1,1540.989}, {8.6,1546.874}, {8.7,1559.845}, {8.7,1556.838}, {8.7,1552.852}, {8.7,1549.865}, {8.7,1540.868}, {8.8,1543.919}, {8.8,1537.891}, {8.6,1546.874}, {8.7,1559.845}, {8.7,1556.838}, {8.7,1552.852}, {8.7,1549.865}, {8.7,1540.868}, {8.8,1543.919}, {8.8,1537.891}, {8.6,1536.88}, {8.8,1539.851}, {8.8,1542.783}, {8.7,1545.85}, {8.7,1548.81}, {8.6,1551.925}, {8.9,1554.8}, {8.8,1557.806}, {8.7,1560.847}, {8.7,1563.7881}, {9.4,1537.927}, {9.1,1540.9}, {9.3,1543.824}, {9.4,1546.868}, {9.2,1549.795}, {9.4,1552.848}, {9.2,1555.959}, {9.2,1558.893}, {9.1,1561.833}, {9.2,1565.857}, {9.8,1533.28}, {9.7,1536.782}, {9.7,1539.724}, {9.4,1542.544}, {9.5,1545.746}, {9.3,1548.583}, {9.4,1551.862}, {8.8,1533.231}, {8.9,1536.3}, {8.8,1539.579}, {8.9,1542.234}, {9.2,1545.224}, {9.2,1548.25}, {9.1,1551.529}, {9.1,1554.316}, {9.5,1557.424}, {9.6,1560.507}, {9.2,1532.419}, {8.8,1535.423}, {8.8,1538.44}, {8.8,1541.37}, {9.5,1532.338}, {9.5,1535.593}, {9.4,1538.606}, {9.2,1541.579}, {9.4,1544.62}, {9.4,1547.436}, {9.5,1550.48}, {9.3,1553.68}, {9.6,1556.401}, {9.5,1559.5}, {9.7,1533.465}, {9.5,1536.576}, {9.4,1538.311}, {9.3,1542.081}, {9.5,1544.913}, {9.2,1548.159}, {9.3,1550.868}, {9.3,1554.26}, {9.4,1556.928}, {9.3,1560.047}, {9.5,1547.537}, {9.4,1553.547}, {9.5,1556.568}, {9.4,1559.39}, {8,1537.936}, {7.9,1540.857}, {8.1,1543.784}, {8.2,1546.859}, {8.3,1549.785}, {8.2,1552.862}, {8.1,1555.947}, {8.1,1558.827}, {8,1561.923}, {8.3,1636.868}, {8.5,1539.832}, {8.7,1542.826}, {8.7,1545.86}, {8.8,1548.829}, {8.8,1551.972}, {8.9,1554.835}, {8.9,1557.869}, {8.9,1560.815}, {8.9,1563.835}, {7.9,1537.944}, {8,1540.885}, {7.9,1543.825}, {8,1546.883}, {8,1549.931}, {8,1552.827}, {8,1555.965}, {8.1,1558.862}, {8,1561.873}, {8,1565.898}, {8.2,1536.901}, {8.3,1539.926}, {8.4,1542.797}, {8.6,1545.828}, {8.7,1548.942}, {8.7,1551.957}, {8.7,1554.805}, {8.5,1557.825}, {8.4,1560.848}, {8.4,1563.82}, {8,1537.88}, {8.1,1540.9}, {8.2,1543.795}, {8.2,1546.836}, {8.2,1549.805}, {8.3,1552.842}, {8.4,1555.919}, {8.5,1558.828}, {8.6,1561.864}, {8.5,1565.845}, {18.4,1555.118}, {18.1,1558.318}, {18.2,1561.226} };
+    ui->label_9->setText("正在转换...");
+    //double WaveAndTemp[231][2] = {{8.4,1535.91}, {8.5,1537.892}, {8.5,1539.88}, {8.5,1541.928}, {8.6,1543.865}, {8.7,1545.865}, {8.7,1547.871}, {8.9,1549.925}, {8.9,1552.03}, {9,1554.058}, {9.1,1555.991}, {9.1,1557.835}, {9.2,1559.858}, {9.3,1561.989}, {9.3,1563.91}, {8.4,1549.888}, {8.4,1551.923}, {8.5,1554.003}, {8.6,1556.046}, {8.6,1558.072}, {8.6,1559.968}, {8.6,1561.973}, {8.7,1563.921}, {8.5,1551.908}, {8.6,1553.899}, {8.6,1555.256}, {8.6,1557.897}, {8.6,1559.862}, {8.7,1561.929}, {8.7,1563.863}, {8.4,1535.919}, {8.4,1537.952}, {8.4,1539.937}, {8.5,1541.986}, {8.7,1543.934}, {8.8,1545.927}, {8.6,1547.917}, {9.4,1549.915}, {9.4,1551.867}, {9.5,1553.893}, {9.6,1555.976}, {9.7,1557.97}, {9.6,1559.93}, {9.7,1561.868}, {9.6,1563.824}, {8.5,1535.883}, {8.4,1537.887}, {8.4,1539.876}, {8.4,1541.944}, {8.6,1543.916}, {8.6,1545.887}, {8.6,1547.862}, {9.3,1549.875}, {9.4,1551.882}, {9.4,1553.864}, {9.8,1555.933}, {9.6,1557.929}, {9.6,1559.979}, {9.6,1562.067}, {9.7,1564.0866}, {8.4,1535.887}, {8.3,1537.895}, {8.4,1539.878}, {8.5,1541.909}, {8.5,1543.891}, {8.4,1545.846}, {8.5,1547.85}, {9.2,1549.849}, {9.3,1551.913}, {9.3,1553.89}, {9.4,1555.283}, {9.4,1557.986}, {9.5,1559.922}, {9.5,1561.974}, {9.5,1563.944}, {9.4,1535.917}, {9.4,1537.936}, {9.2,1539.924}, {9.2,1541.964}, {9.2,1543.869}, {9.1,1545.864}, {9.1,1547.86}, {9.3,1535.953}, {9.3,1538.018}, {9.2,1539.972}, {9.3,1542.003}, {9.3,1544.001}, {9.3,1545.952}, {9.2,1547.968}, {9.1,1550.004}, {8.6,1556.886}, {8.7,1559.866}, {8.7,1552.842}, {8.8,1549.983}, {8.9,1546.884}, {8.9,1537.916}, {9,1543.933}, {9.1,1540.989}, {8.6,1546.874}, {8.7,1559.845}, {8.7,1556.838}, {8.7,1552.852}, {8.7,1549.865}, {8.7,1540.868}, {8.8,1543.919}, {8.8,1537.891}, {8.6,1546.874}, {8.7,1559.845}, {8.7,1556.838}, {8.7,1552.852}, {8.7,1549.865}, {8.7,1540.868}, {8.8,1543.919}, {8.8,1537.891}, {8.6,1536.88}, {8.8,1539.851}, {8.8,1542.783}, {8.7,1545.85}, {8.7,1548.81}, {8.6,1551.925}, {8.9,1554.8}, {8.8,1557.806}, {8.7,1560.847}, {8.7,1563.7881}, {9.4,1537.927}, {9.1,1540.9}, {9.3,1543.824}, {9.4,1546.868}, {9.2,1549.795}, {9.4,1552.848}, {9.2,1555.959}, {9.2,1558.893}, {9.1,1561.833}, {9.2,1565.857}, {9.8,1533.28}, {9.7,1536.782}, {9.7,1539.724}, {9.4,1542.544}, {9.5,1545.746}, {9.3,1548.583}, {9.4,1551.862}, {8.8,1533.231}, {8.9,1536.3}, {8.8,1539.579}, {8.9,1542.234}, {9.2,1545.224}, {9.2,1548.25}, {9.1,1551.529}, {9.1,1554.316}, {9.5,1557.424}, {9.6,1560.507}, {9.2,1532.419}, {8.8,1535.423}, {8.8,1538.44}, {8.8,1541.37}, {9.5,1532.338}, {9.5,1535.593}, {9.4,1538.606}, {9.2,1541.579}, {9.4,1544.62}, {9.4,1547.436}, {9.5,1550.48}, {9.3,1553.68}, {9.6,1556.401}, {9.5,1559.5}, {9.7,1533.465}, {9.5,1536.576}, {9.4,1538.311}, {9.3,1542.081}, {9.5,1544.913}, {9.2,1548.159}, {9.3,1550.868}, {9.3,1554.26}, {9.4,1556.928}, {9.3,1560.047}, {9.5,1547.537}, {9.4,1553.547}, {9.5,1556.568}, {9.4,1559.39}, {8,1537.936}, {7.9,1540.857}, {8.1,1543.784}, {8.2,1546.859}, {8.3,1549.785}, {8.2,1552.862}, {8.1,1555.947}, {8.1,1558.827}, {8,1561.923}, {8.3,1636.868}, {8.5,1539.832}, {8.7,1542.826}, {8.7,1545.86}, {8.8,1548.829}, {8.8,1551.972}, {8.9,1554.835}, {8.9,1557.869}, {8.9,1560.815}, {8.9,1563.835}, {7.9,1537.944}, {8,1540.885}, {7.9,1543.825}, {8,1546.883}, {8,1549.931}, {8,1552.827}, {8,1555.965}, {8.1,1558.862}, {8,1561.873}, {8,1565.898}, {8.2,1536.901}, {8.3,1539.926}, {8.4,1542.797}, {8.6,1545.828}, {8.7,1548.942}, {8.7,1551.957}, {8.7,1554.805}, {8.5,1557.825}, {8.4,1560.848}, {8.4,1563.82}, {8,1537.88}, {8.1,1540.9}, {8.2,1543.795}, {8.2,1546.836}, {8.2,1549.805}, {8.3,1552.842}, {8.4,1555.919}, {8.5,1558.828}, {8.6,1561.864}, {8.5,1565.845}, {18.4,1555.118}, {18.1,1558.318}, {18.2,1561.226} };
+    double WaveAndTemp[231][2]={{9.3,1535.91},{9.3,1537.892},{9.1,1539.88},{9.2,1541.928},{9.1,1543.865},{9,1545.865},{8.9,1547.871},{8.9,1549.925},{8.4,1552.03},{8.5,1554.058},{8.7,1555.991},{8.7,1557.835},{8.6,1559.858},{8.5,1561.989},{8.5,1563.91},{8.4,1549.888},{8.4,1551.923},{8.6,1554.003},{8.7,1556.046},{8.6,1558.072},{8.6,1559.968},{8.5,1561.973},{8.6,1563.921},{8.5,1551.908},{8.6,1553.899},{8.6,1555.256},{8.7,1557.897},{8.6,1559.862},{8.6,1561.929},{8.7,1563.863},{9.6,1535.919},{9.7,1537.952},{9.6,1539.937},{9.7,1541.986},{9.6,1543.934},{9.5,1545.927},{9.4,1547.917},{9.4,1549.915},{8.6,1551.867},{8.8,1553.893},{8.7,1555.976},{8.5,1557.97},{8.4,1559.93},{8.4,1561.868},{8.4,1563.824},{9.7,1535.883},{9.6,1537.887},{9.6,1539.876},{9.6,1541.944},{9.8,1543.916},{9.4,1545.887},{9.4,1547.862},{9.3,1549.875},{8.6,1551.882},{8.6,1553.864},{8.6,1555.933},{8.4,1557.929},{8.4,1559.979},{8.4,1562.067},{8.5,1564.086},{9.5,1535.887},{9.5,1537.895},{9.5,1539.878},{9.4,1541.909},{9.4,1543.891},{9.3,1545.846},{9.3,1547.85},{9.2,1549.849},{8.5,1551.913},{8.4,1553.89},{8.5,1555.283},{8.5,1557.986},{8.4,1559.922},{8.3,1561.974},{8.4,1563.944},{9.4,1535.917},{9.4,1537.936},{9.2,1539.924},{9.2,1541.964},{9.2,1543.869},{9.1,1545.864},{9.1,1547.86},{9.3,1535.953},{9.3,1538.018},{9.2,1539.972},{9.3,1542.003},{9.3,1544.001},{9.3,1545.952},{9.2,1547.968},{9.1,1550.004},{8.9,1537.916},{9.1,1540.989},{9,1543.933},{8.9,1546.884},{8.8,1549.983},{8.7,1552.842},{8.6,1556.886},{8.7,1559.866},{8.8,1537.891},{8.7,1540.868},{8.8,1543.919},{8.6,1546.874},{8.7,1549.865},{8.7,1552.852},{8.7,1556.838},{8.7,1559.845},{8.1,1537.88},{8.1,1540.867},{8.4,1543.895},{8.5,1546.834},{8.6,1550.129},{8.6,1552.898},{8.7,1556.887},{8.6,1559.87},{8.6,1536.88},{8.8,1539.851},{8.8,1542.783},{8.7,1545.85},{8.7,1548.81},{8.6,1551.925},{8.9,1554.8},{8.8,1557.806},{8.7,1560.847},{8.7,1563.788},{9.4,1537.927},{9.1,1540.9},{9.3,1543.824},{9.4,1546.868},{9.2,1549.795},{9.4,1552.848},{9.2,1555.959},{9.2,1558.893},{9.1,1561.833},{9.2,1565.857},{9.8,1533.28},{9.7,1536.782},{9.7,1539.724},{9.4,1542.544},{9.5,1545.746},{9.3,1548.583},{9.4,1551.862},{8.8,1533.231},{8.9,1536.3},{8.8,1539.579},{8.9,1542.234},{9.2,1545.224},{9.2,1548.25},{9.1,1551.529},{9.1,1554.316},{9.5,1557.424},{9.6,1560.507},{9.2,1532.419},{8.8,1535.423},{8.8,1538.44},{8.8,1541.37},{9.5,1532.338},{9.5,1535.593},{9.4,1538.606},{9.2,1541.579},{9.4,1544.62},{9.4,1547.436},{9.5,1550.48},{9.3,1553.68},{9.6,1556.401},{9.5,1559.5},{9.7,1533.465},{9.5,1536.576},{9.4,1538.311},{9.3,1542.081},{9.5,1544.913},{9.2,1548.159},{9.3,1550.868},{9.3,1554.26},{9.4,1556.928},{9.3,1560.047},{9.5,1547.537},{9.4,1553.547},{9.5,1556.568},{9.4,1559.39},{8,1537.936},{7.9,1540.857},{8.1,1543.784},{8.2,1546.859},{8.3,1549.785},{8.2,1552.862},{8.1,1555.947},{8.1,1558.827},{8,1561.923},{8.3,1536.868},{8.5,1539.832},{8.7,1542.826},{8.7,1545.86},{8.8,1548.829},{8.8,1551.972},{8.9,1554.835},{8.9,1557.869},{8.9,1560.815},{8.9,1563.835},{7.9,1537.944},{8,1540.885},{7.9,1543.825},{8,1546.883},{8,1549.931},{8,1552.827},{8,1555.965},{8.1,1558.862},{8,1561.873},{8,1565.898},{8.2,1536.901},{8.3,1539.926},{8.4,1542.797},{8.6,1545.828},{8.7,1548.942},{8.7,1551.957},{8.7,1554.805},{8.5,1557.825},{8.4,1560.848},{8.4,1563.82},{8,1537.88},{8.1,1540.9},{8.2,1543.795},{8.2,1546.836},{8.2,1549.805},{8.3,1552.842},{8.4,1555.919},{8.5,1558.828},{8.6,1561.864},{8.5,1565.845},{18.4,1555.118}, {18.1,1558.318}, {18.2,1561.226}};
     if(!standFBGFileName.isEmpty())
     {
+        QTime time;time.start(); // 计时
         qDebug()<<standFBGFileName;
         int InputFileRow;
         int InputFileCol;
@@ -200,17 +324,20 @@ void MainWindow::on_pushButton_wave2temp_clicked()
         // 波长转温度
         for(unsigned int i=0; i< FBGWave.n_rows; i++)
         {
-           for(unsigned int j=0; j<FBGWave.n_cols; j++)
-           {
-               FBGWave(i,j) = (FBGWave(i,j)-WaveAndTemp[j][1])/0.0105+WaveAndTemp[j][0];
-           }
+            for(unsigned int j=0; j<FBGWave.n_cols; j++)
+            {
+                FBGWave(i,j) = (FBGWave(i,j)-WaveAndTemp[j][1])/0.0105+WaveAndTemp[j][0];
+            }
         }
         qDebug()<<FBGWave(0,0);
         QString Date = standFBGFileName.right(33).left(10);
         qDebug()<<"Date"<<Date;
         int b = saveStandDataNoTimeFix("Data-FBGtoTEMP",DataName_FBGT,Date,XLabelName, FBGWave);
         if( b == 0 )
-            ui->label_10->setText("转换成功！");
+        {
+            QString timecost = QString::number(time.elapsed()/1000.0);
+            ui->label_9->setText("OK:<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+        }
 
     }
 }
@@ -222,7 +349,7 @@ void MainWindow::on_pushButton_File1_clicked()
     qDebug()<<correlationFileName1;
     if(!correlationFileName1.isEmpty() && !correlationFileName2.isEmpty())
     {
-        ui->label_11->setText("选择了文件1");
+        ui->label_11->setText("选了文件1");
         ui->pushButton_covresult->setEnabled(true);
     }
     else
@@ -238,7 +365,7 @@ void MainWindow::on_pushButton_File2_clicked()
     qDebug()<<correlationFileName2;
     if(!correlationFileName1.isEmpty() && !correlationFileName2.isEmpty())
     {
-        ui->label_11->setText("选择了文件2");
+        ui->label_11->setText("选了文件2");
         ui->pushButton_covresult->setEnabled(true);
     }
     else
@@ -251,6 +378,7 @@ void MainWindow::on_pushButton_File2_clicked()
 void MainWindow::on_pushButton_covresult_clicked()
 {
     ui->label_11->setText("计算开始！");
+    QTime time;time.start(); // 计时
 
     // 读取两文件矩阵
     int InputFileRow1;
@@ -262,8 +390,8 @@ void MainWindow::on_pushButton_covresult_clicked()
     QStringList Time;
     mat File1 = JfzReadCSVToAllMat(correlationFileName1, InputFileRow1, InputFileCol1, DataName1, Time);
     mat File2 = JfzReadCSVToAllMat(correlationFileName2, InputFileRow2, InputFileCol2, DataName2, Time);
-//    qDebug()<<"File1(0,0)"<<File1(0,0);
-//    qDebug()<<"File2(0,0)"<<File2(0,0);
+    //    qDebug()<<"File1(0,0)"<<File1(0,0);
+    //    qDebug()<<"File2(0,0)"<<File2(0,0);
 
     // 矩阵合并
     mat All_Mat = join_rows(File1, File2);
@@ -275,7 +403,7 @@ void MainWindow::on_pushButton_covresult_clicked()
     mat corMatneed(File1.n_cols, File2.n_cols);
     for(unsigned int i=0; i<corMatneed.n_rows; i++)
     {
-       for(unsigned int j=0; j<corMatneed.n_cols; j++)
+        for(unsigned int j=0; j<corMatneed.n_cols; j++)
         {
             corMatneed(i,j) = corMat(i, j+File1.n_cols);
         }
@@ -299,23 +427,23 @@ void MainWindow::on_pushButton_covresult_clicked()
     QStringList Name22List = Name2List[3].split(".");
     QString Title = "Correlation-" + Name12List[0] + "vs" + Name22List[0];
     QString Date = Name0List[Name0List.size()-1].left(10);
-//    qDebug()<< "Date "<<Date;
-//    qDebug()<< "correlationFileName1 "<<correlationFileName1;
-//    qDebug()<< "Title "<<Title;
+    //    qDebug()<< "Date "<<Date;
+    //    qDebug()<< "correlationFileName1 "<<correlationFileName1;
+    //    qDebug()<< "Title "<<Title;
     int b = saveStandDataNoTimeFix(Title, DataName2str, Date, DataName1, corMatneed);
     if( b == 0 )
-        ui->label_11->setText("计算完毕！");
+    {
+        QString timecost = QString::number(time.elapsed()/1000.0);
+        ui->label_11->setText("OK:<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+    }
 }
-
-
-
 
 // 载入统计分析源数据
 void MainWindow::on_pushButton_clicked()
 {
     ui->textEdit->clear();
     // 载入文件
-    QString InputFileName_str = QFileDialog::getOpenFileName(this,"open file","/","textfile(*.csv);;All file(*.*)");
+    QString InputFileName_str = QFileDialog::getOpenFileName(this,"open file"," ","textfile(*.csv);;All file(*.*)");
     qDebug()<<InputFileName_str;  // 文件名
 
     if(!InputFileName_str.isEmpty())
@@ -361,18 +489,18 @@ void MainWindow::on_pushButton_clicked()
 
         // Debug信息
         qDebug()<< "Armadillo 版本: "<< QString::fromStdString( arma_version::as_string() ) ;
-    //    qDebug()<< "行" << InputFileRow << "列" << InputFileCol;
-    //    qDebug()<< "标题" << Title;
-    //    qDebug()<< "数据各项名" << DataName;
-    //    qDebug()<< "X标签名" << XLabelName;
+        //    qDebug()<< "行" << InputFileRow << "列" << InputFileCol;
+        //    qDebug()<< "标题" << Title;
+        //    qDebug()<< "数据各项名" << DataName;
+        //    qDebug()<< "X标签名" << XLabelName;
 
         // 保存输入Mat,预留
-    //    Mat.save("Mat.txt", raw_ascii);
-    //    qDebug()<< "Mat行" << Mat.n_rows << "Mat列" << Mat.n_cols;
-    //    qDebug()<< "矩阵的最大值max(max(Mat)) = " << max(max(Mat));
-    //    qDebug()<< "矩阵的最小值min(min(Mat)) = " << min(min(Mat));
-    //    qDebug()<< "所有元素的和accu(Mat): " << accu(Mat);
-    //    qDebug()<< "平均值: " << (accu(Mat))/(Mat.n_rows * Mat.n_cols);
+        //    Mat.save("Mat.txt", raw_ascii);
+        //    qDebug()<< "Mat行" << Mat.n_rows << "Mat列" << Mat.n_cols;
+        //    qDebug()<< "矩阵的最大值max(max(Mat)) = " << max(max(Mat));
+        //    qDebug()<< "矩阵的最小值min(min(Mat)) = " << min(min(Mat));
+        //    qDebug()<< "所有元素的和accu(Mat): " << accu(Mat);
+        //    qDebug()<< "平均值: " << (accu(Mat))/(Mat.n_rows * Mat.n_cols);
 
         // 与矩阵计算相关的定义
         int MatRow = Mat.n_rows;
@@ -398,36 +526,80 @@ void MainWindow::on_pushButton_clicked()
         for(int i=0; i< MatCol ; i++)
         {
             QString text;
-    //        = DataName[i] + "   和:" + QString::number(colMat(i)) + \
-    //                "   最大值:" + QString::number(maxMat(i)) + \
-    //                "   最小值:" + QString::number(minMat(i)) + \
-    //                "   算术平均值:" + QString::number( colMat(i)*1.0/(MatRow) );
+            //        = DataName[i] + "   和:" + QString::number(colMat(i)) + \
+            //                "   最大值:" + QString::number(maxMat(i)) + \
+            //                "   最小值:" + QString::number(minMat(i)) + \
+            //                "   算术平均值:" + QString::number( colMat(i)*1.0/(MatRow) );
             float avg = colMat(i)*1.0/(MatRow); // 算术平均值
-            text.sprintf("%s  和:%10.4f  最大值:%10.4f  最小值:%10.4f  算术平均值:%10.4f", DataName[i].toStdString(), colMat(i), maxMat(i), minMat(i), avg);
+            text.sprintf("%s  和:%-15.4f  最大值:%-15.4f  最小值:%-15.4f  算术平均值:%-15.4f", DataName[i].toStdString(), colMat(i), maxMat(i), minMat(i), avg);
             qDebug()<<avg;
-            if(avg > 0 && avg < 50)
-                ui->textEdit->append(text);
-            else
-                ui->textEdit->append("<span style='color:red'>"+text+"</span>");// 标红
+            if(InputFileName_str.right(6).left(2) == "20" || InputFileName_str.right(6).left(2) == "MP" ) // 电类和转好的FBG温度判断
+            {
+                if(maxMat(i)-minMat(i) < 15 &&  avg > 0 && avg < 50)
+                    ui->textEdit->append(text);
+                else
+                {
+                    if( fabs(avg)<0.00001 )
+                    {
+                        QString text2 = text.replace(QRegExp("\\ "), "&nbsp;");
+                        ui->textEdit->append(text2 + "<span style='color:blue'>数据没有</span>");// 标蓝
+                    }
+                    else
+                    {
+                        QString text2 = text.replace(QRegExp("\\ "), "&nbsp;");
+                        ui->textEdit->append(text2 + "<span style='color:red'>数据异常</span>");// 标红
+                    }
+                }
+            }
+            if(InputFileName_str.right(6).left(2) == "ss" || InputFileName_str.right(6).left(2) == "re" ) // FBG波长数据判断
+            {
+                if(maxMat(i)-minMat(i) < 3 && avg!=0 )
+                    ui->textEdit->append(text);
+                else
+                {
+                    if( fabs(avg)<0.00001 )
+                    {
+                        QString text2 = text.replace(QRegExp("\\ "), "&nbsp;");
+                        ui->textEdit->append(text2 + "<span style='color:blue'>数据没有</span>");// 标蓝
+                    }
+                    else
+                    {
+                        QString text2 = text.replace(QRegExp("\\ "), "&nbsp;");
+                        ui->textEdit->append(text2 + "<span style='color:red'>数据异常</span>");// 标红
+                    }
+                }
+            }
+            if(InputFileName_str.right(6).left(2) == "CD") // CCD数据判断
+            {
+                //qDebug()<<"fabs(avg)"<<fabs(avg);
+                if( fabs(avg)<0.2 )
+                    ui->textEdit->append(text);
+                else
+                {
+                    QString text2 = text.replace(QRegExp("\\ "), "&nbsp;");
+                    ui->textEdit->append(text2 + "<span style='color:red'>偏移过大</span>");// 标红
+                }
+            }
+
         }
         // 数据基本信息-求相关系数
         // 求矩阵A与B的相关系数矩阵。矩阵A(B)的每一列为一个变量，每一行为一组观测值。矩阵C(i,j)表示矩阵A的第i个变量与矩阵B的第j个变量的相关系数。
-        mat corMat = cor(Mat);
-//        qDebug()<< corMat.n_rows<<" "<< corMat.n_cols;
-        QString corStr = "";
-        ui->textEdit->append("\n每列数据间相关系数：");
-        for(unsigned int i=0; i< corMat.n_rows ; i++)
-        {
-            for(unsigned int j=0; j< corMat.n_cols ; j++)
-            {
-                QString standStr;
-                standStr.sprintf("%8.4f", corMat(i,j));
-                corStr += standStr + " ";
-            }
-            ui->textEdit->append(corStr);
-            corStr = "";
-        }
-        qDebug()<< "poi";
+//        mat corMat = cor(Mat);
+//        //        qDebug()<< corMat.n_rows<<" "<< corMat.n_cols;
+//        QString corStr = "";
+//        ui->textEdit->append("\n每列数据间相关系数：");
+//        for(unsigned int i=0; i< corMat.n_rows ; i++)
+//        {
+//            for(unsigned int j=0; j< corMat.n_cols ; j++)
+//            {
+//                QString standStr;
+//                standStr.sprintf("%8.4f", corMat(i,j));
+//                corStr += standStr + " ";
+//            }
+//            ui->textEdit->append(corStr);
+//            corStr = "";
+//        }
+//        qDebug()<< "poi";
     }
 }
 

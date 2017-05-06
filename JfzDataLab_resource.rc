@@ -4,7 +4,7 @@
 #  include <windows.h>
 # endif
 
-IDI_ICON1	ICON	DISCARDABLE	"E:\\Programming\\Coding\\JfzDataLab\\poi.ico"
+IDI_ICON1	ICON	DISCARDABLE	"E:\\Programming\\GitHub\\JfzDataLab\\poi.ico"
 
 VS_VERSION_INFO VERSIONINFO
 	FILEVERSION 0,0,0,0

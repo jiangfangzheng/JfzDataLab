@@ -271,6 +271,13 @@ release\moc_mainwindow.cpp: C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\QMai
 		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\qfileinfo.h \
 		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\qdialog.h \
 		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\QDebug \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\ActiveQt\QAxObject \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\ActiveQt\qaxobject.h \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\ActiveQt\qaxbase.h \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\QMessageBox \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\qmessagebox.h \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\QTime \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\qdatetime.h \
 		D:\Library\Armadillo\include\armadillo \
 		D:\Library\Armadillo\include\armadillo_bits\config.hpp \
 		D:\Library\Armadillo\include\armadillo_bits\compiler_setup.hpp \
@@ -772,7 +779,7 @@ release\moc_mainwindow.cpp: C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\QMai
 		D:\Library\Armadillo\include\armadillo_bits\newarp_UpperHessenbergQR_meat.hpp \
 		D:\Library\Armadillo\include\armadillo_bits\compiler_setup_post.hpp \
 		mainwindow.h
-	C:\Qt\Qt5.6.2\5.6\msvc2013_64\bin\moc.exe $(DEFINES) -D_MSC_VER=1800 -D_WIN32 -D_WIN64 -IC:/Qt/Qt5.6.2/5.6/msvc2013_64/mkspecs/win32-msvc2013 -IE:/Programming/Coding/JfzDataLab -ID:/Library/Armadillo/include -IC:/Qt/Qt5.6.2/5.6/msvc2013_64/include -IC:/Qt/Qt5.6.2/5.6/msvc2013_64/include/ActiveQt -IC:/Qt/Qt5.6.2/5.6/msvc2013_64/include/QtWidgets -IC:/Qt/Qt5.6.2/5.6/msvc2013_64/include/QtGui -IC:/Qt/Qt5.6.2/5.6/msvc2013_64/include/QtANGLE -IC:/Qt/Qt5.6.2/5.6/msvc2013_64/include/QtCore mainwindow.h -o release\moc_mainwindow.cpp
+	C:\Qt\Qt5.6.2\5.6\msvc2013_64\bin\moc.exe $(DEFINES) -D_MSC_VER=1800 -D_WIN32 -D_WIN64 -IC:/Qt/Qt5.6.2/5.6/msvc2013_64/mkspecs/win32-msvc2013 -IE:/Programming/GitHub/JfzDataLab -ID:/Library/Armadillo/include -IC:/Qt/Qt5.6.2/5.6/msvc2013_64/include -IC:/Qt/Qt5.6.2/5.6/msvc2013_64/include/ActiveQt -IC:/Qt/Qt5.6.2/5.6/msvc2013_64/include/QtWidgets -IC:/Qt/Qt5.6.2/5.6/msvc2013_64/include/QtGui -IC:/Qt/Qt5.6.2/5.6/msvc2013_64/include/QtANGLE -IC:/Qt/Qt5.6.2/5.6/msvc2013_64/include/QtCore mainwindow.h -o release\moc_mainwindow.cpp
 
 compiler_dumpcpp_impl_make_all:
 compiler_dumpcpp_impl_clean:
@@ -910,6 +917,13 @@ release\main.obj: main.cpp mainwindow.h \
 		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\qfileinfo.h \
 		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\qdialog.h \
 		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\QDebug \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\ActiveQt\QAxObject \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\ActiveQt\qaxobject.h \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\ActiveQt\qaxbase.h \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\QMessageBox \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\qmessagebox.h \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\QTime \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\qdatetime.h \
 		D:\Library\Armadillo\include\armadillo \
 		D:\Library\Armadillo\include\armadillo_bits\config.hpp \
 		D:\Library\Armadillo\include\armadillo_bits\compiler_setup.hpp \
@@ -1532,6 +1546,13 @@ release\mainwindow.obj: mainwindow.cpp mainwindow.h \
 		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\qfileinfo.h \
 		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\qdialog.h \
 		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\QDebug \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\ActiveQt\QAxObject \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\ActiveQt\qaxobject.h \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\ActiveQt\qaxbase.h \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\QMessageBox \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\qmessagebox.h \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\QTime \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\qdatetime.h \
 		D:\Library\Armadillo\include\armadillo \
 		D:\Library\Armadillo\include\armadillo_bits\config.hpp \
 		D:\Library\Armadillo\include\armadillo_bits\compiler_setup.hpp \
@@ -2154,6 +2175,13 @@ release\jfzlib.obj: jfzlib.cpp jfzlib.h \
 		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\qfileinfo.h \
 		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\qdialog.h \
 		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\QDebug \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\ActiveQt\QAxObject \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\ActiveQt\qaxobject.h \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\ActiveQt\qaxbase.h \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\QMessageBox \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\qmessagebox.h \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\QTime \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\qdatetime.h \
 		D:\Library\Armadillo\include\armadillo \
 		D:\Library\Armadillo\include\armadillo_bits\config.hpp \
 		D:\Library\Armadillo\include\armadillo_bits\compiler_setup.hpp \
@@ -2774,6 +2802,13 @@ release\datatostand.obj: datatostand.cpp datatostand.h \
 		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\qfileinfo.h \
 		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\qdialog.h \
 		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\QDebug \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\ActiveQt\QAxObject \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\ActiveQt\qaxobject.h \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\ActiveQt\qaxbase.h \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\QMessageBox \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtWidgets\qmessagebox.h \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\QTime \
+		C:\Qt\Qt5.6.2\5.6\msvc2013_64\include\QtCore\qdatetime.h \
 		D:\Library\Armadillo\include\armadillo \
 		D:\Library\Armadillo\include\armadillo_bits\config.hpp \
 		D:\Library\Armadillo\include\armadillo_bits\compiler_setup.hpp \

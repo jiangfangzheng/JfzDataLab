@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>1000</width>
     <height>600</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>800</width>
+    <width>1000</width>
     <height>600</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>800</width>
+    <width>1000</width>
     <height>600</height>
    </size>
   </property>
@@ -31,7 +31,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>801</width>
+      <width>1000</width>
       <height>571</height>
      </rect>
     </property>
@@ -64,7 +64,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>DS18B20</string>
+        <string>DS18B20(Dir)</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_CCD">
@@ -77,7 +77,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>CCD</string>
+        <string>CCD(Dir)</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_FBGT">
@@ -90,7 +90,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>FBG温度</string>
+        <string>FBG温度(Dir)</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_FBGS">
@@ -103,7 +103,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>FBG应力</string>
+        <string>FBG应力(Dir)</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_ENV">
@@ -142,8 +142,8 @@
         </rect>
        </property>
        <property name="text">
-        <string>读取xls时请勿操
-作其它以免卡死！</string>
+        <string>Dir:选文件夹
+*.xls:多选xls</string>
        </property>
       </widget>
      </widget>
@@ -151,13 +151,13 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>100</y>
+        <y>110</y>
         <width>381</width>
         <height>61</height>
        </rect>
       </property>
       <property name="title">
-       <string>波长转温度</string>
+       <string>波长转温度(经供参考)</string>
       </property>
       <widget class="QPushButton" name="pushButton_LoadFBGT">
        <property name="geometry">
@@ -192,7 +192,7 @@
        <property name="geometry">
         <rect>
          <x>250</x>
-         <y>20</y>
+         <y>30</y>
          <width>121</width>
          <height>16</height>
         </rect>
@@ -201,25 +201,12 @@
         <string>未载入</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_10">
-       <property name="geometry">
-        <rect>
-         <x>250</x>
-         <y>40</y>
-         <width>121</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>待转换</string>
-       </property>
-      </widget>
      </widget>
      <widget class="QGroupBox" name="groupBox_5">
       <property name="geometry">
        <rect>
         <x>400</x>
-        <y>100</y>
+        <y>110</y>
         <width>391</width>
         <height>61</height>
        </rect>
@@ -235,7 +222,7 @@
         <rect>
          <x>190</x>
          <y>20</y>
-         <width>101</width>
+         <width>81</width>
          <height>28</height>
         </rect>
        </property>
@@ -272,9 +259,9 @@
       <widget class="QLabel" name="label_11">
        <property name="geometry">
         <rect>
-         <x>300</x>
+         <x>280</x>
          <y>30</y>
-         <width>81</width>
+         <width>101</width>
          <height>16</height>
         </rect>
        </property>
@@ -319,7 +306,7 @@
        <rect>
         <x>110</x>
         <y>10</y>
-        <width>681</width>
+        <width>881</width>
         <height>71</height>
        </rect>
       </property>
@@ -404,7 +391,7 @@
        <rect>
         <x>10</x>
         <y>80</y>
-        <width>781</width>
+        <width>981</width>
         <height>451</height>
        </rect>
       </property>
@@ -419,7 +406,7 @@
         <rect>
          <x>10</x>
          <y>20</y>
-         <width>761</width>
+         <width>961</width>
          <height>421</height>
         </rect>
        </property>
@@ -459,7 +446,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>1000</width>
      <height>26</height>
     </rect>
    </property>

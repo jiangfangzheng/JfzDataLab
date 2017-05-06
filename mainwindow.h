@@ -9,6 +9,7 @@
 #include <QAxObject>
 #include <QMessageBox>
 #include <QTime>
+#include <math.h>
 
 
 // armadillo矩阵库

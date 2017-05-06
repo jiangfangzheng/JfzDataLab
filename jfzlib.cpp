@@ -38,7 +38,7 @@ int JfzFileReadCol(QString FileName)
 }
 
 // 读取csv到数组
-int JfzReadCSVToMat(QString FileName, double* OutMat, int RowNum, int ColNum)
+int JfzReadCSVToMat(QString FileName, double* OutMat)
 {
     QFile f(FileName);
     if(!f.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -173,7 +173,7 @@ int saveStandDataNoTimeFix(QString Title, QString DataName, QString Date, QStrin
 
 
 // 读取环境温度xls的专用函数
-int readEnvXlsFile(QString FileName, QMap<QString,float> &map)
+bool readEnvXlsFile(QString FileName, QMap<QString,float> &map)
 {
     QAxObject *excel = NULL;
     QAxObject *workbooks = NULL;
@@ -182,7 +182,8 @@ int readEnvXlsFile(QString FileName, QMap<QString,float> &map)
     if (!excel)
     {
         qDebug() << "EXCEL对象丢失!";
-        //QMessageBox::critical(this, "错误信息", "EXCEL对象丢失"); return;
+        QMessageBox::critical(NULL, "注意", "读取xls文件需要您电脑安装Excel！", QMessageBox::Yes, QMessageBox::Yes);
+        return false;
     }
     excel->dynamicCall("SetVisible(bool)", false);
     workbooks = excel->querySubObject("WorkBooks");
@@ -191,62 +192,39 @@ int readEnvXlsFile(QString FileName, QMap<QString,float> &map)
     QAxObject * usedrange = worksheet->querySubObject("UsedRange");//获取该sheet的使用范围对象
     QAxObject * rows = usedrange->querySubObject("Rows");
     QAxObject * columns = usedrange->querySubObject("Columns");
-    //int intRowStart = usedrange->property("Row").toInt();
-    //int intColStart = usedrange->property("Column").toInt();
     int intRows = rows->property("Count").toInt();
     int intCols = columns->property("Count").toInt();
-
-//    qDebug() << "intRowStart"<<intRowStart;
     qDebug() << "xls行数："<<intRows;
-//    qDebug() << "intColStart"<<intColStart;
     qDebug() << "xls列数："<<intCols;
 
-//    QAxObject * range = worksheet->querySubObject("Cells(int,int)", 13, 2 );
-//    QAxObject * range2 = worksheet->querySubObject("Cells(int,int)", 13, 3 );
-//    //qDebug() << range->property("Value").toString();
-//    //qDebug() << range2->property("Value").toString();
-
-
-//    QString datestr = range->property("Value").toString();
-//    float valueflo = range2->property("Value").toFloat();
-//    qDebug() <<datestr<<valueflo;
+    //    QAxObject * range = worksheet->querySubObject("Cells(int,int)", 13, 2 );
+    //    qDebug() << range->property("Value").toString();
 
     // 批量载入数据
     QString Range = "B13:C" +QString::number(intRows);
     QAxObject *allEnvData = worksheet->querySubObject("Range(QString)", Range);
     QVariant allEnvDataQVariant = allEnvData->property("Value");
-    //qDebug() << (allEnvData->property("Value"));
     QVariantList allEnvDataList = allEnvDataQVariant.toList();
 
     for(int i=0; i<= intRows-13; i++)
     {
         QVariantList allEnvDataList_i =  allEnvDataList[i].toList() ;
         //qDebug()<< allEnvDataList_i[0].toString()<< allEnvDataList_i[1].toFloat();
-        map.insert(allEnvDataList_i[0].toString(),allEnvDataList_i[1].toFloat());
+        QString DateM = allEnvDataList_i[0].toString().left(16);// 精确到分钟就行了
+        float value = allEnvDataList_i[1].toFloat();
+        map.insert(DateM,value);
     }
 
-    // 遍历温度数据13B开始
-//    for (int i=13; i <= 5012; i++) //行
-//    {
-//        QAxObject * date  = worksheet->querySubObject("Cells(int,int)", i, 2 );
-//        QAxObject * value = worksheet->querySubObject("Cells(int,int)", i, 3 );
-//        QString datestr = date->property("Value").toString();
-//        float valueflo = value->property("Value").toFloat();
-//        qDebug() <<datestr<<valueflo;
-//        map.insert(datestr,valueflo);
-//    }
+    // 释放，但是会降低速度
+    workbooks->dynamicCall("Close()");
+    delete(allEnvData);
+    delete(columns);
+    delete(rows);
+    delete(usedrange);
+    delete(worksheet);
+    delete(workbook);
+    delete(workbooks);
+    delete(excel);
 
-
-    // 遍历所有
-    //    for (int i = intRowStart; i < intRowStart + intRows; i++) //行
-    //    {
-    //        for (int j = intColStart; j < intColStart + intCols; j++) //列
-    //        {
-    //            QAxObject * range = worksheet->querySubObject("Cells(int,int)", i, j ); //获取单元格
-    //            //double i,j;
-    //           //qDebug() << i << j << range->property("Value"); //************出问题!!!!!!
-    //           qDebug() << range->property("Value").toString();
-    //        }
-    //    }
-    return 0;
+    return true;
 }

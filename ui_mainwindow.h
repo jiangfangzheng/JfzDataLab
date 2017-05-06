@@ -44,7 +44,6 @@ public:
     QPushButton *pushButton_LoadFBGT;
     QPushButton *pushButton_wave2temp;
     QLabel *label_9;
-    QLabel *label_10;
     QGroupBox *groupBox_5;
     QPushButton *pushButton_covresult;
     QPushButton *pushButton_File2;
@@ -72,14 +71,14 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(800, 600);
-        MainWindow->setMinimumSize(QSize(800, 600));
-        MainWindow->setMaximumSize(QSize(800, 600));
+        MainWindow->resize(1000, 600);
+        MainWindow->setMinimumSize(QSize(1000, 600));
+        MainWindow->setMaximumSize(QSize(1000, 600));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         tabWidget = new QTabWidget(centralWidget);
         tabWidget->setObjectName(QStringLiteral("tabWidget"));
-        tabWidget->setGeometry(QRect(0, 0, 801, 571));
+        tabWidget->setGeometry(QRect(0, 0, 1000, 571));
         tab_3 = new QWidget();
         tab_3->setObjectName(QStringLiteral("tab_3"));
         groupBox_3 = new QGroupBox(tab_3);
@@ -108,7 +107,7 @@ public:
         label_12->setGeometry(QRect(640, 20, 121, 41));
         groupBox_4 = new QGroupBox(tab_3);
         groupBox_4->setObjectName(QStringLiteral("groupBox_4"));
-        groupBox_4->setGeometry(QRect(10, 100, 381, 61));
+        groupBox_4->setGeometry(QRect(10, 110, 381, 61));
         pushButton_LoadFBGT = new QPushButton(groupBox_4);
         pushButton_LoadFBGT->setObjectName(QStringLiteral("pushButton_LoadFBGT"));
         pushButton_LoadFBGT->setGeometry(QRect(10, 20, 111, 28));
@@ -118,17 +117,14 @@ public:
         pushButton_wave2temp->setGeometry(QRect(130, 20, 111, 28));
         label_9 = new QLabel(groupBox_4);
         label_9->setObjectName(QStringLiteral("label_9"));
-        label_9->setGeometry(QRect(250, 20, 121, 16));
-        label_10 = new QLabel(groupBox_4);
-        label_10->setObjectName(QStringLiteral("label_10"));
-        label_10->setGeometry(QRect(250, 40, 121, 16));
+        label_9->setGeometry(QRect(250, 30, 121, 16));
         groupBox_5 = new QGroupBox(tab_3);
         groupBox_5->setObjectName(QStringLiteral("groupBox_5"));
-        groupBox_5->setGeometry(QRect(400, 100, 391, 61));
+        groupBox_5->setGeometry(QRect(400, 110, 391, 61));
         pushButton_covresult = new QPushButton(groupBox_5);
         pushButton_covresult->setObjectName(QStringLiteral("pushButton_covresult"));
         pushButton_covresult->setEnabled(false);
-        pushButton_covresult->setGeometry(QRect(190, 20, 101, 28));
+        pushButton_covresult->setGeometry(QRect(190, 20, 81, 28));
         pushButton_File2 = new QPushButton(groupBox_5);
         pushButton_File2->setObjectName(QStringLiteral("pushButton_File2"));
         pushButton_File2->setGeometry(QRect(100, 20, 81, 28));
@@ -137,7 +133,7 @@ public:
         pushButton_File1->setGeometry(QRect(10, 20, 81, 28));
         label_11 = new QLabel(groupBox_5);
         label_11->setObjectName(QStringLiteral("label_11"));
-        label_11->setGeometry(QRect(300, 30, 81, 16));
+        label_11->setGeometry(QRect(280, 30, 101, 16));
         tabWidget->addTab(tab_3, QString());
         tab = new QWidget();
         tab->setObjectName(QStringLiteral("tab"));
@@ -149,7 +145,7 @@ public:
         pushButton_2->setGeometry(QRect(10, 50, 93, 28));
         groupBox = new QGroupBox(tab);
         groupBox->setObjectName(QStringLiteral("groupBox"));
-        groupBox->setGeometry(QRect(110, 10, 681, 71));
+        groupBox->setGeometry(QRect(110, 10, 881, 71));
         layoutWidget = new QWidget(groupBox);
         layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
         layoutWidget->setGeometry(QRect(10, 20, 661, 39));
@@ -193,11 +189,11 @@ public:
 
         groupBox_2 = new QGroupBox(tab);
         groupBox_2->setObjectName(QStringLiteral("groupBox_2"));
-        groupBox_2->setGeometry(QRect(10, 80, 781, 451));
+        groupBox_2->setGeometry(QRect(10, 80, 981, 451));
         textEdit = new QTextEdit(groupBox_2);
         textEdit->setObjectName(QStringLiteral("textEdit"));
         textEdit->setEnabled(true);
-        textEdit->setGeometry(QRect(10, 20, 761, 421));
+        textEdit->setGeometry(QRect(10, 20, 961, 421));
         QFont font;
         font.setFamily(QStringLiteral("Consolas"));
         textEdit->setFont(font);
@@ -212,7 +208,7 @@ public:
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 800, 26));
+        menuBar->setGeometry(QRect(0, 0, 1000, 26));
         MainWindow->setMenuBar(menuBar);
 
         retranslateUi(MainWindow);
@@ -227,19 +223,18 @@ public:
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "\345\274\202\346\203\263\345\256\266\346\225\260\346\215\256\345\256\236\351\252\214\345\256\244", 0));
         groupBox_3->setTitle(QApplication::translate("MainWindow", "\346\225\260\346\215\256\346\240\207\345\207\206\345\214\226", 0));
-        pushButton_DS18B20->setText(QApplication::translate("MainWindow", "DS18B20", 0));
-        pushButton_CCD->setText(QApplication::translate("MainWindow", "CCD", 0));
-        pushButton_FBGT->setText(QApplication::translate("MainWindow", "FBG\346\270\251\345\272\246", 0));
-        pushButton_FBGS->setText(QApplication::translate("MainWindow", "FBG\345\272\224\345\212\233", 0));
+        pushButton_DS18B20->setText(QApplication::translate("MainWindow", "DS18B20(Dir)", 0));
+        pushButton_CCD->setText(QApplication::translate("MainWindow", "CCD(Dir)", 0));
+        pushButton_FBGT->setText(QApplication::translate("MainWindow", "FBG\346\270\251\345\272\246(Dir)", 0));
+        pushButton_FBGS->setText(QApplication::translate("MainWindow", "FBG\345\272\224\345\212\233(Dir)", 0));
         pushButton_ENV->setText(QApplication::translate("MainWindow", "\347\216\257\345\242\203\346\270\251\345\272\246(*.xls)", 0));
         label_3->setText(QApplication::translate("MainWindow", "\346\226\207\344\273\266\347\212\266\346\200\201\357\274\232\346\234\252\350\275\275\345\205\245", 0));
-        label_12->setText(QApplication::translate("MainWindow", "\350\257\273\345\217\226xls\346\227\266\350\257\267\345\213\277\346\223\215\n"
-"\344\275\234\345\205\266\345\256\203\344\273\245\345\205\215\345\215\241\346\255\273\357\274\201", 0));
-        groupBox_4->setTitle(QApplication::translate("MainWindow", "\346\263\242\351\225\277\350\275\254\346\270\251\345\272\246", 0));
+        label_12->setText(QApplication::translate("MainWindow", "Dir:\351\200\211\346\226\207\344\273\266\345\244\271\n"
+"*.xls:\345\244\232\351\200\211xls", 0));
+        groupBox_4->setTitle(QApplication::translate("MainWindow", "\346\263\242\351\225\277\350\275\254\346\270\251\345\272\246(\347\273\217\344\276\233\345\217\202\350\200\203)", 0));
         pushButton_LoadFBGT->setText(QApplication::translate("MainWindow", "\346\240\207\345\207\206FBG\346\226\207\344\273\266", 0));
         pushButton_wave2temp->setText(QApplication::translate("MainWindow", "\344\270\200\351\224\256\350\275\254\346\215\242", 0));
         label_9->setText(QApplication::translate("MainWindow", "\346\234\252\350\275\275\345\205\245", 0));
-        label_10->setText(QApplication::translate("MainWindow", "\345\276\205\350\275\254\346\215\242", 0));
         groupBox_5->setTitle(QApplication::translate("MainWindow", "\347\233\270\345\205\263\346\200\247\350\256\241\347\256\227", 0));
         pushButton_covresult->setText(QApplication::translate("MainWindow", "\347\224\237\346\210\220\347\273\223\346\236\234", 0));
         pushButton_File2->setText(QApplication::translate("MainWindow", "\346\226\207\344\273\2662", 0));
