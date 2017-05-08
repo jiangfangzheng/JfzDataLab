@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QTime>
 #include <math.h>
+#include "EnvXlsReadThread.h"
 
 
 // armadillo矩阵库
@@ -26,6 +27,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    friend class EnvXlsReadThread;
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
@@ -57,6 +59,7 @@ private:
     mat MatFBGT;
     mat MatFBGS;
     mat MatENV;
+    QStringList EnvFileNameList;
     QString standFBGFileName;// 标准FBG温度波长文件
     QString correlationFileName1;
     QString correlationFileName2;

@@ -24,10 +24,12 @@ LIBS += D:\Library\Armadillo\examples\lib_win64\blas_win64_MT.lib    \
 SOURCES += main.cpp\
         mainwindow.cpp \
     jfzlib.cpp \
-    datatostand.cpp
+    datatostand.cpp \
+    EnvXlsReadThread.cpp
 
 HEADERS  += mainwindow.h \
     jfzlib.h \
-    datatostand.h
+    datatostand.h \
+    EnvXlsReadThread.h
 
 FORMS    += mainwindow.ui

@@ -157,7 +157,7 @@
        </rect>
       </property>
       <property name="title">
-       <string>波长转温度(经供参考)</string>
+       <string>波长转温度(仅供参考)</string>
       </property>
       <widget class="QPushButton" name="pushButton_LoadFBGT">
        <property name="geometry">
@@ -447,7 +447,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>26</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>

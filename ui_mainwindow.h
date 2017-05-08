@@ -208,7 +208,7 @@ public:
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1000, 26));
+        menuBar->setGeometry(QRect(0, 0, 1000, 23));
         MainWindow->setMenuBar(menuBar);
 
         retranslateUi(MainWindow);
@@ -231,7 +231,7 @@ public:
         label_3->setText(QApplication::translate("MainWindow", "\346\226\207\344\273\266\347\212\266\346\200\201\357\274\232\346\234\252\350\275\275\345\205\245", 0));
         label_12->setText(QApplication::translate("MainWindow", "Dir:\351\200\211\346\226\207\344\273\266\345\244\271\n"
 "*.xls:\345\244\232\351\200\211xls", 0));
-        groupBox_4->setTitle(QApplication::translate("MainWindow", "\346\263\242\351\225\277\350\275\254\346\270\251\345\272\246(\347\273\217\344\276\233\345\217\202\350\200\203)", 0));
+        groupBox_4->setTitle(QApplication::translate("MainWindow", "\346\263\242\351\225\277\350\275\254\346\270\251\345\272\246(\344\273\205\344\276\233\345\217\202\350\200\203)", 0));
         pushButton_LoadFBGT->setText(QApplication::translate("MainWindow", "\346\240\207\345\207\206FBG\346\226\207\344\273\266", 0));
         pushButton_wave2temp->setText(QApplication::translate("MainWindow", "\344\270\200\351\224\256\350\275\254\346\215\242", 0));
         label_9->setText(QApplication::translate("MainWindow", "\346\234\252\350\275\275\345\205\245", 0));
