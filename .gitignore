@@ -1,4 +1,7 @@
 # ×Ô¶¨Òå
+Desktop_Qt_5_6_1_MinGW/
+Desktop_Qt_5_6_1_MinGW_Static/
+Desktop_Qt_5_6_2_MSVC2013_64bit/
 debug/
 release/
 *.csv

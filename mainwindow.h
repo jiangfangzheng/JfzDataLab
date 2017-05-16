@@ -1,7 +1,7 @@
 ﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#pragma execution_character_set("utf-8")
+//#pragma execution_character_set("utf-8")
 
 #include <QMainWindow>
 #include <QFileDialog>      //引用文件浏览对话框类
