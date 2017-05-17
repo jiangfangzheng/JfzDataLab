@@ -11,6 +11,11 @@ public:
     EnvXlsReadThread();
     EnvXlsReadThread(QStringList EnvFileNameList, Ui::MainWindow* ui);
     void run();
+private slots:
+	void on_pushButton_wave2temp_clicked();
+
+	void on_pushButton_FBGT_clicked();
+
 private:
     QStringList EnvFileNameList;
     Ui::MainWindow *ui;

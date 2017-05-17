@@ -44,13 +44,15 @@ private slots:
 
     void on_pushButton_LoadFBGT_clicked();
 
-    void on_pushButton_wave2temp_clicked();
+//    void on_pushButton_wave2temp_clicked();
 
     void on_pushButton_File1_clicked();
 
     void on_pushButton_File2_clicked();
 
     void on_pushButton_covresult_clicked();
+
+	void on_pushButton_LoadFBGT_ALL_clicked();
 
 private:
     Ui::MainWindow *ui;

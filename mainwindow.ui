@@ -81,6 +81,9 @@
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_FBGT">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="geometry">
         <rect>
          <x>250</x>
@@ -172,29 +175,13 @@
         <string>标准FBG文件</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_wave2temp">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>130</x>
-         <y>20</y>
-         <width>111</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>一键转换</string>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_9">
        <property name="geometry">
         <rect>
-         <x>250</x>
+         <x>140</x>
          <y>30</y>
-         <width>121</width>
-         <height>16</height>
+         <width>231</width>
+         <height>20</height>
         </rect>
        </property>
        <property name="text">
@@ -267,6 +254,45 @@
        </property>
        <property name="text">
         <string>待计算</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_6">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>180</y>
+        <width>381</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>数据预处理-波长修复</string>
+      </property>
+      <widget class="QPushButton" name="pushButton_LoadFBGT_ALL">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>111</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>FBG温度(Dir)</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_10">
+       <property name="geometry">
+        <rect>
+         <x>140</x>
+         <y>30</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>未载入</string>
        </property>
       </widget>
      </widget>
@@ -447,7 +473,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>23</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>
