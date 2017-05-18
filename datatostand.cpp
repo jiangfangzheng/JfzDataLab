@@ -496,7 +496,7 @@ int Stand_FBGT_Fix(QString CH08, QString CH09, QString CH10, QString CH11, QStri
 	// 倒序来一轮，防止前面很多行都是0，靠后面的把前面的补全了
 	for(unsigned int j=0; j<All_Mat.n_cols;++j) // 先对列处理
 	{
-		for(int i=All_Mat.n_rows-1; i>=0;--i) // 从第二行开始处理, 要处理0行，递减只好用有符号(这种做法不好)
+		for(int i=All_Mat.n_rows-2; i>=0;--i) // 从倒数第二行开始处理, 并且要处理0行，递减只好用有符号(这种做法不好)
 		{
 			if(All_Mat(i,j)<0.001 && All_Mat(i+1,j)>0.001)
 			{

@@ -221,7 +221,7 @@ void MainWindow::on_pushButton_LoadFBGT_clicked()
 			if( b == 0 )
 			{
 				QString timecost = QString::number(time.elapsed()/1000.0);
-				ui->label_9->setText("OK:<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+				ui->label_9->setText("波长转温度成功!:<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
 			}
 
 		}
@@ -562,7 +562,7 @@ void MainWindow::on_pushButton_LoadFBGT_ALL_clicked()
 		if( b == 0 )
 		{
 			QString timecost = QString::number(time.elapsed()/1000.0);
-			ui->label_10->setText("FBG温度修复成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+			ui->label_10->setText("FBG波长修复成功！<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
 		}
 	}
 }
