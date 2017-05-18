@@ -18,12 +18,13 @@ MainWindow::~MainWindow()
 // 电类标准化
 void MainWindow::on_pushButton_DS18B20_clicked()
 {
-	ui->label_3->setText("电类处理中！");
+	ui->label_3->setText("文件状态：未载入");
 	// 载入文件夹
 	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
+		ui->label_3->setText("电类处理中！");
 		QTime time;time.start(); // 计时
 		// 指定文件名
 		QString CH1 = dir + "/通道1.csv";
@@ -51,12 +52,13 @@ void MainWindow::on_pushButton_DS18B20_clicked()
 // CCD标准化
 void MainWindow::on_pushButton_CCD_clicked()
 {
-	ui->label_3->setText("CCD处理中！");
+	ui->label_3->setText("文件状态：未载入");
 	// 载入文件夹
 	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
+		ui->label_3->setText("CCD处理中！");
 		QTime time;time.start(); // 计时
 		// 指定文件名
 		QString CH1 = dir + "/CCD数据值.csv";
@@ -78,12 +80,13 @@ void MainWindow::on_pushButton_CCD_clicked()
 // FBG温度标准化
 void MainWindow::on_pushButton_FBGT_clicked()
 {
-	ui->label_3->setText("FBG温度处理中！");
+	ui->label_3->setText("文件状态：未载入");
 	// 载入文件夹
 	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
+		ui->label_3->setText("FBG温度处理中！");
 		QTime time;time.start(); // 计时
 		// 指定文件名
 		QString CH08 = dir + "/通道8.csv";
@@ -132,12 +135,13 @@ void MainWindow::on_pushButton_FBGT_clicked()
 // FBG应力标准化
 void MainWindow::on_pushButton_FBGS_clicked()
 {
-	ui->label_3->setText("FBG应力处理中！");
+	ui->label_3->setText("文件状态：未载入");
 	// 载入文件夹 ，填"/"跳到根目录， 填“” 默认程序位置
 	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
+		ui->label_3->setText("FBG应力处理中！");
 		QTime time;time.start(); // 计时
 		// 指定文件名
 		QString CH01 = dir + "/通道1.csv";
@@ -166,7 +170,7 @@ void MainWindow::on_pushButton_FBGS_clicked()
 // 环境温度标准化
 void MainWindow::on_pushButton_ENV_clicked()
 {
-	ui->label_3->setText("<span style='color: rgb(255, 0, 0);'>正在开启线程处理xls文件...</span>");
+	ui->label_3->setText("...");
 	ui->pushButton_ENV->setEnabled(false);
 	EnvFileNameList = QFileDialog::getOpenFileNames(this, tr("打开环境温度数据"), " ", tr("textfile(*.xls);"));
 	if(EnvFileNameList.size() != 4)
@@ -177,11 +181,68 @@ void MainWindow::on_pushButton_ENV_clicked()
 	}
 	else
 	{
+		ui->label_3->setText("<span style='color: rgb(255, 0, 0);'>正在开启线程处理xls文件...</span>");
 		EnvXlsReadThread *readxls = new EnvXlsReadThread(EnvFileNameList, ui);
 		readxls->start();
 
 	}
 }
+
+// 数据预处理-波长修复
+void MainWindow::on_pushButton_LoadFBGT_ALL_clicked()
+{
+	ui->label_10->setText("文件状态：未载入");
+	// 载入文件夹
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	// 载入成功操作
+	if(!dir.isEmpty())
+	{
+		ui->label_10->setText("FBG温度波长修复中！");
+		QTime time;time.start(); // 计时
+		// 指定文件名
+		QString CH08 = dir + "/通道8.csv";
+		QString CH09 = dir + "/通道9.csv";
+		QString CH10 = dir + "/通道10.csv";
+		QString CH11 = dir + "/通道11.csv";
+		QString CH12 = dir + "/通道12.csv";
+		QString CH13 = dir + "/通道13.csv";
+		QString CH14 = dir + "/通道14.csv";
+		QString CH15 = dir + "/通道15.csv";
+		QString CH16 = dir + "/通道16.csv";
+		QString CH17 = dir + "/通道17.csv";
+		QString CH18 = dir + "/通道18.csv";
+		QString CH19 = dir + "/通道19.csv";
+		QString CH20 = dir + "/通道20.csv";
+		QString CH21 = dir + "/通道21.csv";
+		QString CH22 = dir + "/通道22.csv";
+		QString CH23 = dir + "/通道23.csv";
+		QString CH24 = dir + "/通道24.csv";
+		QString CH25 = dir + "/通道25.csv";
+		QString CH26 = dir + "/通道26.csv";
+		QString CH27 = dir + "/通道27.csv";
+		QString CH28 = dir + "/通道28.csv";
+		QString CH29 = dir + "/通道29.csv";
+		QString CH30 = dir + "/通道30.csv";
+		QString CH31 = dir + "/通道31.csv";
+		QString CH32 = dir + "/通道32.csv";
+
+		QString  DataName_FBGT= "CH08-01,CH08-02,CH08-03,CH08-04,CH08-05,CH08-06,CH08-07,CH08-08,CH08-09,CH08-10,CH08-11,CH08-12,CH08-13,CH08-14,CH08-15,CH09-01,CH09-02,CH09-03,CH09-04,CH09-05,CH09-06,CH09-07,CH09-08,CH10-01,CH10-02,CH10-03,CH10-04,CH10-05,CH10-06,CH10-07,CH11-01,CH11-02,CH11-03,CH11-04,CH11-05,CH11-06,CH11-07,CH11-08,CH11-09,CH11-10,CH11-11,CH11-12,CH11-13,CH11-14,CH11-15,CH12-01,CH12-02,CH12-03,CH12-04,CH12-05,CH12-06,CH12-07,CH12-08,CH12-09,CH12-10,CH12-11,CH12-12,CH12-13,CH12-14,CH12-15,CH13-01,CH13-02,CH13-03,CH13-04,CH13-05,CH13-06,CH13-07,CH13-08,CH13-09,CH13-10,CH13-11,CH13-12,CH13-13,CH13-14,CH13-15,CH14-01,CH14-02,CH14-03,CH14-04,CH14-05,CH14-06,CH14-07,CH15-01,CH15-02,CH15-03,CH15-04,CH15-05,CH15-06,CH15-07,CH15-08,CH16-01,CH16-02,CH16-03,CH16-04,CH16-05,CH16-06,CH16-07,CH16-08,CH17-01,CH17-02,CH17-03,CH17-04,CH17-05,CH17-06,CH17-07,CH17-08,CH18-01,CH18-02,CH18-03,CH18-04,CH18-05,CH18-06,CH18-07,CH18-08,CH19-01,CH19-02,CH19-03,CH19-04,CH19-05,CH19-06,CH19-07,CH19-08,CH19-09,CH19-10,CH20-01,CH20-02,CH20-03,CH20-04,CH20-05,CH20-06,CH20-07,CH20-08,CH20-09,CH20-10,CH21-01,CH21-02,CH21-03,CH21-04,CH21-05,CH21-06,CH21-07,CH22-01,CH22-02,CH22-03,CH22-04,CH22-05,CH22-06,CH22-07,CH22-08,CH22-09,CH22-10,CH23-01,CH23-02,CH23-03,CH23-04,CH24-01,CH24-02,CH24-03,CH24-04,CH24-05,CH24-06,CH24-07,CH24-08,CH24-09,CH24-10,CH25-01,CH25-02,CH25-03,CH25-04,CH25-05,CH25-06,CH25-07,CH25-08,CH25-09,CH25-10,CH26-01,CH26-02,CH26-03,CH26-04,CH27-01,CH27-02,CH27-03,CH27-04,CH27-05,CH27-06,CH27-07,CH27-08,CH27-09,CH28-01,CH28-02,CH28-03,CH28-04,CH28-05,CH28-06,CH28-07,CH28-08,CH28-09,CH28-10,CH29-01,CH29-02,CH29-03,CH29-04,CH29-05,CH29-06,CH29-07,CH29-08,CH29-09,CH29-10,CH30-01,CH30-02,CH30-03,CH30-04,CH30-05,CH30-06,CH30-07,CH30-08,CH30-09,CH30-10,CH31-01,CH31-02,CH31-03,CH31-04,CH31-05,CH31-06,CH31-07,CH31-08,CH31-09,CH31-10,CH32-01,CH32-02,CH32-03";
+		QStringList Time;
+		int a = Stand_FBGT_Fix( CH08,  CH09,  CH10,  CH11,  CH12,  CH13,  CH14,  CH15,  CH16, \
+							CH17,  CH18,  CH19,  CH20,  CH21,  CH22,  CH23,  CH24,  CH25, \
+							CH26,  CH27,  CH28,  CH29,  CH30,  CH31,  CH32, MatFBGT, Time);
+		if( a == 0 )
+			ui->label_10->setText("拟载入成功！");
+		// 保存文件
+		int b = saveStandData("Data-FBGTemperature",DataName_FBGT,Time, MatFBGT);
+		if( b == 0 )
+		{
+			QString timecost = QString::number(time.elapsed()/1000.0);
+			ui->label_10->setText("FBG波长修复成功！<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		}
+	}
+}
+
 
 // 载入标准化FBG文件
 void MainWindow::on_pushButton_LoadFBGT_clicked()
@@ -513,56 +574,3 @@ void MainWindow::on_pushButton_2_clicked()
 	ui->label_8->setText("数据最小：");
 }
 
-// 数据预处理-波长修复
-void MainWindow::on_pushButton_LoadFBGT_ALL_clicked()
-{
-	ui->label_10->setText("FBG温度波长修复中！");
-	// 载入文件夹
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-	// 载入成功操作
-	if(!dir.isEmpty())
-	{
-		QTime time;time.start(); // 计时
-		// 指定文件名
-		QString CH08 = dir + "/通道8.csv";
-		QString CH09 = dir + "/通道9.csv";
-		QString CH10 = dir + "/通道10.csv";
-		QString CH11 = dir + "/通道11.csv";
-		QString CH12 = dir + "/通道12.csv";
-		QString CH13 = dir + "/通道13.csv";
-		QString CH14 = dir + "/通道14.csv";
-		QString CH15 = dir + "/通道15.csv";
-		QString CH16 = dir + "/通道16.csv";
-		QString CH17 = dir + "/通道17.csv";
-		QString CH18 = dir + "/通道18.csv";
-		QString CH19 = dir + "/通道19.csv";
-		QString CH20 = dir + "/通道20.csv";
-		QString CH21 = dir + "/通道21.csv";
-		QString CH22 = dir + "/通道22.csv";
-		QString CH23 = dir + "/通道23.csv";
-		QString CH24 = dir + "/通道24.csv";
-		QString CH25 = dir + "/通道25.csv";
-		QString CH26 = dir + "/通道26.csv";
-		QString CH27 = dir + "/通道27.csv";
-		QString CH28 = dir + "/通道28.csv";
-		QString CH29 = dir + "/通道29.csv";
-		QString CH30 = dir + "/通道30.csv";
-		QString CH31 = dir + "/通道31.csv";
-		QString CH32 = dir + "/通道32.csv";
-
-		QString  DataName_FBGT= "CH08-01,CH08-02,CH08-03,CH08-04,CH08-05,CH08-06,CH08-07,CH08-08,CH08-09,CH08-10,CH08-11,CH08-12,CH08-13,CH08-14,CH08-15,CH09-01,CH09-02,CH09-03,CH09-04,CH09-05,CH09-06,CH09-07,CH09-08,CH10-01,CH10-02,CH10-03,CH10-04,CH10-05,CH10-06,CH10-07,CH11-01,CH11-02,CH11-03,CH11-04,CH11-05,CH11-06,CH11-07,CH11-08,CH11-09,CH11-10,CH11-11,CH11-12,CH11-13,CH11-14,CH11-15,CH12-01,CH12-02,CH12-03,CH12-04,CH12-05,CH12-06,CH12-07,CH12-08,CH12-09,CH12-10,CH12-11,CH12-12,CH12-13,CH12-14,CH12-15,CH13-01,CH13-02,CH13-03,CH13-04,CH13-05,CH13-06,CH13-07,CH13-08,CH13-09,CH13-10,CH13-11,CH13-12,CH13-13,CH13-14,CH13-15,CH14-01,CH14-02,CH14-03,CH14-04,CH14-05,CH14-06,CH14-07,CH15-01,CH15-02,CH15-03,CH15-04,CH15-05,CH15-06,CH15-07,CH15-08,CH16-01,CH16-02,CH16-03,CH16-04,CH16-05,CH16-06,CH16-07,CH16-08,CH17-01,CH17-02,CH17-03,CH17-04,CH17-05,CH17-06,CH17-07,CH17-08,CH18-01,CH18-02,CH18-03,CH18-04,CH18-05,CH18-06,CH18-07,CH18-08,CH19-01,CH19-02,CH19-03,CH19-04,CH19-05,CH19-06,CH19-07,CH19-08,CH19-09,CH19-10,CH20-01,CH20-02,CH20-03,CH20-04,CH20-05,CH20-06,CH20-07,CH20-08,CH20-09,CH20-10,CH21-01,CH21-02,CH21-03,CH21-04,CH21-05,CH21-06,CH21-07,CH22-01,CH22-02,CH22-03,CH22-04,CH22-05,CH22-06,CH22-07,CH22-08,CH22-09,CH22-10,CH23-01,CH23-02,CH23-03,CH23-04,CH24-01,CH24-02,CH24-03,CH24-04,CH24-05,CH24-06,CH24-07,CH24-08,CH24-09,CH24-10,CH25-01,CH25-02,CH25-03,CH25-04,CH25-05,CH25-06,CH25-07,CH25-08,CH25-09,CH25-10,CH26-01,CH26-02,CH26-03,CH26-04,CH27-01,CH27-02,CH27-03,CH27-04,CH27-05,CH27-06,CH27-07,CH27-08,CH27-09,CH28-01,CH28-02,CH28-03,CH28-04,CH28-05,CH28-06,CH28-07,CH28-08,CH28-09,CH28-10,CH29-01,CH29-02,CH29-03,CH29-04,CH29-05,CH29-06,CH29-07,CH29-08,CH29-09,CH29-10,CH30-01,CH30-02,CH30-03,CH30-04,CH30-05,CH30-06,CH30-07,CH30-08,CH30-09,CH30-10,CH31-01,CH31-02,CH31-03,CH31-04,CH31-05,CH31-06,CH31-07,CH31-08,CH31-09,CH31-10,CH32-01,CH32-02,CH32-03";
-		QStringList Time;
-		int a = Stand_FBGT_Fix( CH08,  CH09,  CH10,  CH11,  CH12,  CH13,  CH14,  CH15,  CH16, \
-							CH17,  CH18,  CH19,  CH20,  CH21,  CH22,  CH23,  CH24,  CH25, \
-							CH26,  CH27,  CH28,  CH29,  CH30,  CH31,  CH32, MatFBGT, Time);
-		if( a == 0 )
-			ui->label_10->setText("拟载入成功！");
-		// 保存文件
-		int b = saveStandData("Data-FBGTemperature",DataName_FBGT,Time, MatFBGT);
-		if( b == 0 )
-		{
-			QString timecost = QString::number(time.elapsed()/1000.0);
-			ui->label_10->setText("FBG波长修复成功！<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		}
-	}
-}
