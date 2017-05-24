@@ -4,13 +4,14 @@
 //#pragma execution_character_set("utf-8")
 
 #include <QMainWindow>
+#include <QMap>
 #include <QFileDialog>      //引用文件浏览对话框类
 #include <QDebug>
 #include <QAxObject>
 #include <QMessageBox>
 #include <QTime>
 #include <math.h>
-#include "EnvXlsReadThread.h"
+#include "tools/EnvXlsReadThread.h"
 
 
 // armadillo矩阵库
@@ -56,6 +57,10 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+	// Skins
+	QMap<QString, QString> mapStyle;
+	void initSkins();
+	// Data
     mat MatDS18B20;
     mat MatCCD;
     mat MatFBGT;

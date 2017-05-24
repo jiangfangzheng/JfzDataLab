@@ -1,7 +1,7 @@
 ﻿#ifndef DATATOSTAND_H
 #define DATATOSTAND_H
 
-#include "jfzlib.h"
+#include "tools/jfzlib.h"
 
 int Stand_DS18B20(QString CH1, QString CH2, QString CH3, QString CH4, QString CH5, QString CH6, QString CH7,mat &DS18B20_All_Mat, QStringList &XLabelName);
 int Stand_CCD(QString CH1, mat &All_Mat, QStringList &XLabelName);

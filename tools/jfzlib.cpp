@@ -1,4 +1,4 @@
-﻿#include "jfzlib.h"
+﻿#include "tools/jfzlib.h"
 
 // 寻找行
 int JfzFileReadRow(QString FileName)

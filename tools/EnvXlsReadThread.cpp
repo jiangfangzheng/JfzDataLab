@@ -1,7 +1,7 @@
 ﻿#include "EnvXlsReadThread.h"
 #include <QDebug>
 #include <QTime>
-#include "jfzlib.h"
+#include "tools/jfzlib.h"
 
 EnvXlsReadThread::EnvXlsReadThread()
 {
