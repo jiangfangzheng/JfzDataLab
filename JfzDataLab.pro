@@ -11,6 +11,13 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = JfzDataLab
 TEMPLATE = app
 RC_ICONS = skins/jfz.ico
+VERSION = 1.0.0.0
+QMAKE_TARGET_PRODUCT = "JfzDataLab"
+QMAKE_TARGET_COMPANY = "Sandeepin"
+QMAKE_TARGET_DESCRIPTION = "Jfz's DataLab"
+QMAKE_TARGET_COPYRIGHT = "Copyright JFZ"
+
+
 QT+=axcontainer
 
 INCLUDEPATH+= D:/Library/Armadillo/include \
