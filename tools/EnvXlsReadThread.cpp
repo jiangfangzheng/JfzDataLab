@@ -124,6 +124,6 @@ void EnvXlsReadThread::run()
    // 计算花费时间
    QString timecost = QString::number(time.elapsed()/1000.0);
    qDebug()<<"读取xls时间："<<timecost<<"s";
-   ui->label_3->setText("转换完成！读取xls文件总共时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+   ui->label_msg->setText("转换完成！读取xls文件总共时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
    ui->pushButton_ENV->setEnabled(true);
 }

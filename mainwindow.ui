@@ -47,8 +47,8 @@
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>781</width>
-        <height>91</height>
+        <width>171</width>
+        <height>271</height>
        </rect>
       </property>
       <property name="title">
@@ -59,7 +59,7 @@
         <rect>
          <x>10</x>
          <y>30</y>
-         <width>111</width>
+         <width>151</width>
          <height>28</height>
         </rect>
        </property>
@@ -70,9 +70,9 @@
       <widget class="QPushButton" name="pushButton_CCD">
        <property name="geometry">
         <rect>
-         <x>130</x>
-         <y>30</y>
-         <width>111</width>
+         <x>10</x>
+         <y>70</y>
+         <width>151</width>
          <height>28</height>
         </rect>
        </property>
@@ -86,9 +86,9 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>250</x>
-         <y>30</y>
-         <width>111</width>
+         <x>10</x>
+         <y>110</y>
+         <width>151</width>
          <height>28</height>
         </rect>
        </property>
@@ -99,9 +99,9 @@
       <widget class="QPushButton" name="pushButton_FBGS">
        <property name="geometry">
         <rect>
-         <x>370</x>
-         <y>30</y>
-         <width>111</width>
+         <x>10</x>
+         <y>190</y>
+         <width>151</width>
          <height>28</height>
         </rect>
        </property>
@@ -112,9 +112,9 @@
       <widget class="QPushButton" name="pushButton_ENV">
        <property name="geometry">
         <rect>
-         <x>490</x>
-         <y>30</y>
-         <width>141</width>
+         <x>10</x>
+         <y>230</y>
+         <width>151</width>
          <height>28</height>
         </rect>
        </property>
@@ -122,31 +122,17 @@
         <string>环境温度(*.xls)</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_3">
+      <widget class="QPushButton" name="pushButton_LoadFBGT_ALL">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>70</y>
-         <width>761</width>
-         <height>16</height>
+         <y>150</y>
+         <width>151</width>
+         <height>28</height>
         </rect>
        </property>
        <property name="text">
-        <string>文件状态：未载入</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_12">
-       <property name="geometry">
-        <rect>
-         <x>640</x>
-         <y>20</y>
-         <width>121</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Dir:选文件夹
-*.xls:多选xls</string>
+        <string>FBG温度(Dir)</string>
        </property>
       </widget>
      </widget>
@@ -154,8 +140,8 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>110</y>
-        <width>381</width>
+        <y>290</y>
+        <width>171</width>
         <height>61</height>
        </rect>
       </property>
@@ -167,7 +153,7 @@
         <rect>
          <x>10</x>
          <y>20</y>
-         <width>111</width>
+         <width>151</width>
          <height>28</height>
         </rect>
        </property>
@@ -175,27 +161,14 @@
         <string>标准FBG文件</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_9">
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>30</y>
-         <width>231</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>未载入</string>
-       </property>
-      </widget>
      </widget>
      <widget class="QGroupBox" name="groupBox_5">
       <property name="geometry">
        <rect>
-        <x>400</x>
-        <y>110</y>
-        <width>391</width>
-        <height>61</height>
+        <x>10</x>
+        <y>360</y>
+        <width>171</width>
+        <height>101</height>
        </rect>
       </property>
       <property name="title">
@@ -207,9 +180,9 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>190</x>
-         <y>20</y>
-         <width>81</width>
+         <x>10</x>
+         <y>60</y>
+         <width>151</width>
          <height>28</height>
         </rect>
        </property>
@@ -220,9 +193,9 @@
       <widget class="QPushButton" name="pushButton_File2">
        <property name="geometry">
         <rect>
-         <x>100</x>
+         <x>90</x>
          <y>20</y>
-         <width>81</width>
+         <width>71</width>
          <height>28</height>
         </rect>
        </property>
@@ -235,64 +208,12 @@
         <rect>
          <x>10</x>
          <y>20</y>
-         <width>81</width>
+         <width>71</width>
          <height>28</height>
         </rect>
        </property>
        <property name="text">
         <string> 文件1</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_11">
-       <property name="geometry">
-        <rect>
-         <x>280</x>
-         <y>30</y>
-         <width>101</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>待计算</string>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QGroupBox" name="groupBox_6">
-      <property name="geometry">
-       <rect>
-        <x>800</x>
-        <y>10</y>
-        <width>191</width>
-        <height>91</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string>数据预处理-波长修复</string>
-      </property>
-      <widget class="QPushButton" name="pushButton_LoadFBGT_ALL">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>30</y>
-         <width>111</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>FBG温度(Dir)</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_10">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>70</y>
-         <width>171</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>未载入</string>
        </property>
       </widget>
      </widget>
@@ -416,7 +337,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>80</y>
+        <y>90</y>
         <width>981</width>
         <height>451</height>
        </rect>
@@ -453,7 +374,7 @@
      </attribute>
     </widget>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="label_Jfz">
     <property name="geometry">
      <rect>
       <x>900</x>
@@ -466,6 +387,19 @@
      <string>蒋方正制作</string>
     </property>
    </widget>
+   <widget class="QLabel" name="label_msg">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>580</y>
+      <width>761</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>文件状态：未载入</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -473,7 +407,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>23</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>
