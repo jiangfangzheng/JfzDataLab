@@ -29,13 +29,17 @@ SOURCES += main.cpp\
     tools/jfzlib.cpp \
     algorithm/datatostand.cpp \
     tools/EnvXlsReadThread.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    algorithm/correlations.cpp \
+    algorithm/datadiagnosis.cpp
 
 HEADERS  += mainwindow.h \
     tools/jfzlib.h \
     algorithm/datatostand.h \
     tools/EnvXlsReadThread.h \
-    skins/skins.h
+    skins/skins.h \
+    algorithm/correlations.h \
+    algorithm/datadiagnosis.h
 
 FORMS    += mainwindow.ui
 

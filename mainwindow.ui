@@ -40,7 +40,7 @@
     </property>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
-      <string>数据标准化</string>
+      <string>数据处理</string>
      </attribute>
      <widget class="QGroupBox" name="groupBox_3">
       <property name="geometry">
@@ -378,7 +378,7 @@
     <property name="geometry">
      <rect>
       <x>900</x>
-      <y>580</y>
+      <y>575</y>
       <width>91</width>
       <height>20</height>
      </rect>
@@ -391,7 +391,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>580</y>
+      <y>575</y>
       <width>761</width>
       <height>20</height>
      </rect>
@@ -400,16 +400,16 @@
      <string>文件状态：未载入</string>
     </property>
    </widget>
-  </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1000</width>
-     <height>26</height>
-    </rect>
-   </property>
+   <widget class="QComboBox" name="comboBox_skin">
+    <property name="geometry">
+     <rect>
+      <x>810</x>
+      <y>575</y>
+      <width>80</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
