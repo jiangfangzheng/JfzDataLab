@@ -4,9 +4,10 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
-
+QT += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT+=axcontainer
+QT += printsupport
 
 TARGET = JfzDataLab
 TEMPLATE = app
@@ -16,9 +17,6 @@ QMAKE_TARGET_PRODUCT = "JfzDataLab"
 QMAKE_TARGET_COMPANY = "Sandeepin"
 QMAKE_TARGET_DESCRIPTION = "Jfz's DataLab"
 QMAKE_TARGET_COPYRIGHT = "Copyright JFZ"
-
-
-QT+=axcontainer
 
 INCLUDEPATH+= D:/Library/Armadillo/include \
 
@@ -31,7 +29,13 @@ SOURCES += main.cpp\
     tools/EnvXlsReadThread.cpp \
     mainwindow.cpp \
     algorithm/correlations.cpp \
-    algorithm/datadiagnosis.cpp
+    algorithm/datadiagnosis.cpp \
+    tools/JCSV.cpp \
+    tools/JMat.cpp \
+    tools/stringtools.cpp \
+    tools/tictoc.cpp \
+    algorithm/LinearRegression.cpp \
+    plugins/qcustomplot.cpp
 
 HEADERS  += mainwindow.h \
     tools/jfzlib.h \
@@ -39,7 +43,13 @@ HEADERS  += mainwindow.h \
     tools/EnvXlsReadThread.h \
     skins/skins.h \
     algorithm/correlations.h \
-    algorithm/datadiagnosis.h
+    algorithm/datadiagnosis.h \
+    tools/JCSV.h \
+    tools/JMat.h \
+    tools/stringtools.h \
+    tools/tictoc.h \
+    algorithm/LinearRegression.h \
+    plugins/qcustomplot.h
 
 FORMS    += mainwindow.ui
 

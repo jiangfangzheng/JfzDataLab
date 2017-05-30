@@ -2,9 +2,12 @@
 #include "ui_mainwindow.h"
 #include "skins/skins.h"
 #include "tools/jfzlib.h"
+#include "tools/JMat.h"
 #include "algorithm/datatostand.h"
 #include "algorithm/correlations.h"
 #include "algorithm/datadiagnosis.h"
+#include "algorithm/LinearRegression.h"
+#include "plugins/qcustomplot.h"
 
 //class JSkin
 //{
@@ -25,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->setupUi(this);
 	// Skin
 	this->initSkins();
+	// init qcustomplot
+	ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
 }
 
 MainWindow::~MainWindow()
@@ -45,9 +50,10 @@ void MainWindow::initSkins()
 	mapStyle["银色"]   = QString(":/qss/silvery.css");
 	mapStyle["淡蓝色"] = QString(":/qss/blue.css");
 	mapStyle["蓝色"]   = QString(":/qss/dev.css");
+	mapStyle["PS黑"]   = QString(":/qss/psblack.css");
 	// 下拉框选择
 	QStringList qssName;
-	qssName << "系统" << "黑色" << "灰黑色" << "灰色" << "浅灰色" << "深灰色" << "银色" << "淡蓝色" << "蓝色";
+	qssName << "系统" << "黑色" << "灰黑色" << "灰色" << "浅灰色" << "深灰色" << "银色" << "淡蓝色" << "蓝色"<< "PS黑";
 	ui->comboBox_skin->addItems(qssName);
 	ui->comboBox_skin->setCurrentIndex(6);// 个人最喜欢银，默认
 	// 直接赋值
@@ -360,3 +366,27 @@ void MainWindow::on_pushButton_2_clicked()
 	ui->label_msg->setText("...");
 }
 
+// 多元线性回归
+void MainWindow::on_pushButton_LinearRegression_clicked()
+{
+	ui->label_msg->setText("");
+	QString inputFile = QFileDialog::getOpenFileName(this, tr("打开数据源"), " ", tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!inputFile.isEmpty())
+	{
+		ui->label_msg->setText("正在计算...");
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】载入\计算
+		QString strOut = QLinearRegression(inputFile);
+		// 【2】保存文件(暂不保存)
+		int b=0;
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if( b == 0 )
+			ui->label_msg->setText(strOut +" 花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+	}
+	else
+		ui->label_msg->setText("未选择文件！");
+}

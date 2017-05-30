@@ -82,7 +82,7 @@ bool DataDiagnosis(QString &InputFileName_str, mat &Mat, QStringList &DataName, 
 	mat maxMat = max(Mat); // 每一列的最大值
 	mat minMat = min(Mat); // 每一列的最大值
 
-	for(int i=0; i< Mat.n_cols ; i++)
+	for(unsigned int i=0; i< Mat.n_cols ; i++)
 	{
 		QString text;
 		float avg = colMat(i)*1.0/(Mat.n_rows); // 算术平均值

@@ -13,6 +13,7 @@
 #include <math.h>
 #include "tools/EnvXlsReadThread.h"
 
+
 // armadillo矩阵库
 #include <armadillo>
 using namespace arma;
@@ -55,6 +56,8 @@ private slots:
 	void on_pushButton_LoadFBGT_ALL_clicked();
 
 	void on_comboBox_skin_currentIndexChanged(const QString &arg1);
+
+	void on_pushButton_LinearRegression_clicked();
 
 private:
     Ui::MainWindow *ui;
