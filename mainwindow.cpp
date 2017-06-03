@@ -3,6 +3,7 @@
 #include "skins/skins.h"
 #include "tools/jfzlib.h"
 #include "tools/JMat.h"
+#include "tools/JIO.h"
 #include "algorithm/datatostand.h"
 #include "algorithm/correlations.h"
 #include "algorithm/datadiagnosis.h"
@@ -389,4 +390,85 @@ void MainWindow::on_pushButton_LinearRegression_clicked()
 	}
 	else
 		ui->label_msg->setText("未选择文件！");
+}
+
+// 封装的绘图函数
+void MainWindow::JfzPlot(QVector<double> MatData, QString PicName, int TuNum, QColor Colorstyle, double ymax, double ymin)
+{
+	//定义两个可变QVector数组存放绘图的坐标数据（X、Y数据量）
+	int xysize = MatData.size();
+	//分别存放x和y坐标的数据
+	QVector<double> x(xysize),y(MatData);
+	//    int max = -1000000,min = 1000000;
+	for(int i=0;i<xysize;i++)
+	{
+		x[i] = i;
+	}
+	//设置属性可缩放，移动等
+	ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes | QCP::iSelectLegend | QCP::iSelectPlottables);
+	//设置坐标轴标签名称
+	ui->customPlot->xAxis->setLabel("X");
+	ui->customPlot->yAxis->setLabel("Y");
+	ui->customPlot->legend->setVisible(true);		// 图注可见
+	//  ui->customPlot->axisRect()->setupFullAxesBox();
+	ui->customPlot->addGraph();						//向绘图区域QCustomPlot(从widget提升来的)添加一条曲线
+	ui->customPlot->graph(TuNum)->setName(PicName);	//曲线名称
+	ui->customPlot->graph(TuNum)->setPen(QPen(Colorstyle));
+	ui->customPlot->graph(TuNum)->setData(x,y);		//设置曲线数据
+	//设置坐标轴显示范围,否则我们只能看到默认的范围
+	ui->customPlot->xAxis->setRange(0,xysize);
+	double delta = (ymax-ymin)*0.3;
+	ui->customPlot->yAxis->setRange(ymin-delta,ymax+delta);
+}
+
+void MainWindow::on_pushButton_LoadPlotData_clicked()
+{
+	ui->label_msg->setText("");
+	ui->comboBox_LoadPlotList->clear();
+	ui->customPlot->clearGraphs();
+	ui->customPlot->replot();
+	QString inputFile = QFileDialog::getOpenFileName(this, tr("打开数据源"), " ", tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!inputFile.isEmpty())
+	{
+		plotDataStrList = JIO::CsvToStrList(inputFile);
+//		JIO::show(strlist);
+		QList<QString> strListItem;
+		for(auto i=1;i<plotDataStrList[0].size();++i)
+			strListItem.append(plotDataStrList[0][i]);
+		ui->comboBox_LoadPlotList->addItems(strListItem);
+		QVector<double> MatData;
+		for(int i=0;i<plotDataStrList.size()-1;++i)
+		{
+			MatData.append(plotDataStrList[i+1][1].toDouble());
+		}
+		auto ymax = max_element(MatData.begin(),MatData.end());
+		auto ymin = min_element(MatData.begin(),MatData.end());
+		JfzPlot(MatData, plotDataStrList[0][1], 0, Qt::red, *ymax, *ymin);
+		ui->customPlot->replot();
+
+		ui->label_msg->setText("绘图完成!");
+	}
+	else
+		ui->label_msg->setText("未选择文件！");
+}
+
+void MainWindow::on_comboBox_LoadPlotList_currentTextChanged(const QString &arg1)
+{
+	ui->label_msg->setText("");
+	ui->customPlot->clearGraphs();
+	ui->customPlot->replot();
+	if(!arg1.isEmpty())
+	{
+		int ItemIndex = plotDataStrList[0].indexOf(arg1); // 对应图项目下标
+		QVector<double> MatData;
+		for(int i=0;i<plotDataStrList.size()-1;++i)
+		{
+			MatData.append(plotDataStrList[i+1][ItemIndex].toDouble());
+		}
+		auto ymax = max_element(MatData.begin(),MatData.end());
+		auto ymin = min_element(MatData.begin(),MatData.end());
+		JfzPlot(MatData, plotDataStrList[0][ItemIndex], 0, Qt::red, *ymax, *ymin);
+		ui->customPlot->replot();
+		ui->label_msg->setText("绘图完成!");
+	}
 }

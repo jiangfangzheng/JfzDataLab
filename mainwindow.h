@@ -12,6 +12,7 @@
 #include <QTime>
 #include <math.h>
 #include "tools/EnvXlsReadThread.h"
+#include "plugins/qcustomplot.h"
 
 
 // armadillo矩阵库
@@ -59,6 +60,10 @@ private slots:
 
 	void on_pushButton_LinearRegression_clicked();
 
+	void on_pushButton_LoadPlotData_clicked();
+
+	void on_comboBox_LoadPlotList_currentTextChanged(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
 	// Skins
@@ -74,6 +79,9 @@ private:
     QString standFBGFileName;// 标准FBG温度波长文件
     QString correlationFileName1;
     QString correlationFileName2;
+	QList<QList<QString>> plotDataStrList; // 绘图载入原始数据
+	// JPlot
+	void JfzPlot(QVector<double> MatData, QString PicName, int TuNum, QColor Colorstyle, double ymax, double ymin);
 };
 
 #endif // MAINWINDOW_H

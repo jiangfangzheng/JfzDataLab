@@ -35,7 +35,8 @@ SOURCES += main.cpp\
     tools/stringtools.cpp \
     tools/tictoc.cpp \
     algorithm/LinearRegression.cpp \
-    plugins/qcustomplot.cpp
+    plugins/qcustomplot.cpp \
+    tools/JIO.cpp
 
 HEADERS  += mainwindow.h \
     tools/jfzlib.h \
@@ -49,7 +50,8 @@ HEADERS  += mainwindow.h \
     tools/stringtools.h \
     tools/tictoc.h \
     algorithm/LinearRegression.h \
-    plugins/qcustomplot.h
+    plugins/qcustomplot.h \
+    tools/JIO.h
 
 FORMS    += mainwindow.ui
 
