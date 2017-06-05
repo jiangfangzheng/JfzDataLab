@@ -44,5 +44,7 @@
         <file>qss/psblack/radiobutton_unchecked.png</file>
         <file>qss/psblack/radiobutton_unchecked_disable.png</file>
         <file>qss/psblack.css</file>
+        <file>jfz.ico</file>
+        <file>jfz.png</file>
     </qresource>
 </RCC>

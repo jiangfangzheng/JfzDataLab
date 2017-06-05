@@ -31,6 +31,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	this->initSkins();
 	// init qcustomplot
 	ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+	// 托盘
+	myTray = new SystemTray(this);
+	connect(myTray,SIGNAL(showWidget()),this,SLOT(ShowWindow()));//关联信号和槽函数
+	connect(myTray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(SystemTrayActivated(QSystemTrayIcon::ActivationReason)));
 }
 
 MainWindow::~MainWindow()
@@ -70,6 +74,32 @@ void MainWindow::on_comboBox_skin_currentIndexChanged(const QString &arg1)
 	if (qssFile.trimmed() == "")
 		qssFile = ":/qss/sys.css";
 	Skins::setStyle(qssFile);
+}
+
+// 托盘相关
+void MainWindow::ShowWindow()
+{
+	this->showNormal();
+	this->raise();
+	this->activateWindow();
+}
+void MainWindow::SystemTrayActivated(QSystemTrayIcon::ActivationReason reason)
+{
+	switch(reason)
+	{
+	case QSystemTrayIcon::Trigger:
+	{
+		ShowWindow();
+		break;
+	}
+	case QSystemTrayIcon::DoubleClick:
+	{
+		ShowWindow();
+		break;
+	}
+	default:
+		break;
+	}
 }
 
 // 电类标准化
@@ -421,6 +451,7 @@ void MainWindow::JfzPlot(QVector<double> MatData, QString PicName, int TuNum, QC
 	ui->customPlot->yAxis->setRange(ymin-delta,ymax+delta);
 }
 
+// 载入用于绘图的数据源
 void MainWindow::on_pushButton_LoadPlotData_clicked()
 {
 	ui->label_msg->setText("");
@@ -430,19 +461,24 @@ void MainWindow::on_pushButton_LoadPlotData_clicked()
 	QString inputFile = QFileDialog::getOpenFileName(this, tr("打开数据源"), " ", tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!inputFile.isEmpty())
 	{
+		// 【1】载入数据
 		plotDataStrList = JIO::CsvToStrList(inputFile);
 //		JIO::show(strlist);
+		// 【2】获取数据项名字
 		QList<QString> strListItem;
 		for(auto i=1;i<plotDataStrList[0].size();++i)
 			strListItem.append(plotDataStrList[0][i]);
+		// 【3】写入comboBox、制作矩阵数据
 		ui->comboBox_LoadPlotList->addItems(strListItem);
 		QVector<double> MatData;
 		for(int i=0;i<plotDataStrList.size()-1;++i)
 		{
 			MatData.append(plotDataStrList[i+1][1].toDouble());
 		}
+		// 【4】计算y范围，绘制默认的曲线
 		auto ymax = max_element(MatData.begin(),MatData.end());
 		auto ymin = min_element(MatData.begin(),MatData.end());
+		ui->customPlot->clearGraphs();
 		JfzPlot(MatData, plotDataStrList[0][1], 0, Qt::red, *ymax, *ymin);
 		ui->customPlot->replot();
 
@@ -452,6 +488,7 @@ void MainWindow::on_pushButton_LoadPlotData_clicked()
 		ui->label_msg->setText("未选择文件！");
 }
 
+// 绘图的comboBox改变时事件
 void MainWindow::on_comboBox_LoadPlotList_currentTextChanged(const QString &arg1)
 {
 	ui->label_msg->setText("");

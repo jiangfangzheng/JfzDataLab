@@ -1,8 +1,6 @@
 ﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-//#pragma execution_character_set("utf-8")
-
 #include <QMainWindow>
 #include <QMap>
 #include <QFileDialog>      //引用文件浏览对话框类
@@ -13,6 +11,7 @@
 #include <math.h>
 #include "tools/EnvXlsReadThread.h"
 #include "plugins/qcustomplot.h"
+#include "systemTray.h"
 
 
 // armadillo矩阵库
@@ -32,7 +31,17 @@ public:
     friend class EnvXlsReadThread;
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+private:
+	Ui::MainWindow *ui;
 
+// 托盘相关
+private:
+	SystemTray * myTray; //自定义系统托盘
+private slots:
+	void ShowWindow(); //处理还原操作
+	void SystemTrayActivated(QSystemTrayIcon::ActivationReason reason); //处理点击托盘操作
+
+// 数据处理相关
 private slots:
     void on_pushButton_DS18B20_clicked();
     void on_pushButton_CCD_clicked();
@@ -65,7 +74,6 @@ private slots:
 	void on_comboBox_LoadPlotList_currentTextChanged(const QString &arg1);
 
 private:
-    Ui::MainWindow *ui;
 	// Skins
 	QMap<QString, QString> mapStyle;
 	void initSkins();

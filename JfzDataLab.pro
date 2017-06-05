@@ -36,7 +36,8 @@ SOURCES += main.cpp\
     tools/tictoc.cpp \
     algorithm/LinearRegression.cpp \
     plugins/qcustomplot.cpp \
-    tools/JIO.cpp
+    tools/JIO.cpp \
+    systemTray.cpp
 
 HEADERS  += mainwindow.h \
     tools/jfzlib.h \
@@ -51,7 +52,8 @@ HEADERS  += mainwindow.h \
     tools/tictoc.h \
     algorithm/LinearRegression.h \
     plugins/qcustomplot.h \
-    tools/JIO.h
+    tools/JIO.h \
+    systemTray.h
 
 FORMS    += mainwindow.ui
 
