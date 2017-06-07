@@ -73,6 +73,14 @@ private slots:
 
 	void on_comboBox_LoadPlotList_currentTextChanged(const QString &arg1);
 
+	void on_pushButton_CCDinSQL_clicked();
+
+	void on_pushButton_FBGinSQL_clicked();
+
+	void on_pushButton_DS18BinSQL_clicked();
+
+	void on_pushButton_ENVinSQL_clicked();
+
 private:
 	// Skins
 	QMap<QString, QString> mapStyle;

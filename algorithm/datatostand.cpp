@@ -331,6 +331,232 @@ int Stand_DS18B20(QStringList &CH, mat &DS18B20_All_Mat, QStringList &XLabelName
     return 0;
 }
 
+mat Stand_DS18B20(QStringList &CH)
+{
+	mat DS18B20_All_Mat;
+	QString CH1=CH[0];
+	QString CH2=CH[1];
+	QString CH3=CH[2];
+	QString CH4=CH[3];
+	QString CH5=CH[4];
+	QString CH6=CH[5];
+	QString CH7=CH[6];
+	QString CH8=CH[7];
+
+	int InputFileRow=0;
+	int InputFileCol=0;
+	// 时间
+	QStringList XLabelName;
+	QStringList XLabelName2;
+
+	// 传感器ID编号
+	QStringList DataNameCH1;
+	QStringList DataNameCH2;
+	QStringList DataNameCH3;
+	QStringList DataNameCH4;
+	QStringList DataNameCH5;
+	QStringList DataNameCH6;
+	QStringList DataNameCH7;
+	QStringList DataNameCH8;
+
+	// 由文件名输出mat、传感器ID编号、时间
+	mat DS18B20_CH1_Mat = JfzReadCSVToAllMat(CH1, InputFileRow, InputFileCol, DataNameCH1, XLabelName);
+	mat DS18B20_CH2_Mat = JfzReadCSVToAllMat(CH2, InputFileRow, InputFileCol, DataNameCH2, XLabelName2);
+	mat DS18B20_CH3_Mat = JfzReadCSVToAllMat(CH3, InputFileRow, InputFileCol, DataNameCH3, XLabelName2);
+	mat DS18B20_CH4_Mat = JfzReadCSVToAllMat(CH4, InputFileRow, InputFileCol, DataNameCH4, XLabelName2);
+	mat DS18B20_CH5_Mat = JfzReadCSVToAllMat(CH5, InputFileRow, InputFileCol, DataNameCH5, XLabelName2);
+	mat DS18B20_CH6_Mat = JfzReadCSVToAllMat(CH6, InputFileRow, InputFileCol, DataNameCH6, XLabelName2);
+	mat DS18B20_CH7_Mat = JfzReadCSVToAllMat(CH7, InputFileRow, InputFileCol, DataNameCH7, XLabelName2);
+	mat DS18B20_CH8_Mat = JfzReadCSVToAllMat(CH8, InputFileRow, InputFileCol, DataNameCH8, XLabelName2);
+
+	//    qDebug()<<"InputFileRow"<<InputFileRow;
+	//    qDebug()<<"InputFileCol"<<InputFileCol;
+	//    qDebug()<<"DataName"<<DataName;
+	//    qDebug()<<"XLabelName"<<XLabelName[0];
+	//    qDebug()<<"DS18B20_CH1_Mat"<<DS18B20_CH1_Mat(0,0);
+
+	// 初始化排序Mat
+	mat DS18B20_CH1_OrderMat(DS18B20_CH1_Mat.n_rows, DS18B20_CH1_Mat.n_cols);
+	mat DS18B20_CH2_OrderMat(DS18B20_CH2_Mat.n_rows, DS18B20_CH2_Mat.n_cols);
+	mat DS18B20_CH3_OrderMat(DS18B20_CH3_Mat.n_rows, DS18B20_CH3_Mat.n_cols);
+	mat DS18B20_CH4_OrderMat(DS18B20_CH4_Mat.n_rows, DS18B20_CH4_Mat.n_cols);
+	mat DS18B20_CH5_OrderMat(DS18B20_CH5_Mat.n_rows, DS18B20_CH5_Mat.n_cols);
+	mat DS18B20_CH6_OrderMat(DS18B20_CH6_Mat.n_rows, DS18B20_CH6_Mat.n_cols);
+	mat DS18B20_CH7_OrderMat(DS18B20_CH7_Mat.n_rows, DS18B20_CH7_Mat.n_cols);
+	mat DS18B20_CH8_OrderMat(DS18B20_CH8_Mat.n_rows, DS18B20_CH8_Mat.n_cols);
+
+	// 0矩阵
+	mat DS18B20_0(DS18B20_CH1_Mat.n_rows,1);
+	DS18B20_0.fill(0);
+	// 原始矩阵曾一列处理错情况
+	DS18B20_CH1_Mat = join_rows(DS18B20_CH1_Mat, DS18B20_0);
+	DS18B20_CH2_Mat = join_rows(DS18B20_CH2_Mat, DS18B20_0);
+	DS18B20_CH3_Mat = join_rows(DS18B20_CH3_Mat, DS18B20_0);
+	DS18B20_CH4_Mat = join_rows(DS18B20_CH4_Mat, DS18B20_0);
+	DS18B20_CH5_Mat = join_rows(DS18B20_CH5_Mat, DS18B20_0);
+	DS18B20_CH6_Mat = join_rows(DS18B20_CH6_Mat, DS18B20_0);
+	DS18B20_CH7_Mat = join_rows(DS18B20_CH7_Mat, DS18B20_0);
+	DS18B20_CH8_Mat = join_rows(DS18B20_CH8_Mat, DS18B20_0);
+
+	// 由ID来排序，建立索引规则
+	int CH10 = DataNameCH1.indexOf("ID:28ffcdfa001604cb");if(CH10 == -1) CH10=8;
+	int CH11 = DataNameCH1.indexOf("ID:28ff7eeda0160301");if(CH11 == -1) CH11=8;
+	int CH12 = DataNameCH1.indexOf("ID:28ffa203011604fc");if(CH12 == -1) CH12=8;
+	int CH13 = DataNameCH1.indexOf("ID:28ffd7cc0016044b");if(CH13 == -1) CH13=8;
+	int CH14 = DataNameCH1.indexOf("ID:28ff6ba7a0160589");if(CH14 == -1) CH14=8;
+	int CH15 = DataNameCH1.indexOf("ID:28ff28f8041603d9");if(CH15 == -1) CH15=8;
+	int CH16 = DataNameCH1.indexOf("ID:28ff280c01160410");if(CH16 == -1) CH16=8;
+	int CH17 = DataNameCH1.indexOf("ID:28ff4a2305160375");if(CH17 == -1) CH17=8;
+
+	int CH20 = DataNameCH2.indexOf("ID:28ffaf1fb2150108");if(CH20 == -1) CH20=8;
+	int CH21 = DataNameCH2.indexOf("ID:28ff921db2150167");if(CH21 == -1) CH21=8;
+	int CH22 = DataNameCH2.indexOf("ID:28ff86eb041603f8");if(CH22 == -1) CH22=8;
+	int CH23 = DataNameCH2.indexOf("ID:28ffd3dd041603fe");if(CH23 == -1) CH23=8;
+	int CH24 = DataNameCH2.indexOf("ID:28ff71c100160479");if(CH24 == -1) CH24=8;
+	int CH25 = DataNameCH2.indexOf("ID:28ffb81cb2150311");if(CH25 == -1) CH25=8;
+	int CH26 = DataNameCH2.indexOf("ID:28ff6a0c0116047a");if(CH26 == -1) CH26=8;
+	int CH27 = DataNameCH2.indexOf("ID:28ffa2dd00160443");if(CH27 == -1) CH27=8;
+
+	int CH30 = DataNameCH3.indexOf("ID:28ff1d93a01603e3");if(CH30 == -1) CH30=8;
+	int CH31 = DataNameCH3.indexOf("ID:28ff78bea01603cd");if(CH31 == -1) CH31=8;
+	int CH32 = DataNameCH3.indexOf("ID:28ff4ec300160495");if(CH32 == -1) CH32=8;
+	int CH33 = DataNameCH3.indexOf("ID:28ffaddc001604a3");if(CH33 == -1) CH33=8;
+	int CH34 = DataNameCH3.indexOf("ID:28ffb6e500160474");if(CH34 == -1) CH34=8;
+	int CH35 = DataNameCH3.indexOf("ID:28ffa3f7001604e5");if(CH35 == -1) CH35=8;
+	int CH36 = DataNameCH3.indexOf("ID:28ff30f70016041c");if(CH36 == -1) CH36=8;
+	int CH37 = DataNameCH3.indexOf("ID:28ff95f7001604fd");if(CH37 == -1) CH37=8;
+
+	int CH40 = DataNameCH4.indexOf("ID:28ffe6ce00160405");if(CH40 == -1) CH40=8;
+	int CH41 = DataNameCH4.indexOf("ID:28ff783db215044f");if(CH41 == -1) CH41=8;
+	int CH42 = DataNameCH4.indexOf("ID:28ff52c600160449");if(CH42 == -1) CH42=8;
+	int CH43 = DataNameCH4.indexOf("ID:28ffed30b2150334");if(CH43 == -1) CH43=8;
+	int CH44 = DataNameCH4.indexOf("ID:28ffdcc20016042e");if(CH44 == -1) CH44=8;
+	int CH45 = DataNameCH4.indexOf("ID:28ffd827b215045f");if(CH45 == -1) CH45=8;
+	int CH46 = DataNameCH4.indexOf("ID:28ff3425051603b3");if(CH46 == -1) CH46=8;
+	int CH47 = DataNameCH4.indexOf("ID:28ff247eb2150310");if(CH47 == -1) CH47=8;
+
+	int CH50 = DataNameCH5.indexOf("ID:28ff76e500160456");if(CH50 == -1) CH50=8;
+	int CH51 = DataNameCH5.indexOf("ID:28ffa5c30016043f");if(CH51 == -1) CH51=8;
+	int CH52 = DataNameCH5.indexOf("ID:28ff2d22b2150195");if(CH52 == -1) CH52=8;
+	int CH53 = DataNameCH5.indexOf("ID:28ffcd0d01160497");if(CH53 == -1) CH53=8;
+	int CH54 = DataNameCH5.indexOf("ID:28ff55a7a01605af");if(CH54 == -1) CH54=8;
+	int CH55 = DataNameCH5.indexOf("ID:28ff56d7001604e1");if(CH55 == -1) CH55=8;
+	int CH56 = DataNameCH5.indexOf("ID:28ff3ccba0160491");if(CH56 == -1) CH56=8;
+	int CH57 = DataNameCH5.indexOf("ID:28ff0091a01604f7");if(CH57 == -1) CH57=8;
+
+	int CH60 = DataNameCH6.indexOf("ID:28ff80efa01605df");if(CH60 == -1) CH60=8;
+	int CH61 = DataNameCH6.indexOf("ID:28ffd7c6a0160325");if(CH61 == -1) CH61=8;
+	int CH62 = DataNameCH6.indexOf("ID:28ff04ada01605ec");if(CH62 == -1) CH62=8;
+	int CH63 = DataNameCH6.indexOf("ID:28fffdd4a0160582");if(CH63 == -1) CH63=8;
+	int CH64 = DataNameCH6.indexOf("ID:28ff87caa0160421");if(CH64 == -1) CH64=8;
+	int CH65 = DataNameCH6.indexOf("ID:28ff1d9da0160475");if(CH65 == -1) CH65=8;
+	int CH66 = DataNameCH6.indexOf("ID:28fffdada01605b9");if(CH66 == -1) CH66=8;
+	int CH67 = DataNameCH6.indexOf("ID:28ff44d3a01605b8");if(CH67 == -1) CH67=8;
+
+	int CH70 = DataNameCH7.indexOf("ID:28ff538da0160406");if(CH70 == -1) CH70=8;
+	int CH71 = DataNameCH7.indexOf("ID:28ff387da0160416");if(CH71 == -1) CH71=8;
+	int CH72 = DataNameCH7.indexOf("ID:28ffcacfa01605fb");if(CH72 == -1) CH72=8;
+	int CH73 = DataNameCH7.indexOf("ID:28ff16a8a0160592");if(CH73 == -1) CH73=8;
+
+
+	// mat根据ID按列排序
+	DS18B20_CH1_OrderMat.col(0) = DS18B20_CH1_Mat.col(CH10);
+	DS18B20_CH1_OrderMat.col(1) = DS18B20_CH1_Mat.col(CH11);
+	DS18B20_CH1_OrderMat.col(2) = DS18B20_CH1_Mat.col(CH12);
+	DS18B20_CH1_OrderMat.col(3) = DS18B20_CH1_Mat.col(CH13);
+	DS18B20_CH1_OrderMat.col(4) = DS18B20_CH1_Mat.col(CH14);
+	DS18B20_CH1_OrderMat.col(5) = DS18B20_CH1_Mat.col(CH15);
+	DS18B20_CH1_OrderMat.col(6) = DS18B20_CH1_Mat.col(CH16);
+	DS18B20_CH1_OrderMat.col(7) = DS18B20_CH1_Mat.col(CH17);
+
+	DS18B20_CH2_OrderMat.col(0) = DS18B20_CH2_Mat.col(CH20);
+	DS18B20_CH2_OrderMat.col(1) = DS18B20_CH2_Mat.col(CH21);
+	DS18B20_CH2_OrderMat.col(2) = DS18B20_CH2_Mat.col(CH22);
+	DS18B20_CH2_OrderMat.col(3) = DS18B20_CH2_Mat.col(CH23);
+	DS18B20_CH2_OrderMat.col(4) = DS18B20_CH2_Mat.col(CH24);
+	DS18B20_CH2_OrderMat.col(5) = DS18B20_CH2_Mat.col(CH25);
+	DS18B20_CH2_OrderMat.col(6) = DS18B20_CH2_Mat.col(CH26);
+	DS18B20_CH2_OrderMat.col(7) = DS18B20_CH2_Mat.col(CH27);
+
+	DS18B20_CH3_OrderMat.col(0) = DS18B20_CH3_Mat.col(CH30);
+	DS18B20_CH3_OrderMat.col(1) = DS18B20_CH3_Mat.col(CH31);
+	DS18B20_CH3_OrderMat.col(2) = DS18B20_CH3_Mat.col(CH32);
+	DS18B20_CH3_OrderMat.col(3) = DS18B20_CH3_Mat.col(CH33);
+	DS18B20_CH3_OrderMat.col(4) = DS18B20_CH3_Mat.col(CH34);
+	DS18B20_CH3_OrderMat.col(5) = DS18B20_CH3_Mat.col(CH35);
+	DS18B20_CH3_OrderMat.col(6) = DS18B20_CH3_Mat.col(CH36);
+	DS18B20_CH3_OrderMat.col(7) = DS18B20_CH3_Mat.col(CH37);
+
+	DS18B20_CH4_OrderMat.col(0) = DS18B20_CH4_Mat.col(CH40);
+	DS18B20_CH4_OrderMat.col(1) = DS18B20_CH4_Mat.col(CH41);
+	DS18B20_CH4_OrderMat.col(2) = DS18B20_CH4_Mat.col(CH42);
+	DS18B20_CH4_OrderMat.col(3) = DS18B20_CH4_Mat.col(CH43);
+	DS18B20_CH4_OrderMat.col(4) = DS18B20_CH4_Mat.col(CH44);
+	DS18B20_CH4_OrderMat.col(5) = DS18B20_CH4_Mat.col(CH45);
+	DS18B20_CH4_OrderMat.col(6) = DS18B20_CH4_Mat.col(CH46);
+	DS18B20_CH4_OrderMat.col(7) = DS18B20_CH4_Mat.col(CH47);
+
+	DS18B20_CH5_OrderMat.col(0) = DS18B20_CH5_Mat.col(CH50);
+	DS18B20_CH5_OrderMat.col(1) = DS18B20_CH5_Mat.col(CH51);
+	DS18B20_CH5_OrderMat.col(2) = DS18B20_CH5_Mat.col(CH52);
+	DS18B20_CH5_OrderMat.col(3) = DS18B20_CH5_Mat.col(CH53);
+	DS18B20_CH5_OrderMat.col(4) = DS18B20_CH5_Mat.col(CH54);
+	DS18B20_CH5_OrderMat.col(5) = DS18B20_CH5_Mat.col(CH55);
+	DS18B20_CH5_OrderMat.col(6) = DS18B20_CH5_Mat.col(CH56);
+	DS18B20_CH5_OrderMat.col(7) = DS18B20_CH5_Mat.col(CH57);
+
+	DS18B20_CH6_OrderMat.col(0) = DS18B20_CH6_Mat.col(CH60);
+	DS18B20_CH6_OrderMat.col(1) = DS18B20_CH6_Mat.col(CH61);
+	DS18B20_CH6_OrderMat.col(2) = DS18B20_CH6_Mat.col(CH62);
+	DS18B20_CH6_OrderMat.col(3) = DS18B20_CH6_Mat.col(CH63);
+	DS18B20_CH6_OrderMat.col(4) = DS18B20_CH6_Mat.col(CH64);
+	DS18B20_CH6_OrderMat.col(5) = DS18B20_CH6_Mat.col(CH65);
+	DS18B20_CH6_OrderMat.col(6) = DS18B20_CH6_Mat.col(CH66);
+	DS18B20_CH6_OrderMat.col(7) = DS18B20_CH6_Mat.col(CH67);
+
+	DS18B20_CH7_OrderMat.col(0) = DS18B20_CH7_Mat.col(CH70);
+	DS18B20_CH7_OrderMat.col(1) = DS18B20_CH7_Mat.col(CH71);
+	DS18B20_CH7_OrderMat.col(2) = DS18B20_CH7_Mat.col(CH72);
+	DS18B20_CH7_OrderMat.col(3) = DS18B20_CH7_Mat.col(CH73);
+
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH3_OrderMat(0,0);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH3_OrderMat(0,1);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH3_OrderMat(0,2);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH3_OrderMat(0,3);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH3_OrderMat(0,4);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH3_OrderMat(0,5);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH3_OrderMat(0,6);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH3_OrderMat(0,7);
+
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH2_OrderMat(0,0);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH2_OrderMat(0,1);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH2_OrderMat(0,2);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH2_OrderMat(0,3);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH2_OrderMat(0,4);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH2_OrderMat(0,5);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH2_OrderMat(0,6);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH2_OrderMat(0,7);
+
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH7_OrderMat(0,0);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH7_OrderMat(0,1);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH7_OrderMat(0,2);
+//        qDebug()<<"DS18B20_CH1_OrderMat"<<DS18B20_CH7_OrderMat(0,3);
+
+	// 矩阵合并
+	DS18B20_All_Mat = join_rows(DS18B20_CH1_OrderMat, DS18B20_CH2_OrderMat);
+	DS18B20_All_Mat = join_rows(DS18B20_All_Mat, DS18B20_CH3_OrderMat);
+	DS18B20_All_Mat = join_rows(DS18B20_All_Mat, DS18B20_CH4_OrderMat);
+	DS18B20_All_Mat = join_rows(DS18B20_All_Mat, DS18B20_CH5_OrderMat);
+	DS18B20_All_Mat = join_rows(DS18B20_All_Mat, DS18B20_CH6_OrderMat);
+	DS18B20_All_Mat = join_rows(DS18B20_All_Mat, DS18B20_CH7_OrderMat);
+	DS18B20_All_Mat = join_rows(DS18B20_All_Mat, DS18B20_CH8_OrderMat);
+
+	qDebug()<<"电类矩阵行列："<<DS18B20_All_Mat.n_rows<<" "<<DS18B20_All_Mat.n_cols;
+//	qDebug()<<"All_Mat(0,0)、All_Mat(0,0)："<<DS18B20_All_Mat(0,0)<<" "<<DS18B20_All_Mat(0,1);
+//	qDebug()<<"CH01_Mat(0,0)、CH01_Mat(0,1)："<<DS18B20_CH1_OrderMat(0,0)<<" "<<DS18B20_CH1_OrderMat(0,1);
+	return DS18B20_All_Mat;
+}
+
 // CCD标准化
 int Stand_CCD(QStringList &CH, mat &All_Mat, QStringList &XLabelName)
 {
@@ -680,4 +906,124 @@ mat FBGtoTEMP(QString &standFBGFileName, QStringList &XLabelName)
 		}
 	}
 	return FBGWave;
+}
+
+
+// FBG汇总为一个mat
+mat Stand_FBG(QStringList &CH)
+{
+	QString CH1  = CH[ 0];
+	QString CH2  = CH[ 1];
+	QString CH3  = CH[ 2];
+	QString CH4  = CH[ 3];
+	QString CH5  = CH[ 4];
+	QString CH6  = CH[ 5];
+	QString CH7  = CH[ 6];
+	QString CH08 = CH[ 7];
+	QString CH09 = CH[ 8];
+	QString CH10 = CH[ 9];
+	QString CH11 = CH[10];
+	QString CH12 = CH[11];
+	QString CH13 = CH[12];
+	QString CH14 = CH[13];
+	QString CH15 = CH[14];
+	QString CH16 = CH[15];
+	QString CH17 = CH[16];
+	QString CH18 = CH[17];
+	QString CH19 = CH[18];
+	QString CH20 = CH[19];
+	QString CH21 = CH[20];
+	QString CH22 = CH[21];
+	QString CH23 = CH[22];
+	QString CH24 = CH[23];
+	QString CH25 = CH[24];
+	QString CH26 = CH[25];
+	QString CH27 = CH[26];
+	QString CH28 = CH[27];
+	QString CH29 = CH[28];
+	QString CH30 = CH[29];
+	QString CH31 = CH[30];
+	QString CH32 = CH[31];
+
+	int InputFileRow=0;
+	int InputFileCol=0;
+	// 时间
+	QStringList XLabelName;
+	QStringList XLabelName2;
+
+	// 传感器ID编号
+	QStringList DataName;
+
+	// 由文件名输出mat、传感器ID编号、时间
+	mat CH01_Mat = JfzReadCSVToAllMat(CH1, InputFileRow, InputFileCol, DataName, XLabelName);
+	mat CH02_Mat = JfzReadCSVToAllMat(CH2, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH03_Mat = JfzReadCSVToAllMat(CH3, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH04_Mat = JfzReadCSVToAllMat(CH4, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH05_Mat = JfzReadCSVToAllMat(CH5, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH06_Mat = JfzReadCSVToAllMat(CH6, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH07_Mat = JfzReadCSVToAllMat(CH7, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH08_Mat = JfzReadCSVToAllMat(CH08, InputFileRow, InputFileCol, DataName, XLabelName);
+	mat CH09_Mat = JfzReadCSVToAllMat(CH09, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH10_Mat = JfzReadCSVToAllMat(CH10, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH11_Mat = JfzReadCSVToAllMat(CH11, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH12_Mat = JfzReadCSVToAllMat(CH12, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH13_Mat = JfzReadCSVToAllMat(CH13, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH14_Mat = JfzReadCSVToAllMat(CH14, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH15_Mat = JfzReadCSVToAllMat(CH15, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH16_Mat = JfzReadCSVToAllMat(CH16, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH17_Mat = JfzReadCSVToAllMat(CH17, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH18_Mat = JfzReadCSVToAllMat(CH18, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH19_Mat = JfzReadCSVToAllMat(CH19, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH20_Mat = JfzReadCSVToAllMat(CH20, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH21_Mat = JfzReadCSVToAllMat(CH21, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH22_Mat = JfzReadCSVToAllMat(CH22, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH23_Mat = JfzReadCSVToAllMat(CH23, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH24_Mat = JfzReadCSVToAllMat(CH24, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH25_Mat = JfzReadCSVToAllMat(CH25, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH26_Mat = JfzReadCSVToAllMat(CH26, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH27_Mat = JfzReadCSVToAllMat(CH27, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH28_Mat = JfzReadCSVToAllMat(CH28, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH29_Mat = JfzReadCSVToAllMat(CH29, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH30_Mat = JfzReadCSVToAllMat(CH30, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH31_Mat = JfzReadCSVToAllMat(CH31, InputFileRow, InputFileCol, DataName, XLabelName2);
+	mat CH32_Mat = JfzReadCSVToAllMat(CH32, InputFileRow, InputFileCol, DataName, XLabelName2);
+
+	// 矩阵合并
+	mat All_Mat;
+	All_Mat	= join_rows(CH01_Mat, CH02_Mat);
+	All_Mat	= join_rows(All_Mat, CH03_Mat);
+	All_Mat	= join_rows(All_Mat, CH04_Mat);
+	All_Mat	= join_rows(All_Mat, CH05_Mat);
+	All_Mat	= join_rows(All_Mat, CH06_Mat);
+	All_Mat	= join_rows(All_Mat, CH07_Mat);
+	All_Mat	= join_rows(All_Mat, CH08_Mat);
+	All_Mat	= join_rows(All_Mat, CH09_Mat);
+	All_Mat	= join_rows(All_Mat, CH10_Mat);
+	All_Mat	= join_rows(All_Mat, CH11_Mat);
+	All_Mat	= join_rows(All_Mat, CH12_Mat);
+	All_Mat	= join_rows(All_Mat, CH13_Mat);
+	All_Mat	= join_rows(All_Mat, CH14_Mat);
+	All_Mat	= join_rows(All_Mat, CH15_Mat);
+	All_Mat	= join_rows(All_Mat, CH16_Mat);
+	All_Mat	= join_rows(All_Mat, CH17_Mat);
+	All_Mat	= join_rows(All_Mat, CH18_Mat);
+	All_Mat	= join_rows(All_Mat, CH19_Mat);
+	All_Mat	= join_rows(All_Mat, CH20_Mat);
+	All_Mat	= join_rows(All_Mat, CH21_Mat);
+	All_Mat	= join_rows(All_Mat, CH22_Mat);
+	All_Mat	= join_rows(All_Mat, CH23_Mat);
+	All_Mat	= join_rows(All_Mat, CH24_Mat);
+	All_Mat	= join_rows(All_Mat, CH25_Mat);
+	All_Mat	= join_rows(All_Mat, CH26_Mat);
+	All_Mat	= join_rows(All_Mat, CH27_Mat);
+	All_Mat	= join_rows(All_Mat, CH28_Mat);
+	All_Mat	= join_rows(All_Mat, CH29_Mat);
+	All_Mat	= join_rows(All_Mat, CH30_Mat);
+	All_Mat	= join_rows(All_Mat, CH31_Mat);
+	All_Mat	= join_rows(All_Mat, CH32_Mat);
+
+	qDebug()<<"FBG矩阵行列："<<All_Mat.n_rows<<" "<<All_Mat.n_cols;
+//	qDebug()<<"All_Mat(0,0)、All_Mat(0,0)："<<All_Mat(0,0)<<" "<<All_Mat(0,1);
+//	qDebug()<<"CH01_Mat(0,0)、CH01_Mat(0,1)："<<CH01_Mat(0,0)<<" "<<CH01_Mat(0,1);
+	return All_Mat;
 }

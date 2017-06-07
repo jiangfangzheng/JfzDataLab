@@ -23,6 +23,8 @@ int Stand_CCD      (QStringList &CH, mat &All_Mat, QStringList &XLabelName);
 int Stand_FBGS     (QStringList &CH, mat &All_Mat, QStringList &XLabelName);
 int Stand_FBGT     (QStringList &CH, mat &All_Mat, QStringList &XLabelName);
 int Stand_FBGT_Fix (QStringList &CH, mat &All_Mat, QStringList &XLabelName);
+mat Stand_FBG(QStringList &CH);
+mat Stand_DS18B20(QStringList &CH);
 
 // 波长转温度算法-T=k(wave-Bwave)+Btemp
 mat FBGtoTEMP(QString &standFBGFileName, QStringList &XLabelName);

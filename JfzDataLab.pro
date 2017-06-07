@@ -6,8 +6,9 @@
 
 QT += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-QT+=axcontainer
+QT += axcontainer
 QT += printsupport
+QT += sql
 
 TARGET = JfzDataLab
 TEMPLATE = app
@@ -37,7 +38,8 @@ SOURCES += main.cpp\
     algorithm/LinearRegression.cpp \
     plugins/qcustomplot.cpp \
     tools/JIO.cpp \
-    systemTray.cpp
+    systemTray.cpp \
+    tools/JSQL.cpp
 
 HEADERS  += mainwindow.h \
     tools/jfzlib.h \
@@ -53,7 +55,8 @@ HEADERS  += mainwindow.h \
     algorithm/LinearRegression.h \
     plugins/qcustomplot.h \
     tools/JIO.h \
-    systemTray.h
+    systemTray.h \
+    tools/JSQL.h
 
 FORMS    += mainwindow.ui
 
