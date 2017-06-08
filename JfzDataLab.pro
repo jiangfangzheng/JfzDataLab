@@ -39,7 +39,8 @@ SOURCES += main.cpp\
     plugins/qcustomplot.cpp \
     tools/JIO.cpp \
     systemTray.cpp \
-    tools/JSQL.cpp
+    tools/JSQL.cpp \
+    algorithm/DataToSQL.cpp
 
 HEADERS  += mainwindow.h \
     tools/jfzlib.h \
@@ -56,7 +57,8 @@ HEADERS  += mainwindow.h \
     plugins/qcustomplot.h \
     tools/JIO.h \
     systemTray.h \
-    tools/JSQL.h
+    tools/JSQL.h \
+    algorithm/DataToSQL.h
 
 FORMS    += mainwindow.ui
 

@@ -81,6 +81,8 @@ private slots:
 
 	void on_pushButton_ENVinSQL_clicked();
 
+	void on_pushButton_CNCinSQL_clicked();
+
 private:
 	// Skins
 	QMap<QString, QString> mapStyle;

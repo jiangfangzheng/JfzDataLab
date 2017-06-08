@@ -9,6 +9,7 @@
 #include "algorithm/correlations.h"
 #include "algorithm/datadiagnosis.h"
 #include "algorithm/LinearRegression.h"
+#include "algorithm/DataToSQL.h"
 #include "plugins/qcustomplot.h"
 
 //class JSkin
@@ -511,162 +512,6 @@ void MainWindow::on_comboBox_LoadPlotList_currentTextChanged(const QString &arg1
 	}
 }
 
-// 递归遍历子目录
-QFileInfoList GetFileList(QString path)
-{
-	QDir dir(path);
-	QFileInfoList file_list = dir.entryInfoList(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
-	QFileInfoList folder_list = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-
-	for(int i = 0; i != folder_list.size(); i++)
-	{
-		 QString name = folder_list.at(i).absoluteFilePath();
-		 QFileInfoList child_file_list = GetFileList(name);
-		 file_list.append(child_file_list);
-	}
-
-	return file_list;
-}
-
-
-
-// FBG目录名转为精确到通道csv文件名
-QStringList FBGDir2FileName(QString DirName)
-{
-	QStringList FBGChannelNames;
-	for(int i=1;i<=32;++i)
-	{
-		FBGChannelNames.append(DirName+"/通道"+QString::number(i)+".csv");
-	}
-	return FBGChannelNames;
-}
-
-// DS18B20目录名转为精确到通道csv文件名
-QStringList DS18B20Dir2FileName(QString DirName)
-{
-	QStringList DS18B20ChannelNames;
-	for(int i=1;i<=8;++i)
-	{
-		DS18B20ChannelNames.append(DirName+"/通道"+QString::number(i)+".csv");
-	}
-	return DS18B20ChannelNames;
-}
-
-bool CCDtoMYSQL(QString fileName,JSQL &jsql)
-{
-	QList<QList<QString>> CCDStrList = JIO::CsvToStrList(fileName);
-	// 格式化时间 由2017-6-7-12:03:14变为2017-6-7 12:03:14
-	QStringList Time;
-	for(int i=1;i<CCDStrList.size();++i)
-	{
-		QString tmp = CCDStrList[i][0].left(10) + " "+ CCDStrList[i][0].right(8);
-		Time.append(tmp);
-	}
-	qDebug()<<"Time.size(): "<<Time.size();
-	// 写入数据库
-	bool bOut;
-	for(int i=1;i<CCDStrList.size();++i)
-	{
-		QStringList onedata{Time[i-1],CCDStrList[i][1],CCDStrList[i][2],CCDStrList[i][3]};
-		bOut = jsql.insertData("ccd",onedata);
-	}
-	return bOut;
-}
-
-bool FBGtoMYSQL(QStringList FBGChannelNames,JSQL &jsql)
-{
-	// 获得大Mat
-	mat All_Mat = Stand_FBG(FBGChannelNames);
-
-	// 格式化时间 由2017-6-7-12:03:14变为2017-6-7 12:03:14
-	QList<QList<QString>> FBGChanneMat = JIO::CsvToStrList(FBGChannelNames[0]);
-	QStringList Time;
-	for(int i=1;i<FBGChanneMat.size();++i)
-	{
-		QString tmp = FBGChanneMat[i][0].left(10) + " "+ FBGChanneMat[i][0].right(8);
-		Time.append(tmp);
-	}
-//	qDebug()<<"Time.size(): "<<Time.size();
-//	qDebug()<<"Time.size(): "<<Time[0];
-
-	// 制作字符串格式的Mat
-	QList<QList<QString>> FBGStrList;
-	for(int i=0;i<All_Mat.n_rows;++i)
-	{
-		QList<QString> temp;
-		for(int j=0;j<All_Mat.n_cols;++j)
-		{
-			QString value;
-			value.sprintf("%.3lf",All_Mat(i,j));
-			temp.append(value);
-		}
-		FBGStrList.append(temp);
-	}
-
-//	qDebug()<<"FBGStrList.size(): "<<FBGStrList.size();
-//	qDebug()<<"FBGStrList[0].size(): "<<FBGStrList[0].size();
-//	qDebug()<<"FBGStrList[0][0]: "<<FBGStrList[0][0];
-//	qDebug()<<"FBGStrList[0][1]: "<<FBGStrList[0][1];
-
-	// 写入数据库
-	bool bOut;
-	for(int i=0;i<FBGStrList.size();++i)
-	{
-		QStringList onedata{FBGStrList[i]};
-		onedata.insert(0,Time[i]);
-		//		if(0==i) qDebug()<<onedata;
-		bOut = jsql.insertData("fbg",onedata);
-	}
-	return bOut;
-}
-
-bool DS18B20toMYSQL(QStringList DS18B20ChannelNames,JSQL &jsql)
-{
-	// 获得大Mat
-	mat All_Mat = Stand_DS18B20(DS18B20ChannelNames);
-
-	// 格式化时间 由2017-6-7-12:03:14变为2017-6-7 12:03:14
-	QList<QList<QString>> DS18B20ChanneMat = JIO::CsvToStrList(DS18B20ChannelNames[0]);
-	QStringList Time;
-	for(int i=1;i<DS18B20ChanneMat.size();++i)
-	{
-		QString tmp = DS18B20ChanneMat[i][0].left(10) + " "+ DS18B20ChanneMat[i][0].right(8);
-		Time.append(tmp);
-	}
-//	qDebug()<<"Time.size(): "<<Time.size();
-//	qDebug()<<"Time.size(): "<<Time[0];
-
-	// 制作字符串格式的Mat
-	QList<QList<QString>> DS18B20StrList;
-	for(int i=0;i<All_Mat.n_rows;++i)
-	{
-		QList<QString> temp;
-		for(int j=0;j<All_Mat.n_cols;++j)
-		{
-			QString value;
-			value.sprintf("%.3lf",All_Mat(i,j));
-			temp.append(value);
-		}
-		DS18B20StrList.append(temp);
-	}
-
-//	qDebug()<<"FBGStrList.size(): "<<DS18B20StrList.size();
-//	qDebug()<<"FBGStrList[0].size(): "<<DS18B20StrList[0].size();
-//	qDebug()<<"FBGStrList[0][0]: "<<DS18B20StrList[0][0];
-//	qDebug()<<"FBGStrList[0][1]: "<<DS18B20StrList[0][1];
-
-	// 写入数据库
-	bool bOut;
-	for(int i=0;i<DS18B20StrList.size();++i)
-	{
-		QStringList onedata{DS18B20StrList[i]};
-		onedata.insert(0,Time[i]);
-//		if(0==i) qDebug()<<onedata;
-		bOut = jsql.insertData("ds18b20",onedata);
-	}
-	return bOut;
-}
-
 // CCD导入数据库
 void MainWindow::on_pushButton_CCDinSQL_clicked()
 {
@@ -676,7 +521,9 @@ void MainWindow::on_pushButton_CCDinSQL_clicked()
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
-		QFileInfoList file_list = GetFileList(strDir); // 递归遍历子目录
+		QTime time;time.start();
+		// 【1】递归遍历子目录，得到所有*.csv文件路径
+		QFileInfoList file_list = GetFileList(strDir);
 		QStringList AllFileName;
 		for (int i = 0; i < file_list.size(); ++i)
 		{
@@ -686,14 +533,21 @@ void MainWindow::on_pushButton_CCDinSQL_clicked()
 //			qDebug()<<QString("%1").arg(fileInfo.filePath());
 		}
 
-		QTime time;time.start();
-		JSQL jsql("localhost","data_wuzhong");
+		// 【2】向SQL中插入数据
+//		JSQL jsql("localhost","data_wuzhong","root","root","QMYSQL");
+		JSQL jsql("localhost","data_wuzhong","root","root","QSQLITE");
+		bool b = false;
 		for(auto filename : AllFileName)
 		{
-			CCDtoMYSQL(filename, jsql);
+			b = CCDtoMYSQL(filename, jsql);
 		}
+
+		// 【3】显示花费时间
 		QString timecost = QString::number(time.elapsed()/1000.0);
-		ui->label_msg->setText("花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		if(b)
+			ui->label_msg->setText("花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'失败！</span>");
 	}
 }
 
@@ -706,6 +560,8 @@ void MainWindow::on_pushButton_FBGinSQL_clicked()
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
+		QTime time;time.start();
+		// 【1】递归遍历子目录，得到所有*.csv文件路径
 		// 遍历目录
 		QDir dir(strDir);
 		QFileInfoList folder_list = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -716,17 +572,23 @@ void MainWindow::on_pushButton_FBGinSQL_clicked()
 			 AllDirsName.append(name);
 		}
 
-		// 遍历目录中的文件
-		QTime time;time.start();
-		JSQL jsql("localhost","data_wuzhong");
+		// 【2】遍历目录中的文件、向SQL中插入数据
+//		JSQL jsql("localhost","data_wuzhong","root","root","QMYSQL");
+		JSQL jsql("localhost","data_wuzhong","root","root","QSQLITE");
+		bool b = false;
 		for(int i=0;i<AllDirsName.size();++i)
 		{
 			QStringList FBGChannelNames = FBGDir2FileName(AllDirsName[i]);
 //			qDebug()<<FBGChannelNames;
-			FBGtoMYSQL(FBGChannelNames,jsql);
+			b = FBGtoMYSQL(FBGChannelNames,jsql);
 		}
+
+		// 【3】显示花费时间
 		QString timecost = QString::number(time.elapsed()/1000.0);
-		ui->label_msg->setText("花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		if(b)
+			ui->label_msg->setText("花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'失败！</span>");
 	}
 
 }
@@ -740,6 +602,8 @@ void MainWindow::on_pushButton_DS18BinSQL_clicked()
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
+		QTime time;time.start();
+		// 【1】递归遍历子目录，得到所有*.csv文件路径
 		// 遍历目录
 		QDir dir(strDir);
 		QFileInfoList folder_list = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -750,24 +614,101 @@ void MainWindow::on_pushButton_DS18BinSQL_clicked()
 			 AllDirsName.append(name);
 		}
 
-		// 遍历目录中的文件
-		QTime time;time.start();
-		JSQL jsql("localhost","data_wuzhong");
+		// 【2】遍历目录中的文件、向SQL中插入数据
+//		JSQL jsql("localhost","data_wuzhong","root","root","QMYSQL");
+		JSQL jsql("localhost","data_wuzhong","root","root","QSQLITE");
+		bool b = false;
 		for(int i=0;i<AllDirsName.size();++i)
 		{
 			QStringList DS18B20ChannelNames = DS18B20Dir2FileName(AllDirsName[i]);
 //			qDebug()<<DS18B20ChannelNames;
-			DS18B20toMYSQL(DS18B20ChannelNames,jsql);
+			b = DS18B20toMYSQL(DS18B20ChannelNames,jsql);
 		}
+
+		// 【3】显示花费时间
 		QString timecost = QString::number(time.elapsed()/1000.0);
-		ui->label_msg->setText("花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		if(b)
+			ui->label_msg->setText("花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'失败！</span>");
 	}
-
-
 }
 
 // 环境温度导入数据库
 void MainWindow::on_pushButton_ENVinSQL_clicked()
 {
+	ui->label_msg->setText("");
+	// 载入文件夹
+	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	// 载入成功操作
+	if(!strDir.isEmpty())
+	{
+		QTime time;time.start();
+		// 【1】递归遍历子目录，得到所有*.csv文件路径
+		QFileInfoList file_list = GetFileList(strDir); // 递归遍历子目录
+		QStringList AllFileName;
+		for (int i = 0; i < file_list.size(); ++i)
+		{
+			QFileInfo fileInfo = file_list.at(i);
+			AllFileName.append(fileInfo.filePath());
+//			qDebug()<<QString("%1 %2").arg(fileInfo.size(), 10).arg(fileInfo.fileName());
+//			qDebug()<<QString("%1").arg(fileInfo.filePath());
+		}
+
+		// 【2】向SQL中插入数据
+//		JSQL jsql("localhost","data_wuzhong","root","root","QMYSQL");
+		JSQL jsql("localhost","data_wuzhong","root","root","QSQLITE");
+		bool b = false;
+		for(auto filename : AllFileName)
+		{
+			b = ENVtoMYSQL(filename, jsql);
+		}
+
+		// 【3】显示花费时间
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if(b)
+			ui->label_msg->setText("花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'失败！</span>");
+	}
+
+}
+
+// 机床CNC内部数据导入数据库
+void MainWindow::on_pushButton_CNCinSQL_clicked()
+{
+	ui->label_msg->setText("");
+	// 载入文件夹
+	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	// 载入成功操作
+	if(!strDir.isEmpty())
+	{
+		QTime time;time.start();
+		// 【1】递归遍历子目录，得到所有*.csv文件路径
+		QFileInfoList file_list = GetFileList(strDir); // 递归遍历子目录
+		QStringList AllFileName;
+		for (int i = 0; i < file_list.size(); ++i)
+		{
+			QFileInfo fileInfo = file_list.at(i);
+			AllFileName.append(fileInfo.filePath());
+		}
+
+		// 【2】向SQL中插入数据
+//		JSQL jsql("localhost","data_wuzhong","root","root","QMYSQL");
+		JSQL jsql("localhost","data_wuzhong","root","root","QSQLITE");
+		bool b = false;
+		for(auto filename : AllFileName)
+		{
+			b = CNCtoMYSQL(filename, jsql);
+		}
+
+		// 【3】显示花费时间
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if(b)
+			ui->label_msg->setText("花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'失败！</span>");
+	}
+
 
 }

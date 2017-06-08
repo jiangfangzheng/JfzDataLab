@@ -474,13 +474,13 @@
       <property name="title">
        <string>历史数据</string>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>860</x>
          <y>20</y>
          <width>113</width>
-         <height>172</height>
+         <height>210</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
@@ -528,6 +528,13 @@
          <widget class="QPushButton" name="pushButton_ENVinSQL">
           <property name="text">
            <string>导入环境</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_CNCinSQL">
+          <property name="text">
+           <string>导入机床</string>
           </property>
          </widget>
         </item>
