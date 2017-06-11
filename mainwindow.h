@@ -100,6 +100,12 @@ private:
 	QList<QList<QString>> plotDataStrList; // 绘图载入原始数据
 	// JPlot
 	void JfzPlot(QVector<double> MatData, QString PicName, int TuNum, QColor Colorstyle, double ymax, double ymin);
+
+// 最下方显示信息标签
+signals:
+	sendMsg(QString msg);
+private slots:
+	void showMsg(QString msg);
 };
 
 #endif // MAINWINDOW_H

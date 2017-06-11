@@ -14,6 +14,11 @@ EnvXlsReadThread::EnvXlsReadThread(QStringList EnvFileNameList, Ui::MainWindow* 
     this->ui = ui;
 }
 
+EnvXlsReadThread::EnvXlsReadThread(QStringList EnvFileNameList)
+{
+	this->EnvFileNameList = EnvFileNameList;
+	this->ui = nullptr;
+}
 
 void EnvXlsReadThread::run()
 {

@@ -12,6 +12,10 @@
 #include "algorithm/DataToSQL.h"
 #include "plugins/qcustomplot.h"
 
+// 数据库类型
+#define DATABASETYPE "QMYSQL"
+//#define DATABASETYPE "QSQLITE"
+
 //class JSkin
 //{
 //public:
@@ -37,11 +41,19 @@ MainWindow::MainWindow(QWidget *parent) :
 	myTray = new SystemTray(this);
 	connect(myTray,SIGNAL(showWidget()),this,SLOT(ShowWindow()));//关联信号和槽函数
 	connect(myTray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(SystemTrayActivated(QSystemTrayIcon::ActivationReason)));
+	// 最下方消息提醒
+	connect(this, SIGNAL(sendMsg(QString)), this, SLOT(showMsg(QString)));
 }
 
 MainWindow::~MainWindow()
 {
 	delete ui;
+}
+
+void MainWindow::showMsg(QString msg)
+{
+	qDebug()<<"[信息]:"<<msg;
+	ui->label_msg->setText(msg);
 }
 
 // 初始化皮肤
@@ -197,7 +209,7 @@ void MainWindow::on_pushButton_LoadFBGT_ALL_clicked()
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
-		ui->label_msg->setText("FBG温度处理中！");
+		emit sendMsg("FBG温度处理中！");
 		// 【0】计时开始
 		QTime time;time.start();
 		// 【1】获取CH通道对应文件
@@ -209,10 +221,10 @@ void MainWindow::on_pushButton_LoadFBGT_ALL_clicked()
 		int b = saveStandData("Data-FBGTemperature",DataName_FBGT,Time, MatFBGT);
 		// 【4】计时结束
 		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b == 0 )
-			ui->label_msg->setText("FBG温度保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		if( b == 0)
+			emit sendMsg("FBG温度保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
 		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+			emit sendMsg("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
 	}
 }
 
@@ -252,13 +264,13 @@ void MainWindow::on_pushButton_ENV_clicked()
 	EnvFileNameList = QFileDialog::getOpenFileNames(this, tr("打开环境温度数据"), " ", tr("textfile(*.xls);"));
 	if(EnvFileNameList.size() != 4)
 	{
-		ui->label_msg->setText("文件状态：未载入");
+		emit sendMsg("文件状态：未载入");
 		QMessageBox::critical(NULL, "注意", "请选择环境温度的4个文件！", QMessageBox::Yes, QMessageBox::Yes);
 		ui->pushButton_ENV->setEnabled(true);
 	}
 	else
 	{
-		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'>正在开启线程处理xls文件...</span>");
+		emit sendMsg("<span style='color: rgb(255, 0, 0);'>正在开启线程处理xls文件...</span>");
 		// 开启线程处理xls文件，防止界面卡死
 		EnvXlsReadThread *readxls = new EnvXlsReadThread(EnvFileNameList, ui);
 		readxls->start();
@@ -534,8 +546,7 @@ void MainWindow::on_pushButton_CCDinSQL_clicked()
 		}
 
 		// 【2】向SQL中插入数据
-//		JSQL jsql("localhost","data_wuzhong","root","root","QMYSQL");
-		JSQL jsql("localhost","data_wuzhong","root","root","QSQLITE");
+		JSQL jsql("localhost","data_wuzhong","root","root",DATABASETYPE);
 		bool b = false;
 		for(auto filename : AllFileName)
 		{
@@ -556,7 +567,7 @@ void MainWindow::on_pushButton_FBGinSQL_clicked()
 {
 	ui->label_msg->setText("");
 	// 载入文件夹
-	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),"/data/fbg/",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
@@ -573,13 +584,12 @@ void MainWindow::on_pushButton_FBGinSQL_clicked()
 		}
 
 		// 【2】遍历目录中的文件、向SQL中插入数据
-//		JSQL jsql("localhost","data_wuzhong","root","root","QMYSQL");
-		JSQL jsql("localhost","data_wuzhong","root","root","QSQLITE");
+		JSQL jsql("localhost","data_wuzhong","root","root",DATABASETYPE);
 		bool b = false;
 		for(int i=0;i<AllDirsName.size();++i)
 		{
 			QStringList FBGChannelNames = FBGDir2FileName(AllDirsName[i]);
-//			qDebug()<<FBGChannelNames;
+			qDebug()<<FBGChannelNames[i];
 			b = FBGtoMYSQL(FBGChannelNames,jsql);
 		}
 
@@ -590,7 +600,6 @@ void MainWindow::on_pushButton_FBGinSQL_clicked()
 		else
 			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'失败！</span>");
 	}
-
 }
 
 // DS18B20导入数据库
@@ -615,8 +624,7 @@ void MainWindow::on_pushButton_DS18BinSQL_clicked()
 		}
 
 		// 【2】遍历目录中的文件、向SQL中插入数据
-//		JSQL jsql("localhost","data_wuzhong","root","root","QMYSQL");
-		JSQL jsql("localhost","data_wuzhong","root","root","QSQLITE");
+		JSQL jsql("localhost","data_wuzhong","root","root",DATABASETYPE);
 		bool b = false;
 		for(int i=0;i<AllDirsName.size();++i)
 		{
@@ -656,8 +664,7 @@ void MainWindow::on_pushButton_ENVinSQL_clicked()
 		}
 
 		// 【2】向SQL中插入数据
-//		JSQL jsql("localhost","data_wuzhong","root","root","QMYSQL");
-		JSQL jsql("localhost","data_wuzhong","root","root","QSQLITE");
+		JSQL jsql("localhost","data_wuzhong","root","root",DATABASETYPE);
 		bool b = false;
 		for(auto filename : AllFileName)
 		{
@@ -671,7 +678,6 @@ void MainWindow::on_pushButton_ENVinSQL_clicked()
 		else
 			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'失败！</span>");
 	}
-
 }
 
 // 机床CNC内部数据导入数据库
@@ -694,8 +700,7 @@ void MainWindow::on_pushButton_CNCinSQL_clicked()
 		}
 
 		// 【2】向SQL中插入数据
-//		JSQL jsql("localhost","data_wuzhong","root","root","QMYSQL");
-		JSQL jsql("localhost","data_wuzhong","root","root","QSQLITE");
+		JSQL jsql("localhost","data_wuzhong","root","root",DATABASETYPE);
 		bool b = false;
 		for(auto filename : AllFileName)
 		{
@@ -709,6 +714,4 @@ void MainWindow::on_pushButton_CNCinSQL_clicked()
 		else
 			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'失败！</span>");
 	}
-
-
 }
