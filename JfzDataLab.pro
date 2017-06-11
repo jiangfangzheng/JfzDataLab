@@ -21,8 +21,8 @@ QMAKE_TARGET_COPYRIGHT = "Copyright JFZ"
 
 INCLUDEPATH+= D:/Library/Armadillo/include \
 
-LIBS += D:\Library\Armadillo\examples\lib_win64\blas_win64_MT.lib    \
-        D:\Library\Armadillo\examples\lib_win64\lapack_win64_MT.lib  \
+LIBS += D:\Library\Armadillo\lib_win32\blas_win32_MT.lib    \
+        D:\Library\Armadillo\lib_win32\lapack_win32_MT.lib  \
 
 SOURCES += main.cpp\
     tools/jfzlib.cpp \
