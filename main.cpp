@@ -1,4 +1,5 @@
 ﻿#include "mainwindow.h"
+#include "tools/log.h"
 #include <QApplication>
 #include <QStyleFactory>
 
@@ -11,6 +12,11 @@ int main(int argc, char *argv[])
 	// 高DPI适应
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
+
+	// Log输出
+#ifndef QT_DEBUG
+	setDebugOutput( "log/all.log" );
 #endif
 
 	QApplication a(argc, argv);

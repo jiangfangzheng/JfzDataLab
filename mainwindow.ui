@@ -227,7 +227,7 @@
        </rect>
       </property>
       <property name="title">
-       <string>多元线性回归</string>
+       <string>线性回归(仅供参考)</string>
       </property>
       <widget class="QPushButton" name="pushButton_LinearRegression">
        <property name="geometry">
@@ -240,6 +240,48 @@
        </property>
        <property name="text">
         <string>输入+输出(最后1列)</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_15">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>10</y>
+        <width>121</width>
+        <height>111</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>数据预测</string>
+      </property>
+      <widget class="QPushButton" name="pushButton_SelectModel">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>101</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>选择模型</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_SelectData">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>101</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>选择数据</string>
        </property>
       </widget>
      </widget>
@@ -468,77 +510,361 @@
         <x>10</x>
         <y>10</y>
         <width>981</width>
-        <height>281</height>
+        <height>181</height>
        </rect>
       </property>
       <property name="title">
        <string>历史数据</string>
       </property>
-      <widget class="QWidget" name="layoutWidget">
+      <widget class="QLabel" name="label_3">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>121</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>1、导出功能</string>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="groupBox_10">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>171</width>
+         <height>121</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>选择类型</string>
+       </property>
+       <widget class="QWidget" name="layoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>147</width>
+          <height>73</height>
+         </rect>
+        </property>
+        <layout class="QFormLayout" name="formLayout">
+         <item row="0" column="0">
+          <widget class="QRadioButton" name="radioButton_selectDS18B20">
+           <property name="text">
+            <string>DS18B20</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QRadioButton" name="radioButton_selectCCD">
+           <property name="text">
+            <string>CCD</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QRadioButton" name="radioButton_selectENV">
+           <property name="text">
+            <string>环境温度</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QRadioButton" name="radioButton_selectFBG">
+           <property name="text">
+            <string>FBG</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QRadioButton" name="radioButton_selectCNC">
+           <property name="text">
+            <string>机床内部</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+      <widget class="QGroupBox" name="groupBox_11">
+       <property name="geometry">
+        <rect>
+         <x>190</x>
+         <y>50</y>
+         <width>241</width>
+         <height>121</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>选择时间</string>
+       </property>
+       <widget class="QWidget" name="layoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>40</y>
+          <width>221</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <layout class="QFormLayout" name="formLayout_2">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_9">
+           <property name="text">
+            <string>起：</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QDateTimeEdit" name="dateTimeEdit_Start">
+           <property name="dateTime">
+            <datetime>
+             <hour>0</hour>
+             <minute>0</minute>
+             <second>0</second>
+             <year>2017</year>
+             <month>5</month>
+             <day>1</day>
+            </datetime>
+           </property>
+           <property name="displayFormat">
+            <string>yyyy-MM-dd HH:mm:ss</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_10">
+           <property name="text">
+            <string>止：</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QDateTimeEdit" name="dateTimeEdit_End">
+           <property name="dateTime">
+            <datetime>
+             <hour>0</hour>
+             <minute>0</minute>
+             <second>0</second>
+             <year>2017</year>
+             <month>5</month>
+             <day>3</day>
+            </datetime>
+           </property>
+           <property name="displayFormat">
+            <string>yyyy-MM-dd HH:mm:ss</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+      <widget class="QGroupBox" name="groupBox_12">
+       <property name="geometry">
+        <rect>
+         <x>440</x>
+         <y>50</y>
+         <width>191</width>
+         <height>121</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>其它选项</string>
+       </property>
+       <widget class="QRadioButton" name="radioButton_DataOri">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>40</y>
+          <width>91</width>
+          <height>19</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>原始数据</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QRadioButton" name="radioButton_DataOpt">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>40</y>
+          <width>81</width>
+          <height>19</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>优化数据</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_OutFromSQL">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>70</y>
+          <width>61</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>导出</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_UpdateSQL">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>70</y>
+          <width>91</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>更新数据库</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>640</x>
+         <y>20</y>
+         <width>93</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>2、导入功能：</string>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="groupBox_13">
+       <property name="geometry">
+        <rect>
+         <x>640</x>
+         <y>50</y>
+         <width>211</width>
+         <height>121</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>选择类型</string>
+       </property>
+       <widget class="QPushButton" name="pushButton_CCDinSQL">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>20</y>
+          <width>93</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>导入CCD</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_DS18BinSQL">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>50</y>
+          <width>93</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>导入电类</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_FBGinSQL">
+        <property name="geometry">
+         <rect>
+          <x>110</x>
+          <y>20</y>
+          <width>93</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>导入FBG</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_CNCinSQL">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>80</y>
+          <width>93</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>导入机床</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_ENVinSQL">
+        <property name="geometry">
+         <rect>
+          <x>110</x>
+          <y>50</y>
+          <width>93</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>导入环境</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QGroupBox" name="groupBox_14">
        <property name="geometry">
         <rect>
          <x>860</x>
-         <y>20</y>
-         <width>113</width>
-         <height>210</height>
+         <y>50</y>
+         <width>111</width>
+         <height>121</height>
         </rect>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <property name="leftMargin">
-         <number>10</number>
+       <property name="title">
+        <string>数据库</string>
+       </property>
+       <widget class="QRadioButton" name="radioButton_SQLite">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>40</y>
+          <width>91</width>
+          <height>19</height>
+         </rect>
         </property>
-        <property name="topMargin">
-         <number>10</number>
+        <property name="text">
+         <string>SQLite</string>
         </property>
-        <property name="rightMargin">
-         <number>10</number>
+       </widget>
+       <widget class="QRadioButton" name="radioButton_MySQL">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>70</y>
+          <width>91</width>
+          <height>19</height>
+         </rect>
         </property>
-        <property name="bottomMargin">
-         <number>10</number>
+        <property name="text">
+         <string>MySQL</string>
         </property>
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>导入功能：</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_CCDinSQL">
-          <property name="text">
-           <string>导入CCD</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_FBGinSQL">
-          <property name="text">
-           <string>导入FBG</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_DS18BinSQL">
-          <property name="text">
-           <string>导入电类</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_ENVinSQL">
-          <property name="text">
-           <string>导入环境</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_CNCinSQL">
-          <property name="text">
-           <string>导入机床</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
       </widget>
      </widget>
     </widget>

@@ -15,6 +15,6 @@ int MultipleRegressionOnlyB(double *data, int rows, int cols, double *Answer);
 void DisplayOnlyB(double *dat, double *Answer, int rows, int cols);
 int PrintCoefficient(double *data, int rows, int cols, double *Answer);
 
-QString QLinearRegression(QString FileName);
+QString QLinearRegression(QString FileName,QString &strOutCsv);
 
 #endif

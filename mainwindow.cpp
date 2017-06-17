@@ -12,10 +12,6 @@
 #include "algorithm/DataToSQL.h"
 #include "plugins/qcustomplot.h"
 
-// 数据库类型
-#define DATABASETYPE "QMYSQL"
-//#define DATABASETYPE "QSQLITE"
-
 //class JSkin
 //{
 //public:
@@ -116,6 +112,7 @@ void MainWindow::SystemTrayActivated(QSystemTrayIcon::ActivationReason reason)
 	}
 }
 
+/**************************************** 第1页 功能 ****************************************/
 // 电类标准化
 void MainWindow::on_pushButton_DS18B20_clicked()
 {
@@ -357,6 +354,129 @@ void MainWindow::on_pushButton_covresult_clicked()
 		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
 }
 
+// 多元线性回归
+void MainWindow::on_pushButton_LinearRegression_clicked()
+{
+	ui->label_msg->setText("");
+	QString inputFile = QFileDialog::getOpenFileName(this, tr("打开数据源"), " ", tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!inputFile.isEmpty())
+	{
+		ui->label_msg->setText("正在计算...");
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】载入\计算 (多元线性回归核心算法)
+		QString strOutCsv;
+		QString strOut = QLinearRegression(inputFile, strOutCsv);
+//		qDebug()<<strOut;
+		// 【2】保存文件
+		QString outFileName = inputFile.right(inputFile.size() - inputFile.lastIndexOf('/')-1);
+		outFileName = outFileName.left(outFileName.lastIndexOf('.'));
+		outFileName += "-LRparameters.csv";
+//		qDebug()<<"outFileName"<<outFileName;
+		bool b = JIO::save(outFileName,strOutCsv);
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if(b)
+			ui->label_msg->setText(strOut +" 花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+	}
+	else
+		ui->label_msg->setText("未选择文件！");
+}
+
+// 选择模型
+void MainWindow::on_pushButton_SelectModel_clicked()
+{
+	ModelMatQList.clear();
+	QString ModelFile = QFileDialog::getOpenFileName(this, tr("打开模型"), " ", tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!ModelFile.isEmpty())
+	{
+		QList<QList<double>> ModelMat = JIO::MatToDList(ModelFile);
+		for(auto &e:ModelMat[0])
+		{
+			ModelMatQList.append(e);
+		}
+		qDebug()<<"ModelMatQList.size() "<<ModelMatQList.size();
+		if( ModelMat.size() == 1 && ModelMatQList.size() > 0)
+		{
+			emit sendMsg("模型载入成功！");
+			ui->pushButton_SelectData->setEnabled(true);
+		}
+		else
+		{
+			emit sendMsg("模型不正确！");
+			ui->pushButton_SelectData->setEnabled(false);
+		}
+	}
+}
+
+// 选择数据（模型数据来预测）
+void MainWindow::on_pushButton_SelectData_clicked()
+{
+	QString DataFile = QFileDialog::getOpenFileName(this, tr("打开模型"), " ", tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!DataFile.isEmpty())
+	{
+		QList<QList<double>> DataFileMat = JIO::MatToDList(DataFile);
+		if(DataFileMat[0].size() != (ModelMatQList.size()-1) )
+		{
+			emit sendMsg("模型、预测数据不匹配！");
+		}
+		else
+		{
+			// 【0】计时开始
+			QTime time;time.start();
+			// 计算预测值
+			QList<double> predictedValueList;
+			double predictedValue=0;
+			for(int i=0; i<DataFileMat.size(); ++i)
+			{
+				for(int j=0; j<ModelMatQList.size(); ++j)
+				{
+					if(j == 0)
+						predictedValue = ModelMatQList[0];
+					else
+					{
+						predictedValue+= ModelMatQList[j]*DataFileMat[i][j-1];
+					}
+				}
+				predictedValueList.append(predictedValue);
+			}
+	//		qDebug()<<"predictedValueLists "<<predictedValueList.size();
+	//		qDebug()<<"predictedValueList0 "<<predictedValueList[0];
+	//		qDebug()<<"predictedValueList1 "<<predictedValueList[1];
+	//		qDebug()<<"predictedValueList2 "<<predictedValueList[2];
+
+			vector<vector<double>> mat;
+			for (int i = 0; i < DataFileMat.size(); ++i)
+			{
+				vector<double> temp(DataFileMat[0].size()+1, 0);
+				mat.push_back(temp);
+				for (int j = 0; j < DataFileMat[0].size()+1; ++j)
+				{
+					if(j == DataFileMat[0].size())
+						mat[i][j] = predictedValueList[i];
+					else
+						mat[i][j] = DataFileMat[i][j];
+				}
+			}
+
+			JMat predictedMat(mat);
+			QString outFileName = DataFile.right(DataFile.size() - DataFile.lastIndexOf('/')-1);
+			outFileName = outFileName.left(outFileName.lastIndexOf('.'));
+			outFileName += "-predictedResult.csv";
+			predictedMat.save(outFileName.toStdString());
+			// 【4】计时结束
+			QString timecost = QString::number(time.elapsed()/1000.0);
+			emit sendMsg("预测完成！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		}
+	}
+}
+
+
+
+/**************************************** 第2页 功能 ****************************************/
+
 // 数据概览-载入数据
 void MainWindow::on_pushButton_clicked()
 {
@@ -411,30 +531,7 @@ void MainWindow::on_pushButton_2_clicked()
 	ui->label_msg->setText("...");
 }
 
-// 多元线性回归
-void MainWindow::on_pushButton_LinearRegression_clicked()
-{
-	ui->label_msg->setText("");
-	QString inputFile = QFileDialog::getOpenFileName(this, tr("打开数据源"), " ", tr("textfile(*.csv*);;Allfile(*.*)"));
-	if(!inputFile.isEmpty())
-	{
-		ui->label_msg->setText("正在计算...");
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】载入\计算
-		QString strOut = QLinearRegression(inputFile);
-		// 【2】保存文件(暂不保存)
-		int b=0;
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b == 0 )
-			ui->label_msg->setText(strOut +" 花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
-	}
-	else
-		ui->label_msg->setText("未选择文件！");
-}
+/**************************************** 第3页 功能 ****************************************/
 
 // 封装的绘图函数
 void MainWindow::JfzPlot(QVector<double> MatData, QString PicName, int TuNum, QColor Colorstyle, double ymax, double ymin)
@@ -524,9 +621,17 @@ void MainWindow::on_comboBox_LoadPlotList_currentTextChanged(const QString &arg1
 	}
 }
 
+/**************************************** 第4页 功能 ****************************************/
+
 // CCD导入数据库
 void MainWindow::on_pushButton_CCDinSQL_clicked()
 {
+	if(ui->radioButton_SQLite->isChecked())
+		DataBaseType = "QSQLITE";
+	if(ui->radioButton_MySQL->isChecked())
+		DataBaseType = "QMYSQL";
+	qDebug()<<"Using"<<DataBaseType;
+
 	ui->label_msg->setText("");
 	// 载入文件夹
 	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
@@ -546,7 +651,7 @@ void MainWindow::on_pushButton_CCDinSQL_clicked()
 		}
 
 		// 【2】向SQL中插入数据
-		JSQL jsql("localhost","data_wuzhong","root","root",DATABASETYPE);
+		JSQL jsql("localhost","data_wuzhong","root","root",DataBaseType);
 		bool b = false;
 		for(auto filename : AllFileName)
 		{
@@ -565,6 +670,12 @@ void MainWindow::on_pushButton_CCDinSQL_clicked()
 // FBG导入数据库
 void MainWindow::on_pushButton_FBGinSQL_clicked()
 {
+	if(ui->radioButton_SQLite->isChecked())
+		DataBaseType = "QSQLITE";
+	if(ui->radioButton_MySQL->isChecked())
+		DataBaseType = "QMYSQL";
+	qDebug()<<"Using"<<DataBaseType;
+
 	ui->label_msg->setText("");
 	// 载入文件夹
 	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),"/data/fbg/",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
@@ -584,7 +695,7 @@ void MainWindow::on_pushButton_FBGinSQL_clicked()
 		}
 
 		// 【2】遍历目录中的文件、向SQL中插入数据
-		JSQL jsql("localhost","data_wuzhong","root","root",DATABASETYPE);
+		JSQL jsql("localhost","data_wuzhong","root","root",DataBaseType);
 		bool b = false;
 		for(int i=0;i<AllDirsName.size();++i)
 		{
@@ -605,6 +716,12 @@ void MainWindow::on_pushButton_FBGinSQL_clicked()
 // DS18B20导入数据库
 void MainWindow::on_pushButton_DS18BinSQL_clicked()
 {
+	if(ui->radioButton_SQLite->isChecked())
+		DataBaseType = "QSQLITE";
+	if(ui->radioButton_MySQL->isChecked())
+		DataBaseType = "QMYSQL";
+	qDebug()<<"Using"<<DataBaseType;
+
 	ui->label_msg->setText("");
 	// 载入文件夹
 	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
@@ -624,7 +741,7 @@ void MainWindow::on_pushButton_DS18BinSQL_clicked()
 		}
 
 		// 【2】遍历目录中的文件、向SQL中插入数据
-		JSQL jsql("localhost","data_wuzhong","root","root",DATABASETYPE);
+		JSQL jsql("localhost","data_wuzhong","root","root",DataBaseType);
 		bool b = false;
 		for(int i=0;i<AllDirsName.size();++i)
 		{
@@ -645,6 +762,12 @@ void MainWindow::on_pushButton_DS18BinSQL_clicked()
 // 环境温度导入数据库
 void MainWindow::on_pushButton_ENVinSQL_clicked()
 {
+	if(ui->radioButton_SQLite->isChecked())
+		DataBaseType = "QSQLITE";
+	if(ui->radioButton_MySQL->isChecked())
+		DataBaseType = "QMYSQL";
+	qDebug()<<"Using"<<DataBaseType;
+
 	ui->label_msg->setText("");
 	// 载入文件夹
 	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
@@ -664,7 +787,7 @@ void MainWindow::on_pushButton_ENVinSQL_clicked()
 		}
 
 		// 【2】向SQL中插入数据
-		JSQL jsql("localhost","data_wuzhong","root","root",DATABASETYPE);
+		JSQL jsql("localhost","data_wuzhong","root","root",DataBaseType);
 		bool b = false;
 		for(auto filename : AllFileName)
 		{
@@ -683,6 +806,12 @@ void MainWindow::on_pushButton_ENVinSQL_clicked()
 // 机床CNC内部数据导入数据库
 void MainWindow::on_pushButton_CNCinSQL_clicked()
 {
+	if(ui->radioButton_SQLite->isChecked())
+		DataBaseType = "QSQLITE";
+	if(ui->radioButton_MySQL->isChecked())
+		DataBaseType = "QMYSQL";
+	qDebug()<<"Using"<<DataBaseType;
+
 	ui->label_msg->setText("");
 	// 载入文件夹
 	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
@@ -700,7 +829,7 @@ void MainWindow::on_pushButton_CNCinSQL_clicked()
 		}
 
 		// 【2】向SQL中插入数据
-		JSQL jsql("localhost","data_wuzhong","root","root",DATABASETYPE);
+		JSQL jsql("localhost","data_wuzhong","root","root",DataBaseType);
 		bool b = false;
 		for(auto filename : AllFileName)
 		{
@@ -713,5 +842,63 @@ void MainWindow::on_pushButton_CNCinSQL_clicked()
 			ui->label_msg->setText("花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
 		else
 			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'失败！</span>");
+	}
+}
+
+// 数据导出
+void MainWindow::on_pushButton_OutFromSQL_clicked()
+{
+	emit sendMsg("");
+	// 选择的数据库类型
+	if(ui->radioButton_SQLite->isChecked())
+		DataBaseType = "QSQLITE";
+	if(ui->radioButton_MySQL->isChecked())
+		DataBaseType = "QMYSQL";
+
+	// 选择的查询数据类型
+	QString tableName;
+	QString itemName = "Time,";
+	int itemNum;
+	bool isStr = false;
+	if(ui->radioButton_selectDS18B20->isChecked()) {tableName = "ds18b20";     itemName+=DataName_DS18ALL; itemNum=65; isStr=false;}
+	if(ui->radioButton_selectCCD    ->isChecked()) {tableName = "ccd";         itemName+=DataName_CCD;     itemNum=4;  isStr=false;}
+	if(ui->radioButton_selectENV    ->isChecked()) {tableName = "environment"; itemName+=DataName_ENV;     itemNum=5;  isStr=false;}
+	if(ui->radioButton_selectFBG    ->isChecked()) {tableName = "fbg";         itemName+=DataName_FBG;     itemNum=641;isStr=false;}
+	if(ui->radioButton_selectCNC    ->isChecked()) {tableName = "cnc";         itemName+=DataName_CNC;     itemNum=17; isStr=true; }
+
+	// 选择的时间
+	QString startTime = ui->dateTimeEdit_Start->text();
+	QString endTime = ui->dateTimeEdit_End->text();
+	if(startTime>=endTime)
+	{
+		emit sendMsg("时间需要正序查询(开始时间比结束时间早)！");
+		return;
+	}
+
+	JSQL jsql("localhost","data_wuzhong","root","root",DataBaseType);
+	// 原始数据导出
+	if(ui->radioButton_DataOri->isChecked())
+	{
+		QTime time;time.start();
+		QStringList out;
+		qDebug()<<"查询成功? "<<jsql.queryData(tableName, startTime, endTime, itemName, itemNum, isStr, out);
+		QString saveFileName;
+		startTime = TimeToTimeNum(startTime);
+		endTime   = TimeToTimeNum(endTime);
+		saveFileName = startTime +"~"+endTime +"_"+tableName+"_OriData.csv";
+		qDebug()<<"saveFileName "<<saveFileName;
+		bool b = JIO::save(saveFileName,out);
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if(b)
+			emit sendMsg("查询并保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			emit sendMsg("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+	}
+
+	// 优化数据导出
+	if(ui->radioButton_DataOpt->isChecked())
+	{
+		// TODO
 	}
 }

@@ -65,6 +65,37 @@ QList<QList<double>> JIO::MatToDList(QString fileName)
 	return out;
 }
 
+bool JIO::save(QString fileName, QString text)
+{
+	QFile f(fileName);
+	if(!f.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		qDebug() << "[JIO::save] Open failed.";
+		return false;
+	}
+	QTextStream txtOutput(&f);
+	txtOutput << text;
+	f.close();
+	return true;
+}
+
+bool JIO::save(QString fileName, QStringList textList)
+{
+	QFile f(fileName);
+	if(!f.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		qDebug() << "[JIO::save(QString fileName, QStringList textList)] Open failed.";
+		return false;
+	}
+	QTextStream txtOutput(&f);
+	for(auto e: textList)
+	{
+		txtOutput << e << "\n";
+	}
+	f.close();
+	return true;
+}
+
 void JIO::show(QStringList input)
 {
 	for (auto &e : input)

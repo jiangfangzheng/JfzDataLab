@@ -98,6 +98,8 @@ private:
     QString correlationFileName1;
     QString correlationFileName2;
 	QList<QList<QString>> plotDataStrList; // 绘图载入原始数据
+	QList<double> ModelMatQList; // 模型参数文件
+	QString DataBaseType; // 数据库类型
 	// JPlot
 	void JfzPlot(QVector<double> MatData, QString PicName, int TuNum, QColor Colorstyle, double ymax, double ymin);
 
@@ -106,6 +108,9 @@ signals:
 	sendMsg(QString msg);
 private slots:
 	void showMsg(QString msg);
+	void on_pushButton_SelectModel_clicked();
+	void on_pushButton_SelectData_clicked();
+	void on_pushButton_OutFromSQL_clicked();
 };
 
 #endif // MAINWINDOW_H

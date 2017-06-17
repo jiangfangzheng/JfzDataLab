@@ -5,9 +5,13 @@
 
 // 数据各项名
 extern QString DataName_DS18B20;
+extern QString DataName_DS18ALL;
 extern QString DataName_FBGT;
 extern QString DataName_FBGS;
+extern QString DataName_FBG;
 extern QString DataName_CCD;
+extern QString DataName_ENV;
+extern QString DataName_CNC;
 // FBG标定波长+标定温度
 extern double WaveAndTemp[231][2];
 
@@ -28,5 +32,8 @@ mat Stand_DS18B20(QStringList &CH);
 
 // 波长转温度算法-T=k(wave-Bwave)+Btemp
 mat FBGtoTEMP(QString &standFBGFileName, QStringList &XLabelName);
+
+// 时间工具，2017-06-17 23:17:13转20170617231713
+QString TimeToTimeNum(QString Time);
 
 #endif // DATATOSTAND_H

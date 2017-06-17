@@ -58,7 +58,8 @@ HEADERS  += mainwindow.h \
     tools/JIO.h \
     systemTray.h \
     tools/JSQL.h \
-    algorithm/DataToSQL.h
+    algorithm/DataToSQL.h \
+    tools/log.h
 
 FORMS    += mainwindow.ui
 
