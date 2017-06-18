@@ -1,5 +1,6 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QtNetwork>
 #include "skins/skins.h"
 #include "tools/jfzlib.h"
 #include "tools/JMat.h"
@@ -11,6 +12,7 @@
 #include "algorithm/LinearRegression.h"
 #include "algorithm/DataToSQL.h"
 #include "plugins/qcustomplot.h"
+
 
 //class JSkin
 //{
@@ -39,6 +41,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(myTray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(SystemTrayActivated(QSystemTrayIcon::ActivationReason)));
 	// 最下方消息提醒
 	connect(this, SIGNAL(sendMsg(QString)), this, SLOT(showMsg(QString)));
+	// 历史数据库下载
+	managerDatabase = new QNetworkAccessManager(this);
+	ui->progressBar_UpdateDatabase->hide();
+	connect(&runDatabaseProcess, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(runDatabaseProcessFinished(int, QProcess::ExitStatus)));
 }
 
 MainWindow::~MainWindow()
@@ -881,7 +887,10 @@ void MainWindow::on_pushButton_OutFromSQL_clicked()
 	{
 		QTime time;time.start();
 		QStringList out;
-		qDebug()<<"查询成功? "<<jsql.queryData(tableName, startTime, endTime, itemName, itemNum, isStr, out);
+		bool b0 = jsql.queryData(tableName, startTime, endTime, itemName, itemNum, isStr, out);
+		qDebug()<<"查询成功? "<<b0;
+		if(b0)
+		{
 		QString saveFileName;
 		startTime = TimeToTimeNum(startTime);
 		endTime   = TimeToTimeNum(endTime);
@@ -894,11 +903,219 @@ void MainWindow::on_pushButton_OutFromSQL_clicked()
 			emit sendMsg("查询并保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
 		else
 			emit sendMsg("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+		}
+		else
+		{
+			emit sendMsg("<span style='color: rgb(255, 0, 0);'>数据库查询失败！</span>");
+		}
 	}
 
 	// 优化数据导出
 	if(ui->radioButton_DataOpt->isChecked())
 	{
-		// TODO
+		// 这三类数据不需要优化
+		if(tableName == "ccd" || tableName == "environment" || tableName == "cnc")
+		{
+			QTime time;time.start();
+			QStringList out;
+			bool b0 = jsql.queryData(tableName, startTime, endTime, itemName, itemNum, isStr, out);
+			qDebug()<<"查询成功? "<<b0;
+			if(b0)
+			{
+			QString saveFileName;
+			startTime = TimeToTimeNum(startTime);
+			endTime   = TimeToTimeNum(endTime);
+			saveFileName = startTime +"~"+endTime +"_"+tableName+"_OptData.csv";
+			qDebug()<<"saveFileName "<<saveFileName;
+			bool b = JIO::save(saveFileName,out);
+			// 【4】计时结束
+			QString timecost = QString::number(time.elapsed()/1000.0);
+			if(b)
+				emit sendMsg("查询并保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+			else
+				emit sendMsg("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+			}
+			else
+			{
+				emit sendMsg("<span style='color: rgb(255, 0, 0);'>数据库查询失败！</span>");
+			}
+		}
+		// 电类数据除去最后为零的通道
+		if(tableName == "ds18b20")
+		{
+			QTime time;time.start();
+			QStringList out;
+			bool b0 = jsql.queryData(tableName, startTime, endTime, itemName, itemNum, isStr, out);
+			qDebug()<<"查询成功? "<< b0;
+			if(b0)
+			{
+			// 除去后续无用通道
+			for(auto &e: out)
+			{
+				QStringList templist;
+				templist = e.split(",");
+				for(int i=0;i<12;++i) // 空余的12个
+				{
+					templist.removeLast();
+				}
+				QString joinStr = templist.join(",");
+				e = joinStr;
+//				qDebug()<<e;
+			}
+			QString saveFileName;
+			startTime = TimeToTimeNum(startTime);
+			endTime   = TimeToTimeNum(endTime);
+			saveFileName = startTime +"~"+endTime +"_"+tableName+"_OptData.csv";
+			qDebug()<<"saveFileName "<<saveFileName;
+			bool b = JIO::save(saveFileName,out);
+			// 【4】计时结束
+			QString timecost = QString::number(time.elapsed()/1000.0);
+			if(b)
+				emit sendMsg("查询并保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+			else
+				emit sendMsg("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+			}
+			else
+			{
+				emit sendMsg("<span style='color: rgb(255, 0, 0);'>数据库查询失败！</span>");
+			}
+		}
+		// fbg数据除去没记录的通道
+		if(tableName == "fbg")
+		{
+			QTime time;time.start();
+			QStringList out;
+			bool b0 = jsql.queryData(tableName, startTime, endTime, itemName, itemNum, isStr, out);
+			qDebug()<<"查询成功? "<< b0;
+			if(b0)
+			{
+				// 提取数据转mat矩阵
+				out.removeFirst(); // 去除抬头
+				mat inputMat(out.size(),640); // FBG矩阵
+				inputMat.fill(0.0);
+				int rows = 0;
+				for(auto &e: out)
+				{
+					QStringList templist;
+					templist = e.split(",");
+					for(int i=1; i<641; ++i) // 除去时间第一个，剩下640个
+					{
+						inputMat(rows,i-1) = templist[i].toDouble();
+					}
+					rows++;
+				}
+				// 全部mat数据优化成321个通道
+				mat outputMat;
+				bool b1 = ALLFBGto321FBG(inputMat, outputMat);
+				// 构造输出数据
+				QStringList outData;
+				rows = 0;
+				for(auto &e: out)
+				{
+					QStringList templist;
+					templist = e.split(",");
+					outData.append(templist[0]+",");
+					for(unsigned int i=0; i<outputMat.n_cols; ++i)
+					{
+						QString value;
+						value.sprintf("%.3lf",outputMat(rows,i));
+						if( i+1 != outputMat.n_cols)
+							outData[rows] += value + ",";
+						else
+							outData[rows] += value;
+					}
+					rows++;
+				}
+				outData.insert(0,"Time,"+DataName_FBGST);
+
+				// 保存数据
+				QString saveFileName;
+				startTime = TimeToTimeNum(startTime);
+				endTime   = TimeToTimeNum(endTime);
+				saveFileName = startTime +"~"+endTime +"_"+tableName+"_OptData.csv";
+				qDebug()<<"saveFileName "<<saveFileName;
+				bool b = JIO::save(saveFileName,outData);
+				// 【4】计时结束
+				QString timecost = QString::number(time.elapsed()/1000.0);
+				if(b && b1)
+					emit sendMsg("查询并保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+				else
+					emit sendMsg("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+			}
+			else
+			{
+				emit sendMsg("<span style='color: rgb(255, 0, 0);'>数据库查询失败！</span>");
+			}
+		}
 	}
 }
+
+// 本地历史数据库下载开始请求
+void MainWindow::startRequest(QUrl url)
+{
+	qDebug()<<"url "<<url;
+	replyDatabase = managerDatabase->get(QNetworkRequest(url));
+	connect(replyDatabase, &QNetworkReply::readyRead,        this, &MainWindow::httpReadyRead);
+	connect(replyDatabase, &QNetworkReply::downloadProgress, this, &MainWindow::updateDataReadProgress);
+	connect(replyDatabase, &QNetworkReply::finished,         this, &MainWindow::httpFinished);
+}
+
+// readyRead后开始写文件
+void MainWindow::httpReadyRead()
+{
+	if (fileDatabase) fileDatabase->write(replyDatabase->readAll());
+}
+
+// 更新进度条
+void MainWindow::updateDataReadProgress(qint64 bytesRead, qint64 totalBytes)
+{
+	ui->progressBar_UpdateDatabase->setMaximum(totalBytes);
+	ui->progressBar_UpdateDatabase->setValue(bytesRead);
+}
+
+// 下载完关进度条、关文件、关请求
+void MainWindow::httpFinished()
+{
+	ui->progressBar_UpdateDatabase->hide();
+	if(fileDatabase) {
+		fileDatabase->close();
+		delete fileDatabase;
+		fileDatabase = nullptr;
+	}
+	replyDatabase->deleteLater();
+	replyDatabase = 0;
+	// 解压文件
+	QString program = "data_wuzhong.exe";
+	QStringList arguments;
+	arguments << "";
+	runDatabaseProcess.start(program, arguments);
+}
+
+// 解包运行结束显示内容
+void MainWindow::runDatabaseProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
+{
+	qDebug() << "runDatabaseProcessFinished: " << endl << exitCode << exitStatus;
+	emit sendMsg("<span style='color: rgb(255, 0, 0);'>历史数据库更新完毕!</span>");
+}
+
+// 更新本地历史数据库
+void MainWindow::on_pushButton_UpdateSQL_clicked()
+{
+	urlDatabase = "http://img.jfz.me/data_wuzhong.exe";
+	QFileInfo info(urlDatabase.path());
+	QString fileName(info.fileName());
+	if (fileName.isEmpty()) fileName = "data_wuzhong.exe";
+
+	fileDatabase = new QFile(fileName);
+	if(!fileDatabase->open(QIODevice::WriteOnly))
+	{
+		delete fileDatabase;
+		fileDatabase = nullptr;
+		return;
+	}
+
+	startRequest(urlDatabase);
+	ui->progressBar_UpdateDatabase->setValue(0);
+	ui->progressBar_UpdateDatabase->show();
+}
+

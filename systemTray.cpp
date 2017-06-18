@@ -42,7 +42,7 @@ void SystemTray::addAction(){
 void SystemTray::showAboutUs(){
 	//显示关于我们的窗口，没有具体实现
 	//当然也可以不用SOLT函数，而是像“还原“操作一样，发送信号出去，留给主窗口来处理
-	QMessageBox::about(NULL, "About", "Jfz's QtFramework");
+	QMessageBox::about(NULL, "About", "Jfz's DataLab");
 }
 
 void SystemTray::showUpdate(){

@@ -8,11 +8,14 @@
 #include <QAxObject>
 #include <QMessageBox>
 #include <QTime>
+#include <QUrl>
 #include <math.h>
 #include "tools/EnvXlsReadThread.h"
 #include "plugins/qcustomplot.h"
 #include "systemTray.h"
 
+class QNetworkReply;
+class QNetworkAccessManager;
 
 // armadillo矩阵库
 #include <armadillo>
@@ -102,6 +105,13 @@ private:
 	QString DataBaseType; // 数据库类型
 	// JPlot
 	void JfzPlot(QVector<double> MatData, QString PicName, int TuNum, QColor Colorstyle, double ymax, double ymin);
+	// 历史数据库下载
+	QNetworkAccessManager *managerDatabase;
+	QNetworkReply         *replyDatabase;
+	QUrl                  urlDatabase;
+	QFile                 *fileDatabase;
+	QProcess              runDatabaseProcess;
+	void startRequest(QUrl url);
 
 // 最下方显示信息标签
 signals:
@@ -111,6 +121,12 @@ private slots:
 	void on_pushButton_SelectModel_clicked();
 	void on_pushButton_SelectData_clicked();
 	void on_pushButton_OutFromSQL_clicked();
+	void on_pushButton_UpdateSQL_clicked();
+	// 历史数据库下载
+	void httpFinished();
+	void httpReadyRead();
+	void updateDataReadProgress(qint64, qint64);
+	void runDatabaseProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
 };
 
 #endif // MAINWINDOW_H

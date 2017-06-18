@@ -12,6 +12,7 @@ extern QString DataName_FBG;
 extern QString DataName_CCD;
 extern QString DataName_ENV;
 extern QString DataName_CNC;
+extern QString DataName_FBGST;
 // FBG标定波长+标定温度
 extern double WaveAndTemp[231][2];
 
@@ -29,6 +30,8 @@ int Stand_FBGT     (QStringList &CH, mat &All_Mat, QStringList &XLabelName);
 int Stand_FBGT_Fix (QStringList &CH, mat &All_Mat, QStringList &XLabelName);
 mat Stand_FBG(QStringList &CH);
 mat Stand_DS18B20(QStringList &CH);
+// 将640个FBG通道转为我们需要的321个通道，包括应力、温度
+bool ALLFBGto321FBG(mat &inputMat, mat &outputMat);
 
 // 波长转温度算法-T=k(wave-Bwave)+Btemp
 mat FBGtoTEMP(QString &standFBGFileName, QStringList &XLabelName);

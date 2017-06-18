@@ -344,7 +344,7 @@ QString QLinearRegression(QString FileName,QString &strOutCsv)
 		QString temp;
 		QString tempCsv;
 		temp.sprintf(" + %.5lf*X%d", B(i,0), i);
-		tempCsv.sprintf("%.15lf,", B(i,0), i);
+		tempCsv.sprintf("%.15lf,", B(i,0));
 		strOut += temp;
 		strOutCsv += tempCsv;
 	}

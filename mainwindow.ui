@@ -36,7 +36,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
@@ -649,12 +649,12 @@
           <widget class="QDateTimeEdit" name="dateTimeEdit_End">
            <property name="dateTime">
             <datetime>
-             <hour>0</hour>
+             <hour>12</hour>
              <minute>0</minute>
              <second>0</second>
              <year>2017</year>
              <month>5</month>
-             <day>3</day>
+             <day>2</day>
             </datetime>
            </property>
            <property name="displayFormat">
@@ -681,7 +681,7 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>40</y>
+          <y>30</y>
           <width>91</width>
           <height>19</height>
          </rect>
@@ -697,7 +697,7 @@
         <property name="geometry">
          <rect>
           <x>100</x>
-          <y>40</y>
+          <y>30</y>
           <width>81</width>
           <height>19</height>
          </rect>
@@ -710,7 +710,7 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>70</y>
+          <y>60</y>
           <width>61</width>
           <height>31</height>
          </rect>
@@ -723,13 +723,26 @@
         <property name="geometry">
          <rect>
           <x>90</x>
-          <y>70</y>
+          <y>60</y>
           <width>91</width>
           <height>31</height>
          </rect>
         </property>
         <property name="text">
          <string>更新数据库</string>
+        </property>
+       </widget>
+       <widget class="QProgressBar" name="progressBar_UpdateDatabase">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>100</y>
+          <width>171</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="value">
+         <number>24</number>
         </property>
        </widget>
       </widget>
@@ -840,7 +853,7 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>40</y>
+          <y>30</y>
           <width>91</width>
           <height>19</height>
          </rect>
@@ -853,7 +866,7 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>70</y>
+          <y>60</y>
           <width>91</width>
           <height>19</height>
          </rect>
@@ -863,6 +876,22 @@
         </property>
         <property name="checked">
          <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QRadioButton" name="radioButton_CloudSQL">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>90</y>
+          <width>91</width>
+          <height>19</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>云数据库</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
         </property>
        </widget>
       </widget>

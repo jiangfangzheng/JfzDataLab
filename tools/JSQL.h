@@ -21,6 +21,7 @@ public:
 	JSQL();
 	bool insertData(QString tableName, QStringList Data);
 	bool queryData(QString tableName, QString startTime, QString endTime,QString itemName, int itemNum, bool isStr, QStringList &out);
+	bool closeDatabase();
 };
 
 #endif // JSQL_H
