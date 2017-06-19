@@ -276,79 +276,83 @@ int PrintCoefficient(double *data, int rows, int cols, double *Answer)
 
 QString QLinearRegression(QString FileName,QString &strOutCsv)
 {
-	QString strOut;
-	// 载入文件
-//	JMat matInput;
-//	matInput.load(FileName.toStdString());
-//	vector<vector<double>> mat = matInput.getMat();
-//	qDebug()<<"matInput: "<<matInput.getRow() <<" "<< matInput.getCol();
-//	// 多元线性回归
-//	double *data = new double[matInput.getRow()*matInput.getCol()];
-//	double Answer[matInput.getCol()];
-//	for(int i=0;i<matInput.getRow();++i)
-//	{
-//		for(int j=0;j<matInput.getCol();++j)
-//		{
-//			data[i*matInput.getCol()+j] = mat[i][j];
-//		}
-//	}
+	QString strOut; // 输出
 
-//	QString strOut;
-//	if (MultipleRegressionOnlyB(data, matInput.getRow(), matInput.getCol(), Answer) == 0)
-//	{
-//		int i;
-//		int cols = matInput.getCol();
-//		strOut.sprintf("Y = %.5lf", Answer[0]);
-//		strOutCsv.sprintf("%.5lf,", Answer[0]);
-//		for (i = 1; i < cols; i++)
-//		{
-//			QString temp;
-//			QString tempCsv;
-//			temp.sprintf(" + %.5lf*X%d", Answer[i], i);
-//			tempCsv.sprintf("%.5lf,", Answer[i], i);
-//			strOut += temp;
-//			strOutCsv += tempCsv;
-//		}
-//		strOutCsv = strOutCsv.left(strOutCsv.lastIndexOf(','));
-//	}
-	// 用mat来算的例子
-	QList<QList<double>> inMat = JIO::MatToDList(FileName);
-	mat X(inMat.size(),inMat[0].size());
-	X.fill(1);
-	for(int i = 0; i<inMat.size(); ++i)
+	// 【1】用C语言版本算-效果还好
+	// 载入文件
+	QList<QList<double>> matInput = JIO::MatToDList(FileName);
+	int matRow = matInput.size();
+	int matCol = 0;
+	if(matRow > 0)
+		matCol = matInput[0].size();
+	// 多元线性回归
+	double *data = new double[matRow * matCol];
+	double Answer[matCol];
+	for(int i=0;i<matRow;++i)
 	{
-		for(int j = 0; j<inMat[0].size()-1; ++j)
+		for(int j=0;j<matCol;++j)
 		{
-			X(i,j+1) = inMat[i][j];
+			data[i*matCol+j] = matInput[i][j];
 		}
 	}
-//	X.save("X.csv", raw_ascii);
-	mat Y(inMat.size(),1);
-	int &&ycol = inMat[0].size()-1;
-	for(int i=0; i<inMat.size(); ++i)
-	{
-		Y(i,0) = inMat[i][ycol];
-	}
-//	Y.save("Y.csv", raw_ascii);
-	//b = (X'X)^(-1)X'Y 核心公式
-	mat B = inv(X.t()*X)*X.t()*Y;
-	B.save("B.csv", raw_ascii);
 
-	// 保存字符串
-	int i;
-	int rows = B.n_rows;
-	strOut.sprintf("Y = %.5lf", B(0,0));
-	strOutCsv.sprintf("%.15lf,", B(0,0));
-	for (i = 1; i < rows; i++)
+	if (MultipleRegressionOnlyB(data, matRow, matCol, Answer) == 0)
 	{
-		QString temp;
-		QString tempCsv;
-		temp.sprintf(" + %.5lf*X%d", B(i,0), i);
-		tempCsv.sprintf("%.15lf,", B(i,0));
-		strOut += temp;
-		strOutCsv += tempCsv;
+		int i;
+		int cols = matCol;
+		strOut.sprintf("Y = %.5lf", Answer[0]);
+		strOutCsv.sprintf("%.5lf,", Answer[0]);
+		for (i = 1; i < cols; i++)
+		{
+			QString temp;
+			QString tempCsv;
+			temp.sprintf(" + %.5lf*X%d", Answer[i], i);
+			tempCsv.sprintf("%.5lf,", Answer[i]);
+			strOut += temp;
+			strOutCsv += tempCsv;
+		}
+		strOutCsv = strOutCsv.left(strOutCsv.lastIndexOf(','));
 	}
-	strOutCsv = strOutCsv.left(strOutCsv.lastIndexOf(','));
+
+
+	// 【2】用mat来算的例子(与matlab计算结果相差大，不好)
+//	QList<QList<double>> inMat = JIO::MatToDList(FileName);
+//	mat X(inMat.size(),inMat[0].size());
+//	X.fill(1);
+//	for(int i = 0; i<inMat.size(); ++i)
+//	{
+//		for(int j = 0; j<inMat[0].size()-1; ++j)
+//		{
+//			X(i,j+1) = inMat[i][j];
+//		}
+//	}
+// //	X.save("X.csv", raw_ascii);
+//	mat Y(inMat.size(),1);
+//	int &&ycol = inMat[0].size()-1;
+//	for(int i=0; i<inMat.size(); ++i)
+//	{
+//		Y(i,0) = inMat[i][ycol];
+//	}
+// //	Y.save("Y.csv", raw_ascii);
+//	//b = (X'X)^(-1)X'Y 核心公式
+//	mat B = inv(X.t()*X)*X.t()*Y;
+// //	B.save("B.csv", raw_ascii);
+
+//	// 保存字符串
+//	int i;
+//	int rows = B.n_rows;
+//	strOut.sprintf("Y = %.5lf", B(0,0));
+//	strOutCsv.sprintf("%.15lf,", B(0,0));
+//	for (i = 1; i < rows; i++)
+//	{
+//		QString temp;
+//		QString tempCsv;
+//		temp.sprintf(" + %.5lf*X%d", B(i,0), i);
+//		tempCsv.sprintf("%.15lf,", B(i,0));
+//		strOut += temp;
+//		strOutCsv += tempCsv;
+//	}
+//	strOutCsv = strOutCsv.left(strOutCsv.lastIndexOf(','));
 
 	return strOut;
 }

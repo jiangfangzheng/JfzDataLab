@@ -111,6 +111,7 @@ private:
 	QUrl                  urlDatabase;
 	QFile                 *fileDatabase;
 	QProcess              runDatabaseProcess;
+	QNetworkAccessManager *managerCheckDatabaseUpdate;
 	void startRequest(QUrl url);
 
 // 最下方显示信息标签
@@ -127,6 +128,7 @@ private slots:
 	void httpReadyRead();
 	void updateDataReadProgress(qint64, qint64);
 	void runDatabaseProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
+	void checkDatabaseUpdateFinished(QNetworkReply *);
 };
 
 #endif // MAINWINDOW_H

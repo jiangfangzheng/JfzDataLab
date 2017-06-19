@@ -45,6 +45,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	managerDatabase = new QNetworkAccessManager(this);
 	ui->progressBar_UpdateDatabase->hide();
 	connect(&runDatabaseProcess, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(runDatabaseProcessFinished(int, QProcess::ExitStatus)));
+	managerCheckDatabaseUpdate = new QNetworkAccessManager(this);
+	connect(managerCheckDatabaseUpdate, &QNetworkAccessManager::finished, this, &MainWindow::checkDatabaseUpdateFinished);
 }
 
 MainWindow::~MainWindow()
@@ -380,10 +382,15 @@ void MainWindow::on_pushButton_LinearRegression_clicked()
 		outFileName += "-LRparameters.csv";
 //		qDebug()<<"outFileName"<<outFileName;
 		bool b = JIO::save(outFileName,strOutCsv);
+		// 保存C语言风格的数组
+		QString CStyleArrayStr{"double Answerx[cols]={"};
+		CStyleArrayStr += strOutCsv + "};";
+		outFileName.replace(QRegExp("\\.csv"), ".cpp");
+		JIO::save("Code_"+outFileName,CStyleArrayStr);
 		// 【4】计时结束
 		QString timecost = QString::number(time.elapsed()/1000.0);
 		if(b)
-			ui->label_msg->setText(strOut +" 花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+			ui->label_msg->setText("计算完毕！时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span> "+strOut);
 		else
 			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
 	}
@@ -1098,24 +1105,43 @@ void MainWindow::runDatabaseProcessFinished(int exitCode, QProcess::ExitStatus e
 	emit sendMsg("<span style='color: rgb(255, 0, 0);'>历史数据库更新完毕!</span>");
 }
 
+void MainWindow::checkDatabaseUpdateFinished(QNetworkReply *reply)
+{
+	QString DatabaseUpdateTime = reply->readAll();
+	reply->deleteLater();
+	qDebug()<<"DatabaseUpdateTime "<<DatabaseUpdateTime;
+	QStringList DatabaseTime = JIO::FileToStrList("Database");
+	bool bupdate = DatabaseUpdateTime > DatabaseTime[0];
+	qDebug()<<"bupdate "<<bupdate;
+	if(bupdate)
+	{
+		urlDatabase = "http://img.jfz.me/data_wuzhong.exe";
+		QFileInfo info(urlDatabase.path());
+		QString fileName(info.fileName());
+		if (fileName.isEmpty()) fileName = "data_wuzhong.exe";
+
+		fileDatabase = new QFile(fileName);
+		if(!fileDatabase->open(QIODevice::WriteOnly))
+		{
+			delete fileDatabase;
+			fileDatabase = nullptr;
+			return;
+		}
+
+		startRequest(urlDatabase);
+		ui->progressBar_UpdateDatabase->setValue(0);
+		ui->progressBar_UpdateDatabase->show();
+		JIO::save("Database",DatabaseUpdateTime); // 保存现在时间
+	}
+	else
+	{
+		emit sendMsg("不需要更新！");
+	}
+}
+
 // 更新本地历史数据库
 void MainWindow::on_pushButton_UpdateSQL_clicked()
 {
-	urlDatabase = "http://img.jfz.me/data_wuzhong.exe";
-	QFileInfo info(urlDatabase.path());
-	QString fileName(info.fileName());
-	if (fileName.isEmpty()) fileName = "data_wuzhong.exe";
-
-	fileDatabase = new QFile(fileName);
-	if(!fileDatabase->open(QIODevice::WriteOnly))
-	{
-		delete fileDatabase;
-		fileDatabase = nullptr;
-		return;
-	}
-
-	startRequest(urlDatabase);
-	ui->progressBar_UpdateDatabase->setValue(0);
-	ui->progressBar_UpdateDatabase->show();
+	managerCheckDatabaseUpdate->get(QNetworkRequest(QUrl("http://blog.jfz.me/soft/JfzDataLabDatabaseUpdate.txt")));
 }
 
