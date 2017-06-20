@@ -87,6 +87,8 @@ private slots:
 	void on_pushButton_CNCinSQL_clicked();
 
 private:
+	// 工作区路径
+	QString workspacePath;
 	// Skins
 	QMap<QString, QString> mapStyle;
 	void initSkins();

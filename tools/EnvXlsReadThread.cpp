@@ -8,22 +8,16 @@ EnvXlsReadThread::EnvXlsReadThread()
 
 }
 
-EnvXlsReadThread::EnvXlsReadThread(QStringList EnvFileNameList, Ui::MainWindow* ui)
-{
-    this->EnvFileNameList = EnvFileNameList;
-    this->ui = ui;
-}
-
 EnvXlsReadThread::EnvXlsReadThread(QStringList EnvFileNameList)
 {
 	this->EnvFileNameList = EnvFileNameList;
-	this->ui = nullptr;
 }
 
 void EnvXlsReadThread::run()
 {
    //qDebug()<<EnvFileNameList;
    QTime time;time.start(); // 计时
+   emit sendMsg("<span style='color: rgb(255, 0, 0);'>正在开启线程处理xls文件...</span>");
    // 从xls中读取文件到map
    QMap<QString,float> mapA;
    QMap<QString,float> mapB;
@@ -128,7 +122,5 @@ void EnvXlsReadThread::run()
 
    // 计算花费时间
    QString timecost = QString::number(time.elapsed()/1000.0);
-   qDebug()<<"读取xls时间："<<timecost<<"s";
-   ui->label_msg->setText("转换完成！读取xls文件总共时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-   ui->pushButton_ENV->setEnabled(true);
+   emit sendMsg("转换完成！读取xls文件总共时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
 }

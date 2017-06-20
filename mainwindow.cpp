@@ -31,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
+	// 工作区路径
+	workspacePath = "./workspace/";
 	// Skin
 	this->initSkins();
 	// init qcustomplot
@@ -126,7 +128,7 @@ void MainWindow::on_pushButton_DS18B20_clicked()
 {
 	ui->label_msg->setText("文件状态：未载入");
 	// 载入文件夹
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
@@ -154,7 +156,7 @@ void MainWindow::on_pushButton_CCD_clicked()
 {
 	ui->label_msg->setText("文件状态：未载入");
 	// 载入文件夹
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
@@ -182,7 +184,7 @@ void MainWindow::on_pushButton_FBGT_clicked()
 {
 	ui->label_msg->setText("文件状态：未载入");
 	// 载入文件夹
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
@@ -210,7 +212,7 @@ void MainWindow::on_pushButton_LoadFBGT_ALL_clicked()
 {
 	ui->label_msg->setText("文件状态：未载入");
 	// 载入文件夹
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
@@ -238,7 +240,7 @@ void MainWindow::on_pushButton_FBGS_clicked()
 {
 	ui->label_msg->setText("文件状态：未载入");
 	// 载入文件夹 ，填"/"跳到根目录， 填“”默认程序位置
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
@@ -265,19 +267,19 @@ void MainWindow::on_pushButton_FBGS_clicked()
 void MainWindow::on_pushButton_ENV_clicked()
 {
 	ui->label_msg->setText("...");
-	ui->pushButton_ENV->setEnabled(false);
+//	ui->pushButton_ENV->setEnabled(false);
 	EnvFileNameList = QFileDialog::getOpenFileNames(this, tr("打开环境温度数据"), " ", tr("textfile(*.xls);"));
 	if(EnvFileNameList.size() != 4)
 	{
 		emit sendMsg("文件状态：未载入");
 		QMessageBox::critical(NULL, "注意", "请选择环境温度的4个文件！", QMessageBox::Yes, QMessageBox::Yes);
-		ui->pushButton_ENV->setEnabled(true);
+//		ui->pushButton_ENV->setEnabled(true);
 	}
 	else
 	{
-		emit sendMsg("<span style='color: rgb(255, 0, 0);'>正在开启线程处理xls文件...</span>");
 		// 开启线程处理xls文件，防止界面卡死
-		EnvXlsReadThread *readxls = new EnvXlsReadThread(EnvFileNameList, ui);
+		EnvXlsReadThread *readxls = new EnvXlsReadThread(EnvFileNameList);
+		connect(readxls, &EnvXlsReadThread::sendMsg, this, &MainWindow::showMsg);
 		readxls->start();
 	}
 }
@@ -647,7 +649,7 @@ void MainWindow::on_pushButton_CCDinSQL_clicked()
 
 	ui->label_msg->setText("");
 	// 载入文件夹
-	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
@@ -737,7 +739,7 @@ void MainWindow::on_pushButton_DS18BinSQL_clicked()
 
 	ui->label_msg->setText("");
 	// 载入文件夹
-	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
@@ -783,7 +785,7 @@ void MainWindow::on_pushButton_ENVinSQL_clicked()
 
 	ui->label_msg->setText("");
 	// 载入文件夹
-	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
@@ -827,7 +829,7 @@ void MainWindow::on_pushButton_CNCinSQL_clicked()
 
 	ui->label_msg->setText("");
 	// 载入文件夹
-	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory")," ",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
@@ -1144,4 +1146,3 @@ void MainWindow::on_pushButton_UpdateSQL_clicked()
 {
 	managerCheckDatabaseUpdate->get(QNetworkRequest(QUrl("http://blog.jfz.me/soft/JfzDataLabDatabaseUpdate.txt")));
 }
-

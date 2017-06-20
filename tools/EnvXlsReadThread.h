@@ -7,14 +7,15 @@
 
 class EnvXlsReadThread : public QThread
 {
+	Q_OBJECT
 public:
     EnvXlsReadThread();
-    EnvXlsReadThread(QStringList EnvFileNameList, Ui::MainWindow* ui);
 	EnvXlsReadThread(QStringList EnvFileNameList);
 	void run();
 private:
-    QStringList EnvFileNameList;
-    Ui::MainWindow *ui;
+	QStringList EnvFileNameList;
+signals:
+	sendMsg(QString msg);
 };
 
 #endif // ENVXLSREADTHREAD_H
