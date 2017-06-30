@@ -32,8 +32,6 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     algorithm/correlations.cpp \
     algorithm/datadiagnosis.cpp \
-    tools/JCSV.cpp \
-    tools/JMat.cpp \
     tools/stringtools.cpp \
     tools/tictoc.cpp \
     algorithm/LinearRegression.cpp \
@@ -50,8 +48,6 @@ HEADERS  += mainwindow.h \
     skins/skins.h \
     algorithm/correlations.h \
     algorithm/datadiagnosis.h \
-    tools/JCSV.h \
-    tools/JMat.h \
     tools/stringtools.h \
     tools/tictoc.h \
     algorithm/LinearRegression.h \

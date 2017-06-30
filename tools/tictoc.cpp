@@ -1,8 +1,8 @@
-//
+﻿//
 // Created by Sandeepin on 2017/5/16 0016.
 //
 #include "tictoc.h"
-#include <c++/cstdio>
+#include <cstdio>
 #include <time.h>
 
 clock_t start, finish;

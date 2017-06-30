@@ -26,24 +26,25 @@ void setDebugOutput(const QString &rawTargetFilePath_, const bool &argDateFlag_ 
 			{
 			case QtDebugMsg:
 				{
-					message = message_;
+					message.append("【调试】"); // Debug
+					message.append(message_);
 					break;
 				}
 			case QtWarningMsg:
 				{
-					message.append("Warning: ");
+					message.append("【警告】"); // warning
 					message.append(message_);
 					break;
 				}
 			case QtCriticalMsg:
 				{
-					message.append("Critical: ");
+					message.append("【严重】"); // Critical
 					message.append(message_);
 					break;
 				}
 			case QtFatalMsg:
 				{
-					message.append("Fatal: ");
+					message.append("【致命】"); // Fatal
 					message.append(message_);
 					break;
 				}
@@ -70,7 +71,8 @@ void setDebugOutput(const QString &rawTargetFilePath_, const bool &argDateFlag_ 
 			file.open( QIODevice::WriteOnly | QIODevice::Append );
 
 			QTextStream textStream( &file );
-			textStream << QDateTime::currentDateTime().toString( "yyyy-MM-dd hh:mm:ss" ) << ": " << message << endl;
+			if(message != "【警告】libpng warning: iCCP: known incorrect sRGB profile")
+				textStream << QDateTime::currentDateTime().toString( "yyyy-MM-dd hh:mm:ss" ) << " " << message << endl;
 		}
 	};
 

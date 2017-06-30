@@ -119,18 +119,25 @@ private:
 // 最下方显示信息标签
 signals:
 	sendMsg(QString msg);
+	sendProgressBar(qint64 already, qint64 total);
 private slots:
 	void showMsg(QString msg);
 	void on_pushButton_SelectModel_clicked();
 	void on_pushButton_SelectData_clicked();
 	void on_pushButton_OutFromSQL_clicked();
 	void on_pushButton_UpdateSQL_clicked();
+	// 最下方进度条
+	void updateProgressBar(qint64, qint64);
 	// 历史数据库下载
 	void httpFinished();
 	void httpReadyRead();
 	void updateDataReadProgress(qint64, qint64);
 	void runDatabaseProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
 	void checkDatabaseUpdateFinished(QNetworkReply *);
+	void on_pushButton_DataZero_clicked();
+	void on_pushButton_DataDelta_clicked();
+	void on_pushButton_DataSampling_clicked();
+	void on_pushButton_DataClean_clicked();
 };
 
 #endif // MAINWINDOW_H

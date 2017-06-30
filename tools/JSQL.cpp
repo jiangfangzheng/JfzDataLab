@@ -94,7 +94,7 @@ bool JSQL::queryData(QString tableName, QString startTime, QString endTime,QStri
 }
 
 
-bool JSQL::closeDatabase()
+void JSQL::closeDatabase()
 {
 	db.close();
 }

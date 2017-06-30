@@ -18,6 +18,7 @@ void EnvXlsReadThread::run()
    //qDebug()<<EnvFileNameList;
    QTime time;time.start(); // 计时
    emit sendMsg("<span style='color: rgb(255, 0, 0);'>正在开启线程处理xls文件...</span>");
+   emit sendProgressBar(0, 100);
    // 从xls中读取文件到map
    QMap<QString,float> mapA;
    QMap<QString,float> mapB;
@@ -32,6 +33,7 @@ void EnvXlsReadThread::run()
        if(ID == "B") readEnvXlsFile(FileName, mapB);
        if(ID == "C") readEnvXlsFile(FileName, mapC);
        if(ID == "D") readEnvXlsFile(FileName, mapD);
+	   emit sendProgressBar(i*25, 100);
    }
    //        qDebug()<<"mapA.size："<<mapA.size();
    //        qDebug()<<"mapB.size："<<mapB.size();
@@ -123,4 +125,5 @@ void EnvXlsReadThread::run()
    // 计算花费时间
    QString timecost = QString::number(time.elapsed()/1000.0);
    emit sendMsg("转换完成！读取xls文件总共时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+   emit sendProgressBar(100, 100);
 }

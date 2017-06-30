@@ -1,6 +1,5 @@
 ﻿#include "LinearRegression.h"
 #include <QDebug>
-#include "tools/JMat.h"
 #include "tools/JIO.h"
 
 #include <armadillo>
@@ -280,7 +279,7 @@ QString QLinearRegression(QString FileName,QString &strOutCsv)
 
 	// 【1】用C语言版本算-效果还好
 	// 载入文件
-	QList<QList<double>> matInput = JIO::MatToDList(FileName);
+	QList<QList<double>> matInput = JIO::readMat(FileName);
 	int matRow = matInput.size();
 	int matCol = 0;
 	if(matRow > 0)

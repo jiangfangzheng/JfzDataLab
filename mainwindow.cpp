@@ -3,7 +3,6 @@
 #include <QtNetwork>
 #include "skins/skins.h"
 #include "tools/jfzlib.h"
-#include "tools/JMat.h"
 #include "tools/JIO.h"
 #include "tools/JSQL.h"
 #include "algorithm/datatostand.h"
@@ -43,6 +42,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(myTray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(SystemTrayActivated(QSystemTrayIcon::ActivationReason)));
 	// 最下方消息提醒
 	connect(this, SIGNAL(sendMsg(QString)), this, SLOT(showMsg(QString)));
+	// 最下方进度条
+	ui->progressBar->hide();
+	connect(this, &MainWindow::sendProgressBar, this, &MainWindow::updateProgressBar);
 	// 历史数据库下载
 	managerDatabase = new QNetworkAccessManager(this);
 	ui->progressBar_UpdateDatabase->hide();
@@ -122,13 +124,20 @@ void MainWindow::SystemTrayActivated(QSystemTrayIcon::ActivationReason reason)
 	}
 }
 
+// 最下方更新进度条
+void MainWindow::updateProgressBar(qint64 bytesRead, qint64 totalBytes)
+{
+	ui->progressBar->setMaximum(totalBytes);
+	ui->progressBar->setValue(bytesRead);
+}
+
 /**************************************** 第1页 功能 ****************************************/
 // 电类标准化
 void MainWindow::on_pushButton_DS18B20_clicked()
 {
 	ui->label_msg->setText("文件状态：未载入");
 	// 载入文件夹
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Open DS18B20 Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
@@ -156,7 +165,7 @@ void MainWindow::on_pushButton_CCD_clicked()
 {
 	ui->label_msg->setText("文件状态：未载入");
 	// 载入文件夹
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Open CCD Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
@@ -184,7 +193,7 @@ void MainWindow::on_pushButton_FBGT_clicked()
 {
 	ui->label_msg->setText("文件状态：未载入");
 	// 载入文件夹
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Open FBGT Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
@@ -212,7 +221,7 @@ void MainWindow::on_pushButton_LoadFBGT_ALL_clicked()
 {
 	ui->label_msg->setText("文件状态：未载入");
 	// 载入文件夹
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Open FBGT Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
@@ -240,7 +249,7 @@ void MainWindow::on_pushButton_FBGS_clicked()
 {
 	ui->label_msg->setText("文件状态：未载入");
 	// 载入文件夹 ，填"/"跳到根目录， 填“”默认程序位置
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Open FBGS Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
@@ -267,8 +276,9 @@ void MainWindow::on_pushButton_FBGS_clicked()
 void MainWindow::on_pushButton_ENV_clicked()
 {
 	ui->label_msg->setText("...");
+	ui->progressBar->show();
 //	ui->pushButton_ENV->setEnabled(false);
-	EnvFileNameList = QFileDialog::getOpenFileNames(this, tr("打开环境温度数据"), " ", tr("textfile(*.xls);"));
+	EnvFileNameList = QFileDialog::getOpenFileNames(this, tr("打开环境温度数据"), workspacePath, tr("textfile(*.xls);"));
 	if(EnvFileNameList.size() != 4)
 	{
 		emit sendMsg("文件状态：未载入");
@@ -280,6 +290,7 @@ void MainWindow::on_pushButton_ENV_clicked()
 		// 开启线程处理xls文件，防止界面卡死
 		EnvXlsReadThread *readxls = new EnvXlsReadThread(EnvFileNameList);
 		connect(readxls, &EnvXlsReadThread::sendMsg, this, &MainWindow::showMsg);
+		connect(readxls, &EnvXlsReadThread::sendProgressBar, this, &MainWindow::updateProgressBar);
 		readxls->start();
 	}
 }
@@ -287,7 +298,7 @@ void MainWindow::on_pushButton_ENV_clicked()
 // FBG波长转温度
 void MainWindow::on_pushButton_LoadFBGT_clicked()
 {
-	standFBGFileName = QFileDialog::getOpenFileName(this, tr("打开标准FBG波长"), " ", tr("textfile(*.csv*);;Allfile(*.*)"));
+	standFBGFileName = QFileDialog::getOpenFileName(this, tr("打开标准FBG波长"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!standFBGFileName.isEmpty())
 	{
 		ui->label_msg->setText("正在转换...");
@@ -314,7 +325,7 @@ void MainWindow::on_pushButton_LoadFBGT_clicked()
 // 相关性分析-文件1
 void MainWindow::on_pushButton_File1_clicked()
 {
-	correlationFileName1 = QFileDialog::getOpenFileName(this, tr("打开文件1"), " ", tr("textfile(*.csv*);;Allfile(*.*)"));
+	correlationFileName1 = QFileDialog::getOpenFileName(this, tr("打开文件1"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!correlationFileName1.isEmpty() && !correlationFileName2.isEmpty())
 	{
 		ui->label_msg->setText("选了文件1");
@@ -329,7 +340,7 @@ void MainWindow::on_pushButton_File1_clicked()
 // 相关性分析-文件2
 void MainWindow::on_pushButton_File2_clicked()
 {
-	correlationFileName2 = QFileDialog::getOpenFileName(this, tr("打开文件1"), " ", tr("textfile(*.csv*);;Allfile(*.*)"));
+	correlationFileName2 = QFileDialog::getOpenFileName(this, tr("打开文件1"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	qDebug()<<correlationFileName2;
 	if(!correlationFileName1.isEmpty() && !correlationFileName2.isEmpty())
 	{
@@ -368,7 +379,7 @@ void MainWindow::on_pushButton_covresult_clicked()
 void MainWindow::on_pushButton_LinearRegression_clicked()
 {
 	ui->label_msg->setText("");
-	QString inputFile = QFileDialog::getOpenFileName(this, tr("打开数据源"), " ", tr("textfile(*.csv*);;Allfile(*.*)"));
+	QString inputFile = QFileDialog::getOpenFileName(this, tr("打开多元线性回归数据源"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!inputFile.isEmpty())
 	{
 		ui->label_msg->setText("正在计算...");
@@ -404,10 +415,10 @@ void MainWindow::on_pushButton_LinearRegression_clicked()
 void MainWindow::on_pushButton_SelectModel_clicked()
 {
 	ModelMatQList.clear();
-	QString ModelFile = QFileDialog::getOpenFileName(this, tr("打开模型"), " ", tr("textfile(*.csv*);;Allfile(*.*)"));
+	QString ModelFile = QFileDialog::getOpenFileName(this, tr("打开模型"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!ModelFile.isEmpty())
 	{
-		QList<QList<double>> ModelMat = JIO::MatToDList(ModelFile);
+		QList<QList<double>> ModelMat = JIO::readMat(ModelFile);
 		for(auto &e:ModelMat[0])
 		{
 			ModelMatQList.append(e);
@@ -429,10 +440,10 @@ void MainWindow::on_pushButton_SelectModel_clicked()
 // 选择数据（模型数据来预测）
 void MainWindow::on_pushButton_SelectData_clicked()
 {
-	QString DataFile = QFileDialog::getOpenFileName(this, tr("打开模型"), " ", tr("textfile(*.csv*);;Allfile(*.*)"));
+	QString DataFile = QFileDialog::getOpenFileName(this, tr("选择来预测的数据"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!DataFile.isEmpty())
 	{
-		QList<QList<double>> DataFileMat = JIO::MatToDList(DataFile);
+		QList<QList<double>> DataFileMat = JIO::readMat(DataFile);
 		if(DataFileMat[0].size() != (ModelMatQList.size()-1) )
 		{
 			emit sendMsg("模型、预测数据不匹配！");
@@ -462,25 +473,15 @@ void MainWindow::on_pushButton_SelectData_clicked()
 	//		qDebug()<<"predictedValueList1 "<<predictedValueList[1];
 	//		qDebug()<<"predictedValueList2 "<<predictedValueList[2];
 
-			vector<vector<double>> mat;
-			for (int i = 0; i < DataFileMat.size(); ++i)
+			for(int i=0; i<DataFileMat.size(); ++i)
 			{
-				vector<double> temp(DataFileMat[0].size()+1, 0);
-				mat.push_back(temp);
-				for (int j = 0; j < DataFileMat[0].size()+1; ++j)
-				{
-					if(j == DataFileMat[0].size())
-						mat[i][j] = predictedValueList[i];
-					else
-						mat[i][j] = DataFileMat[i][j];
-				}
+				DataFileMat[i].append(predictedValueList[i]);
 			}
-
-			JMat predictedMat(mat);
+			// 提取文件名
 			QString outFileName = DataFile.right(DataFile.size() - DataFile.lastIndexOf('/')-1);
 			outFileName = outFileName.left(outFileName.lastIndexOf('.'));
 			outFileName += "-predictedResult.csv";
-			predictedMat.save(outFileName.toStdString());
+			JIO::save(outFileName, DataFileMat);
 			// 【4】计时结束
 			QString timecost = QString::number(time.elapsed()/1000.0);
 			emit sendMsg("预测完成！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
@@ -497,7 +498,7 @@ void MainWindow::on_pushButton_clicked()
 {
 	ui->textEdit->clear();
 	// 载入文件
-	QString InputFileName_str = QFileDialog::getOpenFileName(this,"open file"," ","textfile(*.csv);;All file(*.*)");
+	QString InputFileName_str = QFileDialog::getOpenFileName(this,"载入数据", workspacePath,"textfile(*.csv);;All file(*.*)");
 	qDebug()<<InputFileName_str;  // 文件名
 
 	if(!InputFileName_str.isEmpty())
@@ -584,11 +585,11 @@ void MainWindow::on_pushButton_LoadPlotData_clicked()
 	ui->comboBox_LoadPlotList->clear();
 	ui->customPlot->clearGraphs();
 	ui->customPlot->replot();
-	QString inputFile = QFileDialog::getOpenFileName(this, tr("打开数据源"), " ", tr("textfile(*.csv*);;Allfile(*.*)"));
+	QString inputFile = QFileDialog::getOpenFileName(this, tr("打开绘图的数据源"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!inputFile.isEmpty())
 	{
 		// 【1】载入数据
-		plotDataStrList = JIO::CsvToStrList(inputFile);
+		plotDataStrList = JIO::readCsv(inputFile);
 //		JIO::show(strlist);
 		// 【2】获取数据项名字
 		QList<QString> strListItem;
@@ -649,7 +650,7 @@ void MainWindow::on_pushButton_CCDinSQL_clicked()
 
 	ui->label_msg->setText("");
 	// 载入文件夹
-	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open CCD Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
@@ -693,7 +694,7 @@ void MainWindow::on_pushButton_FBGinSQL_clicked()
 
 	ui->label_msg->setText("");
 	// 载入文件夹
-	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),"/data/fbg/",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open FBG Directory"),"/data/fbg/",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
@@ -739,7 +740,7 @@ void MainWindow::on_pushButton_DS18BinSQL_clicked()
 
 	ui->label_msg->setText("");
 	// 载入文件夹
-	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open DS18B20 Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
@@ -785,7 +786,7 @@ void MainWindow::on_pushButton_ENVinSQL_clicked()
 
 	ui->label_msg->setText("");
 	// 载入文件夹
-	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open ENV Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
@@ -829,7 +830,7 @@ void MainWindow::on_pushButton_CNCinSQL_clicked()
 
 	ui->label_msg->setText("");
 	// 载入文件夹
-	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open CNC Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
@@ -1112,7 +1113,7 @@ void MainWindow::checkDatabaseUpdateFinished(QNetworkReply *reply)
 	QString DatabaseUpdateTime = reply->readAll();
 	reply->deleteLater();
 	qDebug()<<"DatabaseUpdateTime "<<DatabaseUpdateTime;
-	QStringList DatabaseTime = JIO::FileToStrList("Database");
+	QStringList DatabaseTime = JIO::readFile("Database");
 	bool bupdate = DatabaseUpdateTime > DatabaseTime[0];
 	qDebug()<<"bupdate "<<bupdate;
 	if(bupdate)
@@ -1145,4 +1146,151 @@ void MainWindow::checkDatabaseUpdateFinished(QNetworkReply *reply)
 void MainWindow::on_pushButton_UpdateSQL_clicked()
 {
 	managerCheckDatabaseUpdate->get(QNetworkRequest(QUrl("http://blog.jfz.me/soft/JfzDataLabDatabaseUpdate.txt")));
+}
+
+// 数据小处理-初始值为0
+void MainWindow::on_pushButton_DataZero_clicked()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, tr("初始值为0算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!fileName.isEmpty())
+	{
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】初始值为0算法
+		mat inputMat = JIO::readAMat(fileName);
+		for(unsigned int j=0; j<inputMat.n_cols; ++j) // 列
+		{
+			double oneLineValue = inputMat(0,j);
+			for(unsigned int i=0; i<inputMat.n_rows; ++i) // 遍历行，减第一行的值
+			{
+				inputMat(i,j) = inputMat(i,j) - oneLineValue;
+			}
+		}
+		// 【2】保存文件
+		QString saveFileName = "Zero_" + fileName.right(fileName.size() - fileName.lastIndexOf('/')-1);
+		bool b = JIO::save(saveFileName, inputMat);
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if( b )
+			ui->label_msg->setText("初始值为0 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	}
+}
+
+// 数据小处理-增量化（后一个数-前一个数）
+void MainWindow::on_pushButton_DataDelta_clicked()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, tr("增量化算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!fileName.isEmpty())
+	{
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】增量化算法
+		mat inputMat = JIO::readAMat(fileName);
+		for(unsigned int j=0; j<inputMat.n_cols; ++j) // 列 0列到n列
+		{
+			for(int i=inputMat.n_rows-1; i>0; --i) // 行n行到1行-倒序
+			{
+				inputMat(i,j) = inputMat(i,j) - inputMat(i-1,j);
+			}
+		}
+		// 【2】保存文件
+		QString saveFileName = "Delta_" + fileName.right(fileName.size() - fileName.lastIndexOf('/')-1);
+		bool b = JIO::save(saveFileName, inputMat);
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if( b )
+			ui->label_msg->setText("增量化 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	}
+}
+
+// 抽样取点函数
+QList<int> sampling(int nowNum, int needNum)
+ {
+	QList<int> outQList;
+	// 压缩
+	if(nowNum >= needNum)
+	{
+		double bilv = needNum*1.0 / nowNum;
+		double data[nowNum];
+		for (int i = 0; i<nowNum; ++i)
+		{
+			data[i] = floor(i*bilv);
+		}
+
+		int value = -1;
+		for (int i = 0; i<nowNum; ++i)
+		{
+			if (data[i] != value)
+			{
+				outQList.append(i);
+				value = data[i];
+			}
+		}
+	}
+	// 拉伸
+	if(nowNum < needNum)
+	{
+		double bilv = nowNum*1.0 / needNum;
+		double data[needNum];
+		for (int i = 0; i<needNum; ++i)
+		{
+			data[i] = floor(i*bilv);
+			outQList.append(data[i]);
+		}
+	}
+	return outQList;
+ }
+
+// 数据小处理-压缩拉伸
+void MainWindow::on_pushButton_DataSampling_clicked()
+{
+//	qDebug()<<sampling(30, 13);
+//	qDebug()<<sampling(13, 30);
+	QString fileName = QFileDialog::getOpenFileName(this, tr("压缩拉伸算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!fileName.isEmpty())
+	{
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】压缩拉伸算法
+		mat inputMat = JIO::readAMat(fileName);
+		int nowNum = inputMat.n_rows;
+		int needNum = ui->lineEdit_DataSampling->text().toInt();
+		QList<int> needLine = sampling(nowNum, needNum);
+		mat out(needLine.size(),inputMat.n_cols);
+		out.fill(0);
+		for(unsigned int j=0; j<inputMat.n_cols; ++j) // 列 0列到n列
+		{
+			for(int i=0; i<needLine.size(); ++i) // 行
+			{
+				out(i,j) = inputMat(needLine[i],j);
+			}
+		}
+		// 【2】保存文件
+		QString saveFileName;
+		if(nowNum >= needNum)
+			saveFileName = "Minus_" + fileName.right(fileName.size() - fileName.lastIndexOf('/')-1);
+		else
+			saveFileName = "Add_" + fileName.right(fileName.size() - fileName.lastIndexOf('/')-1);
+
+		bool b = JIO::save(saveFileName, out);
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if( b )
+			if(nowNum >= needNum)
+				ui->label_msg->setText("压缩 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+			else
+				ui->label_msg->setText("拉伸 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	}
+}
+
+// 数据小处理-数据清洗()
+void MainWindow::on_pushButton_DataClean_clicked()
+{
+
 }

@@ -45,7 +45,7 @@ QStringList DS18B20Dir2FileName(QString DirName)
 
 bool CCDtoMYSQL(QString fileName,JSQL &jsql)
 {
-	QList<QList<QString>> CCDStrList = JIO::CsvToStrList(fileName);
+	QList<QList<QString>> CCDStrList = JIO::readCsv(fileName);
 	// 格式化时间 由2017-6-7-12:03:14变为2017-6-7 12:03:14
 	QStringList Time;
 	for(int i=1;i<CCDStrList.size();++i)
@@ -70,7 +70,7 @@ bool FBGtoMYSQL(QStringList FBGChannelNames,JSQL &jsql)
 	mat All_Mat = Stand_FBG(FBGChannelNames);
 
 	// 格式化时间 由2017-6-7-12:03:14变为2017-6-7 12:03:14
-	QList<QList<QString>> FBGChanneMat = JIO::CsvToStrList(FBGChannelNames[0]);
+	QList<QList<QString>> FBGChanneMat = JIO::readCsv(FBGChannelNames[0]);
 	QStringList Time;
 	for(int i=1;i<FBGChanneMat.size();++i)
 	{
@@ -117,7 +117,7 @@ bool DS18B20toMYSQL(QStringList DS18B20ChannelNames,JSQL &jsql)
 	mat All_Mat = Stand_DS18B20(DS18B20ChannelNames);
 
 	// 格式化时间 由2017-6-7-12:03:14变为2017-6-7 12:03:14
-	QList<QList<QString>> DS18B20ChanneMat = JIO::CsvToStrList(DS18B20ChannelNames[0]);
+	QList<QList<QString>> DS18B20ChanneMat = JIO::readCsv(DS18B20ChannelNames[0]);
 	QStringList Time;
 	for(int i=1;i<DS18B20ChanneMat.size();++i)
 	{
@@ -160,7 +160,7 @@ bool DS18B20toMYSQL(QStringList DS18B20ChannelNames,JSQL &jsql)
 
 bool ENVtoMYSQL(QString fileName,JSQL &jsql)
 {
-	QList<QList<QString>> ENVStrList = JIO::CsvToStrList(fileName);
+	QList<QList<QString>> ENVStrList = JIO::readCsv(fileName);
 	// 格式化时间 由2017-6-7-12:03:14变为2017-6-7 12:03:14
 	QStringList Time;
 	for(int i=1;i<ENVStrList.size();++i)
@@ -181,7 +181,7 @@ bool ENVtoMYSQL(QString fileName,JSQL &jsql)
 
 bool CNCtoMYSQL(QString fileName,JSQL &jsql)
 {
-	QList<QList<QString>> CNCStrList = JIO::CsvToStrList(fileName);
+	QList<QList<QString>> CNCStrList = JIO::readCsv(fileName);
 	// 格式化时间 由2017-6-7-12:03:14变为2017-6-7 12:03:14
 	QStringList Time;
 	for(int i=1;i<CNCStrList.size();++i)
