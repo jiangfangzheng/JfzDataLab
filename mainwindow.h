@@ -138,6 +138,7 @@ private slots:
 	void on_pushButton_DataDelta_clicked();
 	void on_pushButton_DataSampling_clicked();
 	void on_pushButton_DataClean_clicked();
+	void on_pushButton_DataTendency_clicked();
 };
 
 #endif // MAINWINDOW_H

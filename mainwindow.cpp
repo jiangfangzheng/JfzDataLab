@@ -1289,8 +1289,139 @@ void MainWindow::on_pushButton_DataSampling_clicked()
 	}
 }
 
-// 数据小处理-数据清洗()
+// 数据小处理-数据清洗(设定阈值内数据，前一个值覆盖后一个值)
 void MainWindow::on_pushButton_DataClean_clicked()
 {
+	QString fileName = QFileDialog::getOpenFileName(this, tr("数据清洗算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!fileName.isEmpty())
+	{
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】数据清洗算法
+		double maxNum = ui->lineEdit_DataCleanMax->text().toDouble();
+		double minNum = ui->lineEdit_DataCleanMin->text().toDouble();
+		mat inputMat = JIO::readAMat(fileName);
+		for(unsigned int j=0; j<inputMat.n_cols; ++j) // 列 0列到n列
+		{
+			for(int i=1; i<inputMat.n_rows; ++i) // 行
+			{
+				double value = inputMat(0,j);
+				inputMat(0,j) = (maxNum - value) >  (value - minNum) ? minNum:maxNum;
+				// 超出范围执行
+				if(inputMat(i,j) > maxNum || inputMat(i,j) < minNum)
+				{
+					// 确保上一个不超出范围
+					if(inputMat(i-1,j) > minNum && inputMat(i-1,j) < maxNum )
+						inputMat(i,j) = inputMat(i-1,j);
+					else
+					{
+						double value = inputMat(i,j);
+						inputMat(i,j) = (maxNum - value) >  (value - minNum) ? minNum:maxNum;
+					}
+				}
+			}
+		}
+		// 【2】保存文件
+		QString saveFileName = "Clean_" + fileName.right(fileName.size() - fileName.lastIndexOf('/')-1);
+		bool b = JIO::save(saveFileName, inputMat);
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if( b )
+			ui->label_msg->setText("数据清洗 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	}
+}
 
+// 功能: 按窗口大小寻找某一序列的 最大值\最小值\平均值 集合
+// 参数: 输入向量, 窗口大小, 输出最大值向量, 输出最小值向量
+bool findTrendByWindow(QList<double> &input, int window, QList<double> &outMax, QList<double> &outMin, QList<double> &outAvg)
+{
+	int   j = 1;
+	double max = -100000000;
+	double min = 100000000;
+	double sum = 0;
+	for (int i = 0; i<input.size(); i = i + window)
+	{
+		int cnt = 0;
+		for (int j = 0; j< window; j++)
+		{
+			if ((i + j) >= input.size())
+			{
+				cnt = j;
+				break;
+			}
+			if (input[i + j] >max) max = input[i + j];
+			if (input[i + j] <min) min = input[i + j];
+			sum += input[i + j];
+			cnt = j + 1;
+		}
+		outMax.append(max);
+		outMin.append(min);
+		outAvg.append(sum / cnt);
+		//cout<<max<<" ";
+		//cout<<min<<" ";
+		max = -100000000;
+		min = 100000000;
+		sum = 0;
+	}
+	return true;
+}
+
+// 数据小处理-趋势预测
+void MainWindow::on_pushButton_DataTendency_clicked()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, tr("趋势预测算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!fileName.isEmpty())
+	{
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】趋势预测算法
+		int window = ui->lineEdit_DataWindow->text().toInt();
+		mat inputMat = JIO::readAMat(fileName);
+		mat matMaxOut;
+		mat matMinOut;
+		mat matAvgOut;
+		for(unsigned int j=0; j<inputMat.n_cols; ++j) // 列 0列到n列
+		{
+			QList<double> input;
+			QList<double> outMax;
+			QList<double> outMin;
+			QList<double> outAvg;
+			// 得到QList输入
+			for(unsigned int i=1; i<inputMat.n_rows; ++i) // 行
+			{
+				input.append(inputMat(i,j));
+			}
+			// 加窗滤波
+			findTrendByWindow(input, window, outMax, outMin, outAvg);
+			// 写入mat
+			mat matMax(outMax.size(),1);
+			mat matMin(outMin.size(),1);
+			mat matAvg(outAvg.size(),1);
+			for(int i=0; i<matMax.n_rows;++i)
+			{
+				matMax(i,0) = outMax[i];
+				matMin(i,0) = outMin[i];
+				matAvg(i,0) = outAvg[i];
+			}
+			// 合入大mat
+			matMaxOut = join_rows(matMaxOut, matMax);
+			matMinOut = join_rows(matMinOut, matMin);
+			matAvgOut = join_rows(matAvgOut, matAvg);
+		}
+		// 【2】保存文件
+		QString saveFileName1 = "TrendMax_" + fileName.right(fileName.size() - fileName.lastIndexOf('/')-1);
+		QString saveFileName2 = "TrendMin_" + fileName.right(fileName.size() - fileName.lastIndexOf('/')-1);
+		QString saveFileName3 = "TrendAvg_" + fileName.right(fileName.size() - fileName.lastIndexOf('/')-1);
+		bool b = JIO::save(saveFileName1, matMaxOut);
+		b = JIO::save(saveFileName2, matMinOut);
+		b = JIO::save(saveFileName3, matAvgOut);
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if( b )
+			ui->label_msg->setText("趋势预测 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	}
 }

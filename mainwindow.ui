@@ -339,7 +339,7 @@
       <widget class="QPushButton" name="pushButton_DataTendency">
        <property name="geometry">
         <rect>
-         <x>360</x>
+         <x>120</x>
          <y>70</y>
          <width>101</width>
          <height>28</height>
@@ -371,22 +371,28 @@
          <height>21</height>
         </rect>
        </property>
+       <property name="text">
+        <string>300</string>
+       </property>
       </widget>
       <widget class="QLineEdit" name="lineEdit_DataWindow">
        <property name="geometry">
         <rect>
-         <x>510</x>
+         <x>270</x>
          <y>70</y>
          <width>71</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="text">
+        <string>3</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_11">
        <property name="geometry">
         <rect>
          <x>230</x>
-         <y>40</y>
+         <y>35</y>
          <width>41</width>
          <height>16</height>
         </rect>
@@ -398,8 +404,8 @@
       <widget class="QLabel" name="label_12">
        <property name="geometry">
         <rect>
-         <x>470</x>
-         <y>80</y>
+         <x>230</x>
+         <y>75</y>
          <width>41</width>
          <height>16</height>
         </rect>
@@ -408,51 +414,45 @@
         <string>窗</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEdit_DataCleanMax">
-       <property name="geometry">
-        <rect>
-         <x>510</x>
-         <y>40</y>
-         <width>51</width>
-         <height>21</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="lineEdit_DataCleanMin">
-       <property name="geometry">
-        <rect>
-         <x>600</x>
-         <y>40</y>
-         <width>51</width>
-         <height>21</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_13">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>470</x>
-         <y>40</y>
-         <width>41</width>
-         <height>16</height>
+         <y>20</y>
+         <width>71</width>
+         <height>48</height>
         </rect>
        </property>
-       <property name="text">
-        <string>Max</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_14">
-       <property name="geometry">
-        <rect>
-         <x>570</x>
-         <y>40</y>
-         <width>41</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Min</string>
-       </property>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_13">
+          <property name="text">
+           <string>Max</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="lineEdit_DataCleanMax">
+          <property name="text">
+           <string>2.5</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_14">
+          <property name="text">
+           <string>Min</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="lineEdit_DataCleanMin">
+          <property name="text">
+           <string>-2.1</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </widget>
