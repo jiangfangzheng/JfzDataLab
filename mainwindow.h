@@ -147,6 +147,8 @@ private slots:
 	void on_pushButton_SplitByDate_clicked();
 	void on_pushButton_VirtualMap_S_clicked();
 	void on_pushButton_VirtualMap_DS18_clicked();
+	void on_pushButton_VirtualFBGtoTEMP_clicked();
+	void on_pushButton_VirtualFBGtoSTRESS_clicked();
 };
 
 #endif // MAINWINDOW_H

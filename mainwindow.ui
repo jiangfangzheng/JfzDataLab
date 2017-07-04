@@ -474,7 +474,7 @@
         <x>190</x>
         <y>130</y>
         <width>120</width>
-        <height>151</height>
+        <height>241</height>
        </rect>
       </property>
       <property name="title">
@@ -517,6 +517,32 @@
        </property>
        <property name="text">
         <string>电类温度</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_VirtualFBGtoTEMP">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>150</y>
+         <width>101</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>映射转温度</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_VirtualFBGtoSTRESS">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>190</y>
+         <width>101</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>映射转应力</string>
        </property>
       </widget>
      </widget>
