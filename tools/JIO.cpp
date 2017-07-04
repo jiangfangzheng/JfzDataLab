@@ -210,6 +210,41 @@ bool JIO::save(QString fileName, QList<QList<double>> matData)
 	return true;
 }
 
+bool JIO::save(QString fileName, QString itemName, QStringList timeName, mat matData)
+{
+	// TODO
+	// 写文件
+	QFile f(fileName);
+	if (!f.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		qDebug() << "[JIO::save(QString fileName, QStringList textList)] Open failed.";
+		return false;
+	}
+	QTextStream txtOutput(&f);
+	// 写数据抬头
+	txtOutput << itemName << "\n";
+	// 写时间和mat
+	for (unsigned int i=0; i < matData.n_rows; ++i)
+	{
+		// 写时间
+		txtOutput << timeName.at(i)<<",";
+		// 写mat
+		QString tmp;
+		for (unsigned int j = 0; j < matData.n_cols; ++j)
+		{
+			QString value;
+			if (j + 1 != matData.n_cols)
+				value.sprintf("%.3lf,", matData(i, j));
+			else
+				value.sprintf("%.3lf", matData(i, j));
+			tmp += value;
+		}
+		txtOutput << tmp << "\n";
+	}
+	f.close();
+	return true;
+}
+
 void JIO::show(QStringList input)
 {
 	for (auto &e : input)

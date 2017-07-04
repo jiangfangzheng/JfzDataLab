@@ -15,8 +15,8 @@ public:
 private:
 	QStringList EnvFileNameList;
 signals:
-	sendMsg(QString msg);
-	sendProgressBar(qint64 already, qint64 total);
+	void sendMsg(QString msg);
+	void sendProgressBar(qint64 already, qint64 total);
 };
 
 #endif // ENVXLSREADTHREAD_H

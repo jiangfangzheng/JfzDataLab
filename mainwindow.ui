@@ -419,8 +419,8 @@
         <rect>
          <x>470</x>
          <y>20</y>
-         <width>71</width>
-         <height>48</height>
+         <width>79</width>
+         <height>51</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
@@ -453,6 +453,71 @@
          </widget>
         </item>
        </layout>
+      </widget>
+      <widget class="QPushButton" name="pushButton_SplitByDate">
+       <property name="geometry">
+        <rect>
+         <x>360</x>
+         <y>70</y>
+         <width>101</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>按天拆分</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_17">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>130</y>
+        <width>120</width>
+        <height>151</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>虚拟映射</string>
+      </property>
+      <widget class="QPushButton" name="pushButton_VirtualMap_T">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>101</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>FBG温度</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_VirtualMap_S">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>101</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>FBG应力</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_VirtualMap_DS18">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>110</y>
+         <width>101</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>电类温度</string>
+       </property>
       </widget>
      </widget>
     </widget>

@@ -286,7 +286,8 @@ QString QLinearRegression(QString FileName,QString &strOutCsv)
 		matCol = matInput[0].size();
 	// 多元线性回归
 	double *data = new double[matRow * matCol];
-	double Answer[matCol];
+	double *Answer = new double[matCol];
+
 	for(int i=0;i<matRow;++i)
 	{
 		for(int j=0;j<matCol;++j)
@@ -312,6 +313,8 @@ QString QLinearRegression(QString FileName,QString &strOutCsv)
 		}
 		strOutCsv = strOutCsv.left(strOutCsv.lastIndexOf(','));
 	}
+
+	delete Answer;
 
 
 	// 【2】用mat来算的例子(与matlab计算结果相差大，不好)

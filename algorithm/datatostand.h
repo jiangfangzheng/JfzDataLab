@@ -39,4 +39,16 @@ mat FBGtoTEMP(QString &standFBGFileName, QStringList &XLabelName);
 // 时间工具，2017-06-17 23:17:13转20170617231713
 QString TimeToTimeNum(QString Time);
 
+// 虚拟映射
+extern QString VirtualMap_FBGT_Now;
+extern QString VirtualMap_FBGT_Ori;
+extern QString VirtualMap_FBGS_Now;
+extern QString VirtualMap_FBGS_Ori;
+extern QString VirtualMap_DS18_Now;
+extern const int VirtualMap_FBGT_Index[219];
+extern const int VirtualMap_FBGS_Index[90];
+
+// 由路径获取文件名
+QString getFileName(QString filePath);
+
 #endif // DATATOSTAND_H

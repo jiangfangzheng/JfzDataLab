@@ -15,9 +15,9 @@ int main(int argc, char *argv[])
 #endif
 
 	// Log输出
-#ifndef QT_DEBUG
-	setDebugOutput( "log/all.log" );
-#endif
+//#ifndef QT_DEBUG
+//	setDebugOutput( "log/all.log" );
+//#endif
 
 	QApplication a(argc, argv);
 

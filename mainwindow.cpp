@@ -1215,7 +1215,7 @@ QList<int> sampling(int nowNum, int needNum)
 	if(nowNum >= needNum)
 	{
 		double bilv = needNum*1.0 / nowNum;
-		double data[nowNum];
+		double *data = new double[nowNum];
 		for (int i = 0; i<nowNum; ++i)
 		{
 			data[i] = floor(i*bilv);
@@ -1230,18 +1230,21 @@ QList<int> sampling(int nowNum, int needNum)
 				value = data[i];
 			}
 		}
+		delete data;
 	}
 	// 拉伸
 	if(nowNum < needNum)
 	{
 		double bilv = nowNum*1.0 / needNum;
-		double data[needNum];
+		double *data = new double[needNum];
 		for (int i = 0; i<needNum; ++i)
 		{
 			data[i] = floor(i*bilv);
 			outQList.append(data[i]);
 		}
+		delete data;
 	}
+
 	return outQList;
  }
 
@@ -1303,7 +1306,7 @@ void MainWindow::on_pushButton_DataClean_clicked()
 		mat inputMat = JIO::readAMat(fileName);
 		for(unsigned int j=0; j<inputMat.n_cols; ++j) // 列 0列到n列
 		{
-			for(int i=1; i<inputMat.n_rows; ++i) // 行
+			for(unsigned int i=1; i<inputMat.n_rows; ++i) // 行
 			{
 				double value = inputMat(0,j);
 				inputMat(0,j) = (maxNum - value) >  (value - minNum) ? minNum:maxNum;
@@ -1337,7 +1340,6 @@ void MainWindow::on_pushButton_DataClean_clicked()
 // 参数: 输入向量, 窗口大小, 输出最大值向量, 输出最小值向量
 bool findTrendByWindow(QList<double> &input, int window, QList<double> &outMax, QList<double> &outMin, QList<double> &outAvg)
 {
-	int   j = 1;
 	double max = -100000000;
 	double min = 100000000;
 	double sum = 0;
@@ -1399,7 +1401,7 @@ void MainWindow::on_pushButton_DataTendency_clicked()
 			mat matMax(outMax.size(),1);
 			mat matMin(outMin.size(),1);
 			mat matAvg(outAvg.size(),1);
-			for(int i=0; i<matMax.n_rows;++i)
+			for(unsigned int i=0; i<matMax.n_rows;++i)
 			{
 				matMax(i,0) = outMax[i];
 				matMin(i,0) = outMin[i];
@@ -1421,6 +1423,165 @@ void MainWindow::on_pushButton_DataTendency_clicked()
 		QString timecost = QString::number(time.elapsed()/1000.0);
 		if( b )
 			ui->label_msg->setText("趋势预测 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	}
+}
+
+// 虚拟映射-数据通道映射为虚拟标准通道-FBG温度
+void MainWindow::on_pushButton_VirtualMap_T_clicked()
+{
+	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("虚拟映射-FBG温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	// 【0】计时开始
+	QTime time;time.start();
+	bool b = false;
+
+	for(QString fileName: fileNameList)
+	{
+		if(!fileName.isEmpty())
+		{
+			// 【1】虚拟映射算法
+			QStringList itemName;
+			QStringList timeName;
+			mat inputMat = JIO::readCsv(fileName, itemName, timeName);
+			mat outputMat;
+			for(int i=0; i<219; ++i) // FBG温度219个
+			{
+				outputMat = join_rows(outputMat, inputMat.col( VirtualMap_FBGT_Index[i] ));
+			}
+			// 【2】保存文件
+			QString saveFileName = getFileName(fileName);
+			saveFileName = saveFileName.left(10)+"_FBGT_Wave.csv";
+			b = JIO::save(saveFileName, VirtualMap_FBGT_Now, timeName, outputMat);
+
+		}
+	}
+
+	// 【4】计时结束
+	QString timecost = QString::number(time.elapsed()/1000.0);
+	if( b )
+		ui->label_msg->setText("虚拟映射 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+	else
+		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+}
+
+
+// 虚拟映射-数据通道映射为虚拟标准通道-FBG应力
+void MainWindow::on_pushButton_VirtualMap_S_clicked()
+{
+	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("虚拟映射-FBG应力"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	// 【0】计时开始
+	QTime time;time.start();
+	bool b = false;
+
+	for(QString fileName: fileNameList)
+	{
+		if(!fileName.isEmpty())
+		{
+			// 【1】虚拟映射算法
+			QStringList itemName;
+			QStringList timeName;
+			mat inputMat = JIO::readCsv(fileName, itemName, timeName);
+			mat outputMat;
+			for(int i=0; i<90; ++i) // FBG应力90个
+			{
+				outputMat = join_rows(outputMat, inputMat.col( VirtualMap_FBGS_Index[i] ));
+			}
+			// 【2】保存文件
+			QString saveFileName = getFileName(fileName);
+			saveFileName = saveFileName.left(10)+"_FBGS_Wave.csv";
+			b = JIO::save(saveFileName, VirtualMap_FBGS_Now, timeName, outputMat);
+		}
+	}
+
+	// 【4】计时结束
+	QString timecost = QString::number(time.elapsed()/1000.0);
+	if( b )
+		ui->label_msg->setText("虚拟映射 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+	else
+		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+}
+
+// 虚拟映射-数据通道映射为虚拟标准通道-电类温度
+void MainWindow::on_pushButton_VirtualMap_DS18_clicked()
+{
+	// 电类温度不需要交换位置，只需要改抬头
+	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("虚拟映射-电类温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	// 【0】计时开始
+	QTime time;time.start();
+	bool b = false;
+
+	for(QString fileName: fileNameList)
+	{
+		if(!fileName.isEmpty())
+		{
+			// 【1】虚拟映射算法
+			QStringList itemName;
+			QStringList timeName;
+			mat inputMat = JIO::readCsv(fileName, itemName, timeName);
+			// 【2】保存文件
+			QString saveFileName = getFileName(fileName);
+			saveFileName = saveFileName.left(10)+"_DS18_Temp.csv";
+			b = JIO::save(saveFileName, VirtualMap_DS18_Now, timeName, inputMat);
+		}
+
+	}
+
+	// 【4】计时结束
+	QString timecost = QString::number(time.elapsed()/1000.0);
+	if( b )
+		ui->label_msg->setText("虚拟映射 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+	else
+		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+}
+
+// 数据小处理-按天拆分
+void MainWindow::on_pushButton_SplitByDate_clicked()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, tr("虚拟映射-电类温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!fileName.isEmpty())
+	{
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】虚拟映射算法
+		QStringList inputList = JIO::readFile(fileName);
+		QString itemName = inputList[0];
+		qDebug()<< "itemName" << itemName;
+		// 得到日期集合
+		QSet<QString> dateSet;
+		for(auto e: inputList)
+		{
+			if(e.left(4) != "Time") // 排除第一行
+				dateSet.insert(e.left(10));
+		}
+
+		// 【2】保存文件-保存"日期个数"个文件
+		bool b = true;
+		for(QString dateName: dateSet)
+		{
+			qDebug()<< dateName;
+			QString saveName = dateName+ "_" + getFileName(fileName);
+			QFile f(saveName);
+			qDebug()<< saveName;
+			if (!f.open(QIODevice::WriteOnly | QIODevice::Text))
+			{
+				qDebug() << "[on_pushButton_SplitByDate_clicked] Open failed.";
+				b = false;
+			}
+			QTextStream txtOutput(&f);
+			txtOutput << itemName << "\n";
+			for (auto e : inputList)
+			{
+				if(e.left(10) == dateName)
+					txtOutput << e.right(e.size() -11) << "\n"; // 去掉日期
+			}
+			f.close();
+		}
+
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if( b )
+			ui->label_msg->setText("按天拆分 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
 		else
 			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
 	}

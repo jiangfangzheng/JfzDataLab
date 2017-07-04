@@ -1,6 +1,10 @@
 ﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#if _MSC_VER >= 1600
+	   #pragma execution_character_set("utf-8")
+#endif
+
 #include <QMainWindow>
 #include <QMap>
 #include <QFileDialog>      //引用文件浏览对话框类
@@ -118,8 +122,8 @@ private:
 
 // 最下方显示信息标签
 signals:
-	sendMsg(QString msg);
-	sendProgressBar(qint64 already, qint64 total);
+	void sendMsg(QString msg);
+	void sendProgressBar(qint64 already, qint64 total);
 private slots:
 	void showMsg(QString msg);
 	void on_pushButton_SelectModel_clicked();
@@ -139,6 +143,10 @@ private slots:
 	void on_pushButton_DataSampling_clicked();
 	void on_pushButton_DataClean_clicked();
 	void on_pushButton_DataTendency_clicked();
+	void on_pushButton_VirtualMap_T_clicked();
+	void on_pushButton_SplitByDate_clicked();
+	void on_pushButton_VirtualMap_S_clicked();
+	void on_pushButton_VirtualMap_DS18_clicked();
 };
 
 #endif // MAINWINDOW_H

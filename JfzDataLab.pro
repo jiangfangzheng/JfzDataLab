@@ -6,6 +6,7 @@
 
 QT += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QMAKE_CFLAGS += -std=c99
 QT += axcontainer
 QT += printsupport
 QT += sql
@@ -24,6 +25,8 @@ INCLUDEPATH+= D:/Library/Armadillo/include \
 
 LIBS += D:\Library\Armadillo\lib_win32\blas_win32_MT.lib    \
         D:\Library\Armadillo\lib_win32\lapack_win32_MT.lib  \
+        D:\Library\Armadillo\lib_win64\blas_win64_MT.lib    \
+        D:\Library\Armadillo\lib_win64\lapack_win64_MT.lib  \
 
 SOURCES += main.cpp\
     tools/jfzlib.cpp \

@@ -1,4 +1,4 @@
-//
+﻿//
 // Created by Sandeepin on 2017/5/11 0011.
 //
 
@@ -6,8 +6,8 @@
 #define JFZCPPLIB_STRINGTOOLS_H
 
 #include <string>
-#include <c++/vector>
-#include <c++/cstring>
+#include <vector>
+#include <cstring>
 using namespace std;
 
 vector<string> split(string& str,const char* c);
