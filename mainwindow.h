@@ -149,6 +149,10 @@ private slots:
 	void on_pushButton_VirtualMap_DS18_clicked();
 	void on_pushButton_VirtualFBGtoTEMP_clicked();
 	void on_pushButton_VirtualFBGtoSTRESS_clicked();
+	void on_pushButton_OriDS18toVirtual_clicked();
+	void on_pushButton_OriENVtoVirtual_clicked();
+	void on_pushButton_OriFBGtoVirtual_clicked();
+	void on_pushButton_CSVmerge_clicked();
 };
 
 #endif // MAINWINDOW_H

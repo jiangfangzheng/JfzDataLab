@@ -28,6 +28,7 @@ int Stand_CCD      (QStringList &CH, mat &All_Mat, QStringList &XLabelName);
 int Stand_FBGS     (QStringList &CH, mat &All_Mat, QStringList &XLabelName);
 int Stand_FBGT     (QStringList &CH, mat &All_Mat, QStringList &XLabelName);
 int Stand_FBGT_Fix (QStringList &CH, mat &All_Mat, QStringList &XLabelName);
+int Stand_FBGS_Fix (QStringList &CH, mat &All_Mat, QStringList &XLabelName);
 mat Stand_FBG(QStringList &CH);
 mat Stand_DS18B20(QStringList &CH);
 // 将640个FBG通道转为我们需要的321个通道，包括应力、温度

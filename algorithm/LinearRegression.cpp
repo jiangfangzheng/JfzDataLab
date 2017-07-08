@@ -314,7 +314,8 @@ QString QLinearRegression(QString FileName,QString &strOutCsv)
 		strOutCsv = strOutCsv.left(strOutCsv.lastIndexOf(','));
 	}
 
-	delete Answer;
+	delete [] data;
+	delete [] Answer;
 
 
 	// 【2】用mat来算的例子(与matlab计算结果相差大，不好)

@@ -419,7 +419,7 @@
         <rect>
          <x>470</x>
          <y>20</y>
-         <width>79</width>
+         <width>71</width>
          <height>51</height>
         </rect>
        </property>
@@ -467,6 +467,19 @@
         <string>按天拆分</string>
        </property>
       </widget>
+      <widget class="QPushButton" name="pushButton_CSVmerge">
+       <property name="geometry">
+        <rect>
+         <x>470</x>
+         <y>70</y>
+         <width>101</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>csv合并</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QGroupBox" name="groupBox_17">
       <property name="geometry">
@@ -474,7 +487,7 @@
         <x>190</x>
         <y>130</y>
         <width>120</width>
-        <height>241</height>
+        <height>401</height>
        </rect>
       </property>
       <property name="title">
@@ -543,6 +556,56 @@
        </property>
        <property name="text">
         <string>映射转应力</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_OriDS18toVirtual">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>280</y>
+         <width>101</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton { background-color: rgb(255, 170, 0); border: none; }</string>
+       </property>
+       <property name="text">
+        <string>一键映射
+电类数据</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_OriFBGtoVirtual">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>340</y>
+         <width>101</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton { background-color: rgb(255, 170, 0); border: none; }</string>
+       </property>
+       <property name="text">
+        <string>一键映射
+FBG数据</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_OriENVtoVirtual">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>240</y>
+         <width>101</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton { background-color: rgb(255, 170, 0); border: none; }</string>
+       </property>
+       <property name="text">
+        <string>环境温度(txt)</string>
        </property>
       </widget>
      </widget>
