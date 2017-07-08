@@ -1719,15 +1719,148 @@ void MainWindow::on_pushButton_OriENVtoVirtual_clicked()
 {
 	ui->label_msg->setText("文件状态：未载入");
 	EnvFileNameList = QFileDialog::getOpenFileNames(this, tr("打开环境温度txt"), workspacePath, tr("textfile(*.txt);"));
+	QTime time;time.start(); // 计时
+	bool b = false;
 	if(EnvFileNameList.size() != 4)
 	{
-		emit sendMsg("文件状态：未载入");
 		QMessageBox::critical(NULL, "注意", "请选择环境温度的4个txt文件！", QMessageBox::Yes, QMessageBox::Yes);
+		b = false;
 	}
 	else
 	{
-		//
+		// 读取txt文件
+		QString FileNameA;
+		QString FileNameB;
+		QString FileNameC;
+		QString FileNameD;
+		for(int i=0; i<EnvFileNameList.size(); i++)
+		{
+			QString FileName = EnvFileNameList[i];
+			QString ID = FileName.right(16).left(1); // 提取文件名中的ABCD以区分，例如“WHUT-A_2017-05-02.txt”
+			if(ID == "A") FileNameA = FileName;
+			if(ID == "B") FileNameB = FileName;
+			if(ID == "C") FileNameC = FileName;
+			if(ID == "D") FileNameD = FileName;
+		}
+		QList<QList<QString>>  Afile = JIO::readCsv( FileNameA, "\t");
+		QList<QList<QString>>  Bfile = JIO::readCsv( FileNameB, "\t");
+		QList<QList<QString>>  Cfile = JIO::readCsv( FileNameC, "\t");
+		QList<QList<QString>>  Dfile = JIO::readCsv( FileNameD, "\t");
+
+		// txt中读取文件到map
+		QMap<QString,float> mapA;
+		QMap<QString,float> mapB;
+		QMap<QString,float> mapC;
+		QMap<QString,float> mapD;
+		for(int i=8; i<Afile.size(); ++i)
+		{
+			mapA.insert(Afile[i][1].left(16), Afile[i][2].toFloat()); // .left(16)取时间到分钟
+		}
+		for(int i=8; i<Bfile.size(); ++i)
+		{
+			mapB.insert(Bfile[i][1].left(16), Bfile[i][2].toFloat());
+		}
+		for(int i=8; i<Cfile.size(); ++i)
+		{
+			mapC.insert(Cfile[i][1].left(16), Cfile[i][2].toFloat());
+		}
+		for(int i=8; i<Dfile.size(); ++i)
+		{
+			mapD.insert(Dfile[i][1].left(16), Dfile[i][2].toFloat());
+		}
+//		qDebug()<<"mapA.size："<<mapA.size();
+//		qDebug()<<"mapB.size："<<mapB.size();
+//		qDebug()<<"mapC.size："<<mapC.size();
+//		qDebug()<<"mapD.size："<<mapD.size();
+//		qDebug()<<"mapD.firstKey："<<mapD.firstKey();
+//		qDebug()<<"mapD.firstValue："<<mapD.value(mapD.firstKey());
+
+		// 找出共有的【最晚开始时间】和【最早结束时间】
+		QString startDate;
+		QString endDate;
+		QMap<QString, float>::const_iterator i;
+		for (i = mapA.constBegin(); i != mapA.constEnd(); ++i)
+		{
+			if( i == mapA.constBegin() )  startDate = i.key();
+			if( i+1 == mapA.constEnd() )  endDate   = i.key();
+		}
+		for (i = mapB.constBegin(); i != mapB.constEnd(); ++i)
+		{
+			if( i == mapB.constBegin() )  startDate = QString::compare(i.key(),startDate)>=0?i.key():startDate;
+			if( i+1 == mapB.constEnd() )  endDate   = QString::compare(i.key(),endDate  )<=0?i.key():endDate;
+		}
+		for (i = mapC.constBegin(); i != mapC.constEnd(); ++i)
+		{
+			if( i == mapC.constBegin() )  startDate = QString::compare(i.key(),startDate)>=0?i.key():startDate;
+			if( i+1 == mapC.constEnd() )  endDate   = QString::compare(i.key(),endDate  )<=0?i.key():endDate;
+		}
+		for (i = mapD.constBegin(); i != mapD.constEnd(); ++i)
+		{
+			if( i == mapD.constBegin() )  startDate = QString::compare(i.key(),startDate)>=0?i.key():startDate;
+			if( i+1 == mapD.constEnd() )  endDate   = QString::compare(i.key(),endDate  )<=0?i.key():endDate;
+		}
+		qDebug() <<"公共开始时间:" <<startDate << " 公共结束时间:" << endDate;
+
+		// 制作整合的数据（Key为时间，value为,分隔4个值）例如："2017-04-25 13:23"、"19.6,19.4,19.3,19.5"
+		QMap<QString,QString> mapAll;
+		for (i = mapA.constBegin(); i != mapA.constEnd(); ++i)
+		{
+			if( QString::compare(i.key(),startDate)>=0 && QString::compare(i.key(),endDate)<=0)
+			{
+				QString value = QString::number(i.value());
+				mapAll.insert(i.key(), value);
+			}
+		}
+		for (i = mapB.constBegin(); i != mapB.constEnd(); ++i)
+		{
+			if( QString::compare(i.key(),startDate)>=0 && QString::compare(i.key(),endDate)<=0)
+			{
+				QString value = "," + QString::number(i.value());
+				mapAll.insert(i.key(), mapAll[i.key()] + value);
+			}
+		}
+		for (i = mapC.constBegin(); i != mapC.constEnd(); ++i)
+		{
+			if( QString::compare(i.key(),startDate)>=0 && QString::compare(i.key(),endDate)<=0)
+			{
+				QString value = "," + QString::number(i.value());
+				mapAll.insert(i.key(), mapAll[i.key()] + value);
+			}
+		}
+		for (i = mapD.constBegin(); i != mapD.constEnd(); ++i)
+		{
+			if( QString::compare(i.key(),startDate)>=0 && QString::compare(i.key(),endDate)<=0)
+			{
+				QString value = "," + QString::number(i.value());
+				mapAll.insert(i.key(), mapAll[i.key()] + value);
+			}
+		}
+
+		// 保存文件
+		QString Text = "Time,Back,Right,Left,Front";
+		QString SaveFileName = startDate.left(10) +"~" + endDate.left(10) +"_ENV.csv";
+		QFile file(SaveFileName);
+		file.open(QIODevice::WriteOnly | QIODevice::Append); // 存在打开，不存在创建
+		// 写抬头
+		QTextStream txtOutput(&file);
+		txtOutput << Text << "\n";
+		// 写数据
+		for (auto ii = mapAll.constBegin(); ii != mapAll.constEnd(); ++ii)
+		{
+			Text = ii.key() + ":00," +ii.value();// 时间还原到秒
+			txtOutput << Text << "\n";
+//			qDebug()<< "Key:"<< ii.key() << " Value:" << ii.value();
+		}
+		file.close();
+		b = true;
 	}
+
+	// 【4】计时结束
+	QString timecost = QString::number(time.elapsed()/1000.0);
+	if( b )
+		ui->label_msg->setText("一键原始电类数据虚拟通道化 成功！ <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+	else
+		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
 }
 
 // 一键原始电类数据映射
@@ -1862,24 +1995,47 @@ void MainWindow::on_pushButton_OriFBGtoVirtual_clicked()
 void MainWindow::on_pushButton_CSVmerge_clicked()
 {
 	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("csv合并"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	// 【0】计时开始
-	QTime time;time.start();
+	QTime time;time.start();// 【0】计时开始
 	bool b = false;
-
-	for(QString fileName: fileNameList)
+	if(fileNameList.size() <=1 )
 	{
-		if(!fileName.isEmpty())
+		QMessageBox::critical(NULL, "注意", "请选择2个或以上数目的文件！", QMessageBox::Yes, QMessageBox::Yes);
+	}
+	else
+	{
+		// 【1】第一个文件：追加写入
+		QFile f(fileNameList[0]);
+		if (!f.open(QIODevice::WriteOnly |  QIODevice::Append  | QIODevice::Text))
 		{
-			// 【1】虚拟映射算法
-//			QStringList itemName;
-//			QStringList timeName;
-//			mat inputMat = JIO::readCsv(fileName, itemName, timeName);
-			// 【2】保存文件
-//			QString saveFileName = getFileName(fileName);
-//			saveFileName = saveFileName.left(10)+"_DS18_Temp.csv";
-//			b = JIO::save(saveFileName, VirtualMap_DS18_Now, timeName, inputMat);
+			qDebug() << "[f.open] 打开失败！";
+			b = false;
+		}
+		QTextStream txtOutput(&f);
+
+		// 【2】从此读入第2、3...个文件，跳过“第1行”, 写入第一个文件
+		for(int i=1; i<fileNameList.size(); ++i)
+		{
+			QFile f2(fileNameList[i]);
+			if (!f2.open(QIODevice::ReadOnly | QIODevice::Text))
+			{
+				qDebug("[f2.open] 打开失败！");
+			}
+			QTextStream txtInput2(&f2);
+			int lineNum = 0;
+			while (!txtInput2.atEnd())
+			{
+				QString lineStr = txtInput2.readLine();
+				if(lineNum != 0) // 跳过“第1行”
+					txtOutput << lineStr << "\n";
+//				qDebug() << i  <<"   :" <<  lineNum  <<"   :"<<lineStr;
+				lineNum++;
+			}
+			f2.close();
 		}
 
+		// 第一个文件：关闭
+		f.close();
+		b = true;
 	}
 
 	// 【4】计时结束

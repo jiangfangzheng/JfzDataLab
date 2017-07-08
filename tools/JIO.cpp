@@ -34,7 +34,7 @@ QStringList JIO::readFile(QString fileName)
 }
 
 // 读取csv到2维字符串列表
-QList<QList<QString>> JIO::readCsv(QString fileName)
+QList<QList<QString>> JIO::readCsv(QString fileName, QString fuhao)
 {
 	// 输出变量
 	QList<QList<QString>> out;
@@ -43,7 +43,7 @@ QList<QList<QString>> JIO::readCsv(QString fileName)
 	// 切片放入二维List
 	for (auto &e : outRow)
 	{
-		QList<QString> strList = e.split(",");
+		QList<QString> strList = e.split(fuhao);
 		out.append(strList);
 	}
 	return out;

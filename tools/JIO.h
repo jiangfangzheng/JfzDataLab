@@ -10,7 +10,7 @@ public:
 	~JIO();
 	// 读取
 	static QStringList           readFile(QString fileName);	// 读取普通文本到字符串列表
-	static QList<QList<QString>> readCsv(QString fileName);		// 读取csv到2维字符串列表
+	static QList<QList<QString>> readCsv(QString fileName, QString fuhao = ",");		// 读取csv到2维字符串列表
 	static mat                   readCsv(QString fileName, QStringList &itemName, QStringList &timeName);	// 读取csv分别保存为项目名列表、时间列表、mat
 	static QList<QList<double>>  readMat(QString fileName);		// 读取mat到2维double列表
 	static mat                   readAMat(QString fileName);	// 读取mat到2维Armadillo mat
