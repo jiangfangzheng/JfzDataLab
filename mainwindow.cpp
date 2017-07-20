@@ -1614,12 +1614,18 @@ void MainWindow::on_pushButton_VirtualFBGtoTEMP_clicked()
 					if(j<=170) // 0.0105 其它
 					{
 						value = 1.0/0.0105*(inputMat(i,j) - VirtualCalibrationWave_201706[j]);
-						inputMat(i,j) = value;
+						if(value>=0 && value<=100)
+							inputMat(i,j) = value;
+						else
+							inputMat(i,j) = 0;
 					}
 					if(j>170) // 0.0400 立柱
 					{
 						value = 1.0/0.0400*(inputMat(i,j) - VirtualCalibrationWave_201706[j]);
-						inputMat(i,j) = value;
+						if(value>=0 && value<=100)
+							inputMat(i,j) = value;
+						else
+							inputMat(i,j) = 0;
 					}
 				}
 			}
@@ -1691,7 +1697,10 @@ void MainWindow::on_pushButton_VirtualFBGtoSTRESS_clicked()
 				for(unsigned int i=1; i<inputStress.n_rows;++i)
 				{
 					// 核心公式-相对于第一条数据
-					inputStress(i,j) = ((inputStress(i,j)-inputStress(0,j))/inputStress(0,j)-0.920863*(inputTempALL(i,j)-inputTempALL(0,j))/inputTempALL(0,j))/0.776*1000000;
+					if(inputStress(0,j)!=0 && inputTempALL(0,j)!=0 )
+						inputStress(i,j) = ((inputStress(i,j)-inputStress(0,j))/inputStress(0,j)-0.920863*(inputTempALL(i,j)-inputTempALL(0,j))/inputTempALL(0,j))/0.776*1000000;
+					else
+						inputStress(i,j) = 0;
 				}
 				inputStress(0,j) = 0; // 每天相对则需要+这句
 

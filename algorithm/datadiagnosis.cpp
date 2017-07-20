@@ -1,4 +1,5 @@
 ﻿#include "datadiagnosis.h"
+#include "algorithm/datatostand.h"
 
 mat DataAnalysis(QString &InputFileName_str, QStringList &DataName, QString &strMatRow, QString &strMatCol, QString &strTitle, QString &strMatSum, QString &strMatArithmeticMean, QString &strMatMax, QString &strMatMin)
 {
@@ -77,6 +78,8 @@ mat DataAnalysis(QString &InputFileName_str, QStringList &DataName, QString &str
 
 bool DataDiagnosis(QString &InputFileName_str, mat &Mat, QStringList &DataName, Ui::MainWindow *ui)
 {
+	ui->textEdit->append("【文件名】" + getFileName(InputFileName_str));
+
 	// 数据基本信息-处理
 	mat colMat = sum(Mat); // 每一列的总和
 	mat maxMat = max(Mat); // 每一列的最大值
@@ -108,7 +111,7 @@ bool DataDiagnosis(QString &InputFileName_str, mat &Mat, QStringList &DataName, 
 				}
 			}
 		}
-		if(InputFileName_str.right(6).left(2) == "ss" || InputFileName_str.right(6).left(2) == "re" ) // FBG波长数据判断
+		else if(InputFileName_str.right(6).left(2) == "ss" || InputFileName_str.right(6).left(2) == "re" ) // FBG波长数据判断
 		{
 			if(maxMat(i)-minMat(i) < 3 && avg!=0 )
 				ui->textEdit->append(text);
@@ -126,7 +129,7 @@ bool DataDiagnosis(QString &InputFileName_str, mat &Mat, QStringList &DataName, 
 				}
 			}
 		}
-		if(InputFileName_str.right(6).left(2) == "CD") // CCD数据判断
+		else if(InputFileName_str.right(6).left(2) == "CD") // CCD数据判断
 		{
 			//qDebug()<<"fabs(avg)"<<fabs(avg);
 			if( fabs(avg)<0.2 )
@@ -136,6 +139,10 @@ bool DataDiagnosis(QString &InputFileName_str, mat &Mat, QStringList &DataName, 
 				QString text2 = text.replace(QRegExp("\\ "), "&nbsp;");
 				ui->textEdit->append(text2 + "<span style='color:red'>偏移过大</span>");// 标红
 			}
+		}
+		else // 没有特殊说明，不诊断直接显示
+		{
+			ui->textEdit->append(text);
 		}
 
 	}
