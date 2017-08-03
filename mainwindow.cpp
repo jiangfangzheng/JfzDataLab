@@ -2,14 +2,12 @@
 #include "ui_mainwindow.h"
 #include <QtNetwork>
 #include "skins/skins.h"
-#include "tools/jfzlib.h"
 #include "tools/JIO.h"
 #include "tools/JSQL.h"
-#include "algorithm/datatostand.h"
-#include "algorithm/correlations.h"
-#include "algorithm/datadiagnosis.h"
-#include "algorithm/LinearRegression.h"
+#include "algorithm/DataProcessing.h"
 #include "algorithm/DataToSQL.h"
+#include "algorithm/datadiagnosis.h"
+
 #include "plugins/qcustomplot.h"
 
 
@@ -80,9 +78,10 @@ void MainWindow::initSkins()
 	mapStyle["PS黑"]   = QString(":/qss/psblack.css");
 	// 下拉框选择
 	QStringList qssName;
-	qssName << "系统" << "黑色" << "灰黑色" << "灰色" << "浅灰色" << "深灰色" << "银色" << "淡蓝色" << "蓝色"<< "PS黑";
+//	qssName << "系统" << "黑色" << "灰黑色" << "灰色" << "浅灰色" << "深灰色" << "银色" << "淡蓝色" << "蓝色"<< "PS黑";
+	qssName << "系统" << "银色" << "淡蓝色";
 	ui->comboBox_skin->addItems(qssName);
-	ui->comboBox_skin->setCurrentIndex(6);// 个人最喜欢银，默认
+	ui->comboBox_skin->setCurrentIndex(1);// 个人最喜欢银，默认
 	// 直接赋值
 	QString qssFile = mapStyle["银色"];
 	Skins::setStyle(qssFile);
@@ -105,6 +104,8 @@ void MainWindow::ShowWindow()
 	this->raise();
 	this->activateWindow();
 }
+
+// 托盘菜单
 void MainWindow::SystemTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
 	switch(reason)
@@ -141,19 +142,13 @@ void MainWindow::on_pushButton_DS18B20_clicked()
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
-		ui->label_msg->setText("电类处理中！");
 		// 【0】计时开始
 		QTime time;time.start();
-		// 【1】获取CH通道对应文件
-		QStringList CH = get_DS18B20_csv(dir);
-		// 【2】数据标准化
-		QStringList Time;
-		Stand_DS18B20(CH, MatDS18B20, Time);// 各通道数据转Mat并排序
-		// 【3】保存文件
-		int b = saveStandData("Data-DS18B20",DataName_DS18B20,Time, MatDS18B20);
-		// 【4】计时结束
+		// 【1】数据标准化
+		bool b = standardDS18B20(dir);
+		// 【2】计时结束
 		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( 0 == b )
+		if( b )
 			ui->label_msg->setText("电类温度保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
 		else
 			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
@@ -169,19 +164,13 @@ void MainWindow::on_pushButton_CCD_clicked()
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
-		ui->label_msg->setText("CCD处理中！");
 		// 【0】计时开始
 		QTime time;time.start();
-		// 【1】获取CH通道对应文件
-		QStringList CH = get_CCD_csv(dir);
 		// 【2】数据标准化
-		QStringList Time;
-		Stand_CCD(CH, MatCCD, Time);
-		// 【3】保存文件
-		int b = saveStandData("Data-CCD",DataName_CCD,Time, MatCCD);
+		bool b = standardCCD(dir);
 		// 【4】计时结束
 		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b == 0 )
+		if( b )
 			ui->label_msg->setText("CCD位移保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
 		else
 			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
@@ -191,29 +180,29 @@ void MainWindow::on_pushButton_CCD_clicked()
 // FBG温度标准化
 void MainWindow::on_pushButton_FBGT_clicked()
 {
-	ui->label_msg->setText("文件状态：未载入");
-	// 载入文件夹
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open FBGT Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-	// 载入成功操作
-	if(!dir.isEmpty())
-	{
-		ui->label_msg->setText("FBG温度处理中！");
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】获取CH通道对应文件
-		QStringList CH = get_FBGT_csv(dir);
-		// 【2】数据标准化
-		QStringList Time;
-		Stand_FBGT(CH, MatFBGT, Time);
-		// 【3】保存文件
-		int b = saveStandData("Data-FBGTemperature",DataName_FBGT,Time, MatFBGT);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b == 0 )
-			ui->label_msg->setText("FBG温度保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
-	}
+//	ui->label_msg->setText("文件状态：未载入");
+//	// 载入文件夹
+//	QString dir = QFileDialog::getExistingDirectory(this, tr("Open FBGT Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+//	// 载入成功操作
+//	if(!dir.isEmpty())
+//	{
+//		ui->label_msg->setText("FBG温度处理中！");
+//		// 【0】计时开始
+//		QTime time;time.start();
+//		// 【1】获取CH通道对应文件
+//		QStringList CH = get_FBGT_csv(dir);
+//		// 【2】数据标准化
+//		QStringList Time;
+//		Stand_FBGT(CH, MatFBGT, Time);
+//		// 【3】保存文件
+//		int b = saveStandData("Data-FBGTemperature",DataName_FBGT,Time, MatFBGT);
+//		// 【4】计时结束
+//		QString timecost = QString::number(time.elapsed()/1000.0);
+//		if( b == 0 )
+//			ui->label_msg->setText("FBG温度保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+//		else
+//			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+//	}
 }
 
 // FBG温度标准化（预处理-波长修复）
@@ -225,19 +214,13 @@ void MainWindow::on_pushButton_LoadFBGT_ALL_clicked()
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
-		emit sendMsg("FBG温度处理中！");
 		// 【0】计时开始
 		QTime time;time.start();
-		// 【1】获取CH通道对应文件
-		QStringList CH = get_FBGT_csv(dir);
 		// 【2】数据标准化
-		QStringList Time;
-		Stand_FBGT_Fix(CH, MatFBGT, Time);
-		// 【3】保存文件
-		int b = saveStandData("Data-FBGTemperature",DataName_FBGT,Time, MatFBGT);
+		bool b = standardFBGT(dir);
 		// 【4】计时结束
 		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b == 0)
+		if( b )
 			emit sendMsg("FBG温度保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
 		else
 			emit sendMsg("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
@@ -253,19 +236,13 @@ void MainWindow::on_pushButton_FBGS_clicked()
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
-		ui->label_msg->setText("FBG应力处理中！");
 		// 【0】计时开始
 		QTime time;time.start();
-		// 【1】获取CH通道对应文件
-		QStringList CH = get_FBGS_csv(dir);
 		// 【2】数据标准化
-		QStringList Time;
-		Stand_FBGS(CH, MatFBGS, Time);// 各通道数据转Mat并排序
-		// 【3】保存文件
-		int b = saveStandData("Data-FBGStress",DataName_FBGS,Time, MatFBGS);
+		bool b = standardFBGS(dir);
 		// 【4】计时结束
 		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b == 0 )
+		if( b )
 			ui->label_msg->setText("FBG应力保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
 		else
 			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
@@ -275,24 +252,24 @@ void MainWindow::on_pushButton_FBGS_clicked()
 // 环境温度标准化
 void MainWindow::on_pushButton_ENV_clicked()
 {
-	ui->label_msg->setText("...");
-	ui->progressBar->show();
-//	ui->pushButton_ENV->setEnabled(false);
-	EnvFileNameList = QFileDialog::getOpenFileNames(this, tr("打开环境温度数据"), workspacePath, tr("textfile(*.xls);"));
-	if(EnvFileNameList.size() != 4)
-	{
-		emit sendMsg("文件状态：未载入");
-		QMessageBox::critical(NULL, "注意", "请选择环境温度的4个文件！", QMessageBox::Yes, QMessageBox::Yes);
-//		ui->pushButton_ENV->setEnabled(true);
-	}
-	else
-	{
-		// 开启线程处理xls文件，防止界面卡死
-		EnvXlsReadThread *readxls = new EnvXlsReadThread(EnvFileNameList);
-		connect(readxls, &EnvXlsReadThread::sendMsg, this, &MainWindow::showMsg);
-		connect(readxls, &EnvXlsReadThread::sendProgressBar, this, &MainWindow::updateProgressBar);
-		readxls->start();
-	}
+//	ui->label_msg->setText("...");
+//	ui->progressBar->show();
+////	ui->pushButton_ENV->setEnabled(false);
+//	EnvFileNameList = QFileDialog::getOpenFileNames(this, tr("打开环境温度数据"), workspacePath, tr("textfile(*.xls);"));
+//	if(EnvFileNameList.size() != 4)
+//	{
+//		emit sendMsg("文件状态：未载入");
+//		QMessageBox::critical(NULL, "注意", "请选择环境温度的4个文件！", QMessageBox::Yes, QMessageBox::Yes);
+////		ui->pushButton_ENV->setEnabled(true);
+//	}
+//	else
+//	{
+//		// 开启线程处理xls文件，防止界面卡死
+//		EnvXlsReadThread *readxls = new EnvXlsReadThread(EnvFileNameList);
+//		connect(readxls, &EnvXlsReadThread::sendMsg, this, &MainWindow::showMsg);
+//		connect(readxls, &EnvXlsReadThread::sendProgressBar, this, &MainWindow::updateProgressBar);
+//		readxls->start();
+//	}
 }
 
 // FBG波长转温度
@@ -301,24 +278,17 @@ void MainWindow::on_pushButton_LoadFBGT_clicked()
 	standFBGFileName = QFileDialog::getOpenFileName(this, tr("打开标准FBG波长"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!standFBGFileName.isEmpty())
 	{
-		ui->label_msg->setText("正在转换...");
-		if(!standFBGFileName.isEmpty())
-		{
-			// 【0】计时开始
-			QTime time;time.start();
-			// 【1】FBG波长转温度
-			QStringList XLabelName;
-			mat FBGWave = FBGtoTEMP(standFBGFileName, XLabelName);
-			// 【2】保存文件
-			QString Date = standFBGFileName.right(33).left(10);
-			int b = saveStandDataNoTimeFix("Data-FBGtoTEMP",DataName_FBGT,Date,XLabelName, FBGWave);
-			// 【4】计时结束
-			QString timecost = QString::number(time.elapsed()/1000.0);
-			if( b == 0 )
-				ui->label_msg->setText("波长转温度成功!花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-			else
-				ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
-		}
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】FBG波长转温度
+		bool b = FBGTtoTEMP(standFBGFileName);
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if( b )
+			ui->label_msg->setText("波长转温度成功!花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+
 	}
 }
 
@@ -357,16 +327,10 @@ void MainWindow::on_pushButton_File2_clicked()
 void MainWindow::on_pushButton_covresult_clicked()
 {
 	ui->label_msg->setText("计算开始！");
-	// 需要的变量
-	QStringList DataName1;
-	QStringList DataName2;
-	QStringList Time;
 	// 【0】计时开始
 	QTime time;time.start();
 	// 【1】相关性计算
-	mat corMatneed = CorrelationAnalysis(correlationFileName1, correlationFileName2, DataName1, DataName2, Time);
-	// 【2】保存文件
-	bool b = saveCorrelationAnalysisCSV(correlationFileName1, correlationFileName2, DataName1, DataName2, corMatneed);
+	bool b = correlationAnalysis(correlationFileName1, correlationFileName2);
 	// 【3】计时结束
 	QString timecost = QString::number(time.elapsed()/1000.0);
 	if(b)
@@ -378,44 +342,28 @@ void MainWindow::on_pushButton_covresult_clicked()
 // 多元线性回归
 void MainWindow::on_pushButton_LinearRegression_clicked()
 {
-	ui->label_msg->setText("");
+	ui->label_msg->setText("未选择文件！");
 	QString inputFile = QFileDialog::getOpenFileName(this, tr("打开多元线性回归数据源"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!inputFile.isEmpty())
 	{
-		ui->label_msg->setText("正在计算...");
 		// 【0】计时开始
 		QTime time;time.start();
 		// 【1】载入\计算 (多元线性回归核心算法)
-		QString strOutCsv;
-		QString strOut = QLinearRegression(inputFile, strOutCsv);
-//		qDebug()<<strOut;
-		// 【2】保存文件
-		QString outFileName = inputFile.right(inputFile.size() - inputFile.lastIndexOf('/')-1);
-		outFileName = outFileName.left(outFileName.lastIndexOf('.'));
-		outFileName += "-LRparameters.csv";
-//		qDebug()<<"outFileName"<<outFileName;
-		bool b = JIO::save(outFileName,strOutCsv);
-		// 保存C语言风格的数组
-		QString CStyleArrayStr{"double Answerx[cols]={"};
-		CStyleArrayStr += strOutCsv + "};";
-		outFileName.replace(QRegExp("\\.csv"), ".cpp");
-		JIO::save("Code_"+outFileName,CStyleArrayStr);
+		bool b = LinearRegression(inputFile);
 		// 【4】计时结束
 		QString timecost = QString::number(time.elapsed()/1000.0);
 		if(b)
-			ui->label_msg->setText("计算完毕！时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span> "+strOut);
+			ui->label_msg->setText("计算完毕！时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span> ");
 		else
 			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
 	}
-	else
-		ui->label_msg->setText("未选择文件！");
 }
 
 // 选择模型
 void MainWindow::on_pushButton_SelectModel_clicked()
 {
 	ModelMatQList.clear();
-	QString ModelFile = QFileDialog::getOpenFileName(this, tr("打开模型"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	ModelFile = QFileDialog::getOpenFileName(this, tr("打开模型"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!ModelFile.isEmpty())
 	{
 		QList<QList<double>> ModelMat = JIO::readMat(ModelFile);
@@ -453,39 +401,304 @@ void MainWindow::on_pushButton_SelectData_clicked()
 			// 【0】计时开始
 			QTime time;time.start();
 			// 计算预测值
-			QList<double> predictedValueList;
-			double predictedValue=0;
-			for(int i=0; i<DataFileMat.size(); ++i)
-			{
-				for(int j=0; j<ModelMatQList.size(); ++j)
-				{
-					if(j == 0)
-						predictedValue = ModelMatQList[0];
-					else
-					{
-						predictedValue+= ModelMatQList[j]*DataFileMat[i][j-1];
-					}
-				}
-				predictedValueList.append(predictedValue);
-			}
-	//		qDebug()<<"predictedValueLists "<<predictedValueList.size();
-	//		qDebug()<<"predictedValueList0 "<<predictedValueList[0];
-	//		qDebug()<<"predictedValueList1 "<<predictedValueList[1];
-	//		qDebug()<<"predictedValueList2 "<<predictedValueList[2];
-
-			for(int i=0; i<DataFileMat.size(); ++i)
-			{
-				DataFileMat[i].append(predictedValueList[i]);
-			}
-			// 提取文件名
-			QString outFileName = DataFile.right(DataFile.size() - DataFile.lastIndexOf('/')-1);
-			outFileName = outFileName.left(outFileName.lastIndexOf('.'));
-			outFileName += "-predictedResult.csv";
-			JIO::save(outFileName, DataFileMat);
+			bool b = LinearRegressionPredict(ModelFile, DataFile);
 			// 【4】计时结束
 			QString timecost = QString::number(time.elapsed()/1000.0);
-			emit sendMsg("预测完成！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+			if(b)
+				emit sendMsg("预测完成！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
 		}
+	}
+}
+
+// 数据小处理-初始值为0
+void MainWindow::on_pushButton_DataZero_clicked()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, tr("初始值为0算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!fileName.isEmpty())
+	{
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】初始值为0算法
+		bool b = dataZero(fileName);
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if( b )
+			ui->label_msg->setText("初始值为0 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	}
+}
+
+// 数据小处理-增量化（后一个数-前一个数）
+void MainWindow::on_pushButton_DataDelta_clicked()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, tr("增量化算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!fileName.isEmpty())
+	{
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】增量化算法
+		bool b = dataDelta(fileName);
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if( b )
+			ui->label_msg->setText("增量化 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	}
+}
+
+// 数据小处理-压缩拉伸
+void MainWindow::on_pushButton_DataSampling_clicked()
+{
+//	qDebug()<<sampling(30, 13);
+//	qDebug()<<sampling(13, 30);
+	QString fileName = QFileDialog::getOpenFileName(this, tr("压缩拉伸算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!fileName.isEmpty())
+	{
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】压缩拉伸算法
+		int needNum = ui->lineEdit_DataSampling->text().toInt();
+		int nowNum = 0;
+		bool b = dataSampling(fileName, nowNum, needNum);
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if( b )
+			if(nowNum >= needNum)
+				ui->label_msg->setText("压缩 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+			else
+				ui->label_msg->setText("拉伸 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	}
+}
+
+// 数据小处理-数据清洗(设定阈值内数据，前一个值覆盖后一个值)
+void MainWindow::on_pushButton_DataClean_clicked()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, tr("数据清洗算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!fileName.isEmpty())
+	{
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】数据清洗算法
+		double maxNum = ui->lineEdit_DataCleanMax->text().toDouble();
+		double minNum = ui->lineEdit_DataCleanMin->text().toDouble();
+		bool b = dataClean(fileName, maxNum, minNum);
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if( b )
+			ui->label_msg->setText("数据清洗 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	}
+}
+
+// 数据小处理-趋势预测
+void MainWindow::on_pushButton_DataTendency_clicked()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, tr("趋势预测算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!fileName.isEmpty())
+	{
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】趋势预测算法
+		int window = ui->lineEdit_DataWindow->text().toInt();
+		bool b = dataTendency(fileName, window);
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if( b )
+			ui->label_msg->setText("趋势预测 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	}
+}
+
+// 数据小处理-按天拆分
+void MainWindow::on_pushButton_SplitByDate_clicked()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, tr("虚拟映射-电类温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!fileName.isEmpty())
+	{
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】按天拆分
+		bool b = dataSplitByDate(fileName);
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if( b )
+			ui->label_msg->setText("按天拆分 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	}
+}
+
+// 数据小处理-csv合并
+void MainWindow::on_pushButton_CSVmerge_clicked()
+{
+	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("csv合并"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	QTime time;time.start();// 【0】计时开始
+	bool b = false;
+	if(fileNameList.size() <=1 )
+	{
+		QMessageBox::critical(NULL, "注意", "请选择2个或以上数目的文件！", QMessageBox::Yes, QMessageBox::Yes);
+	}
+	else
+	{
+		// csv合并
+		b = csvMerge(fileNameList);
+	}
+
+	// 【4】计时结束
+	QString timecost = QString::number(time.elapsed()/1000.0);
+	if( b )
+		ui->label_msg->setText("csv合并 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+	else
+		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+}
+
+// 虚拟映射-数据通道映射为虚拟标准通道-FBG温度
+void MainWindow::on_pushButton_VirtualMap_T_clicked()
+{
+	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("虚拟映射-FBG温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	// 【0】计时开始
+	QTime time;time.start();
+	// 【0】算法
+	bool b = virtualMapFBGT(fileNameList);
+	// 【4】计时结束
+	QString timecost = QString::number(time.elapsed()/1000.0);
+	if( b )
+		ui->label_msg->setText("虚拟映射 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+	else
+		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+}
+
+// 虚拟映射-数据通道映射为虚拟标准通道-FBG应力
+void MainWindow::on_pushButton_VirtualMap_S_clicked()
+{
+	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("虚拟映射-FBG应力"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	// 【0】计时开始
+	QTime time;time.start();
+	bool b = virtualMapFBGS(fileNameList);
+	// 【4】计时结束
+	QString timecost = QString::number(time.elapsed()/1000.0);
+	if( b )
+		ui->label_msg->setText("虚拟映射 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+	else
+		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+}
+
+// 虚拟映射-数据通道映射为虚拟标准通道-电类温度
+void MainWindow::on_pushButton_VirtualMap_DS18_clicked()
+{
+	// 电类温度不需要交换位置，只需要改抬头
+	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("虚拟映射-电类温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	// 【0】计时开始
+	QTime time;time.start();
+	bool b = virtualMapDS18(fileNameList);
+	// 【4】计时结束
+	QString timecost = QString::number(time.elapsed()/1000.0);
+	if( b )
+		ui->label_msg->setText("虚拟映射 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+	else
+		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+}
+
+// 虚拟映射-映射的FBG温度传感器转温度值
+void MainWindow::on_pushButton_VirtualFBGtoTEMP_clicked()
+{
+	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("FBG转温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	// 【0】计时开始
+	QTime time;time.start();
+	bool b = virtualFBGtoTEMP(fileNameList);
+	// 【4】计时结束
+	QString timecost = QString::number(time.elapsed()/1000.0);
+	if( b )
+		ui->label_msg->setText("映射FBG转温度 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+	else
+		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+}
+
+// 虚拟映射-映射的FBG应力传感器转应力
+void MainWindow::on_pushButton_VirtualFBGtoSTRESS_clicked()
+{
+	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("FBG转温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	// 【0】计时开始
+	QTime time;time.start();
+	bool b = virtualFBGtoSTRESS(fileNameList);
+	// 【4】计时结束
+	QString timecost = QString::number(time.elapsed()/1000.0);
+	if( b )
+		ui->label_msg->setText("映射FBG转应力 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+	else
+		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+}
+
+// 一键环境温度数据映射
+void MainWindow::on_pushButton_OriENVtoVirtual_clicked()
+{
+	ui->label_msg->setText("文件状态：未载入");
+	EnvFileNameList = QFileDialog::getOpenFileNames(this, tr("打开环境温度txt"), workspacePath, tr("textfile(*.txt);"));
+	QTime time;time.start(); // 计时
+	bool b = false;
+	if(EnvFileNameList.size() != 4)
+	{
+		QMessageBox::critical(NULL, "注意", "请选择环境温度的4个txt文件！", QMessageBox::Yes, QMessageBox::Yes);
+	}
+	else
+	{
+		b = OriENVtoVirtual(EnvFileNameList);
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if( b )
+			ui->label_msg->setText("一键原始电类数据虚拟通道化 成功！ <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+	}
+}
+
+// 一键原始电类数据映射
+void MainWindow::on_pushButton_OriDS18toVirtual_clicked()
+{
+	ui->label_msg->setText("文件状态：未载入");
+	// 载入文件夹
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Open DS18B20 Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	// 载入成功操作
+	if(!dir.isEmpty())
+	{
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】获取CH通道对应文件
+		bool b = OriDS18toVirtual(dir);
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if( b )
+			ui->label_msg->setText("一键原始电类数据虚拟通道化 成功！ <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+	}
+}
+
+// 一键原始FBG数据映射
+void MainWindow::on_pushButton_OriFBGtoVirtual_clicked()
+{
+	ui->label_msg->setText("文件状态：未载入");
+	// 载入文件夹
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Open FBG Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	// 载入成功操作
+	if(!dir.isEmpty())
+	{
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【1】获取CH通道对应文件
+		bool b = OriFBGtoVirtual(dir);
+		// 【5】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if(b)
+			emit sendMsg("一键原始FBG数据虚拟通道化 成功！ <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			emit sendMsg("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
 	}
 }
 
@@ -496,42 +709,42 @@ void MainWindow::on_pushButton_SelectData_clicked()
 // 数据概览-载入数据
 void MainWindow::on_pushButton_clicked()
 {
-	ui->textEdit->clear();
-	// 载入文件
-	QString InputFileName_str = QFileDialog::getOpenFileName(this,"载入数据", workspacePath,"textfile(*.csv);;All file(*.*)");
-	qDebug()<<InputFileName_str;  // 文件名
+//	ui->textEdit->clear();
+//	// 载入文件
+//	QString InputFileName_str = QFileDialog::getOpenFileName(this,"载入数据", workspacePath,"textfile(*.csv);;All file(*.*)");
+//	qDebug()<<InputFileName_str;  // 文件名
 
-	if(!InputFileName_str.isEmpty())
-	{
-		// 需要变量
-		QStringList DataName; // 数据各项名
-		QString strMatRow;
-		QString strMatCol;
-		QString strTitle;
-		QString strMatSum;
-		QString strMatArit;
-		QString strMatMax;
-		QString strMatMin;
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】数据分析
-		mat Mat = DataAnalysis(InputFileName_str, DataName, strMatRow, strMatCol, strTitle, strMatSum, strMatArit, strMatMax, strMatMin);
-		// 【2】数据概览-处理
-		ui->label_2->setText("数据行列：" + strMatRow+ " x "+ strMatCol );
-		ui->label_4->setText("数据名字：" + strTitle );
-		ui->label_5->setText("数据总和：" + strMatSum );
-		ui->label_6->setText("数据平均：" + strMatArit );
-		ui->label_7->setText("数据最大：" + strMatMax );
-		ui->label_8->setText("数据最小：" + strMatMin );
-		// 【3】数据诊断
-		bool b = DataDiagnosis(InputFileName_str, Mat, DataName, ui);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if(b)
-			ui->label_msg->setText("分析成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'分析失败！</span>");
-	}
+//	if(!InputFileName_str.isEmpty())
+//	{
+//		// 需要变量
+//		QStringList DataName; // 数据各项名
+//		QString strMatRow;
+//		QString strMatCol;
+//		QString strTitle;
+//		QString strMatSum;
+//		QString strMatArit;
+//		QString strMatMax;
+//		QString strMatMin;
+//		// 【0】计时开始
+//		QTime time;time.start();
+//		// 【1】数据分析
+//		mat Mat = DataAnalysis(InputFileName_str, DataName, strMatRow, strMatCol, strTitle, strMatSum, strMatArit, strMatMax, strMatMin);
+//		// 【2】数据概览-处理
+//		ui->label_2->setText("数据行列：" + strMatRow+ " x "+ strMatCol );
+//		ui->label_4->setText("数据名字：" + strTitle );
+//		ui->label_5->setText("数据总和：" + strMatSum );
+//		ui->label_6->setText("数据平均：" + strMatArit );
+//		ui->label_7->setText("数据最大：" + strMatMax );
+//		ui->label_8->setText("数据最小：" + strMatMin );
+//		// 【3】数据诊断
+//		bool b = DataDiagnosis(InputFileName_str, Mat, DataName, ui);
+//		// 【4】计时结束
+//		QString timecost = QString::number(time.elapsed()/1000.0);
+//		if(b)
+//			ui->label_msg->setText("分析成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+//		else
+//			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'分析失败！</span>");
+//	}
 }
 
 // 数据概览-清空全部
@@ -1108,6 +1321,7 @@ void MainWindow::runDatabaseProcessFinished(int exitCode, QProcess::ExitStatus e
 	emit sendMsg("<span style='color: rgb(255, 0, 0);'>历史数据库更新完毕!</span>");
 }
 
+// 数据库下载完成后做的事情
 void MainWindow::checkDatabaseUpdateFinished(QNetworkReply *reply)
 {
 	QString DatabaseUpdateTime = reply->readAll();
@@ -1148,909 +1362,3 @@ void MainWindow::on_pushButton_UpdateSQL_clicked()
 	managerCheckDatabaseUpdate->get(QNetworkRequest(QUrl("http://blog.jfz.me/soft/JfzDataLabDatabaseUpdate.txt")));
 }
 
-// 数据小处理-初始值为0
-void MainWindow::on_pushButton_DataZero_clicked()
-{
-	QString fileName = QFileDialog::getOpenFileName(this, tr("初始值为0算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	if(!fileName.isEmpty())
-	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】初始值为0算法
-		mat inputMat = JIO::readAMat(fileName);
-		for(unsigned int j=0; j<inputMat.n_cols; ++j) // 列
-		{
-			double oneLineValue = inputMat(0,j);
-			for(unsigned int i=0; i<inputMat.n_rows; ++i) // 遍历行，减第一行的值
-			{
-				inputMat(i,j) = inputMat(i,j) - oneLineValue;
-			}
-		}
-		// 【2】保存文件
-		QString saveFileName = "Zero_" + fileName.right(fileName.size() - fileName.lastIndexOf('/')-1);
-		bool b = JIO::save(saveFileName, inputMat);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("初始值为0 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
-	}
-}
-
-// 数据小处理-增量化（后一个数-前一个数）
-void MainWindow::on_pushButton_DataDelta_clicked()
-{
-	QString fileName = QFileDialog::getOpenFileName(this, tr("增量化算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	if(!fileName.isEmpty())
-	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】增量化算法
-		mat inputMat = JIO::readAMat(fileName);
-		for(unsigned int j=0; j<inputMat.n_cols; ++j) // 列 0列到n列
-		{
-			for(int i=inputMat.n_rows-1; i>0; --i) // 行n行到1行-倒序
-			{
-				inputMat(i,j) = inputMat(i,j) - inputMat(i-1,j);
-			}
-		}
-		// 【2】保存文件
-		QString saveFileName = "Delta_" + fileName.right(fileName.size() - fileName.lastIndexOf('/')-1);
-		bool b = JIO::save(saveFileName, inputMat);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("增量化 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
-	}
-}
-
-// 抽样取点函数
-QList<int> sampling(int nowNum, int needNum)
- {
-	QList<int> outQList;
-	// 压缩
-	if(nowNum >= needNum)
-	{
-		double bilv = needNum*1.0 / nowNum;
-		double *data = new double[nowNum];
-		for (int i = 0; i<nowNum; ++i)
-		{
-			data[i] = floor(i*bilv);
-		}
-
-		int value = -1;
-		for (int i = 0; i<nowNum; ++i)
-		{
-			if (data[i] != value)
-			{
-				outQList.append(i);
-				value = data[i];
-			}
-		}
-		delete [] data;
-	}
-	// 拉伸
-	if(nowNum < needNum)
-	{
-		double bilv = nowNum*1.0 / needNum;
-		double *data = new double[needNum];
-		for (int i = 0; i<needNum; ++i)
-		{
-			data[i] = floor(i*bilv);
-			outQList.append(data[i]);
-		}
-		delete [] data;
-	}
-
-	return outQList;
- }
-
-// 数据小处理-压缩拉伸
-void MainWindow::on_pushButton_DataSampling_clicked()
-{
-//	qDebug()<<sampling(30, 13);
-//	qDebug()<<sampling(13, 30);
-	QString fileName = QFileDialog::getOpenFileName(this, tr("压缩拉伸算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	if(!fileName.isEmpty())
-	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】压缩拉伸算法
-		mat inputMat = JIO::readAMat(fileName);
-		int nowNum = inputMat.n_rows;
-		int needNum = ui->lineEdit_DataSampling->text().toInt();
-		QList<int> needLine = sampling(nowNum, needNum);
-		mat out(needLine.size(),inputMat.n_cols);
-		out.fill(0);
-		for(unsigned int j=0; j<inputMat.n_cols; ++j) // 列 0列到n列
-		{
-			for(int i=0; i<needLine.size(); ++i) // 行
-			{
-				out(i,j) = inputMat(needLine[i],j);
-			}
-		}
-		// 【2】保存文件
-		QString saveFileName;
-		if(nowNum >= needNum)
-			saveFileName = "Minus_" + fileName.right(fileName.size() - fileName.lastIndexOf('/')-1);
-		else
-			saveFileName = "Add_" + fileName.right(fileName.size() - fileName.lastIndexOf('/')-1);
-
-		bool b = JIO::save(saveFileName, out);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			if(nowNum >= needNum)
-				ui->label_msg->setText("压缩 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-			else
-				ui->label_msg->setText("拉伸 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
-	}
-}
-
-// 数据小处理-数据清洗(设定阈值内数据，前一个值覆盖后一个值)
-void MainWindow::on_pushButton_DataClean_clicked()
-{
-	QString fileName = QFileDialog::getOpenFileName(this, tr("数据清洗算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	if(!fileName.isEmpty())
-	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】数据清洗算法
-		double maxNum = ui->lineEdit_DataCleanMax->text().toDouble();
-		double minNum = ui->lineEdit_DataCleanMin->text().toDouble();
-		mat inputMat = JIO::readAMat(fileName);
-		for(unsigned int j=0; j<inputMat.n_cols; ++j) // 列 0列到n列
-		{
-			for(unsigned int i=1; i<inputMat.n_rows; ++i) // 行
-			{
-				double value = inputMat(0,j);
-				inputMat(0,j) = (maxNum - value) >  (value - minNum) ? minNum:maxNum;
-				// 超出范围执行
-				if(inputMat(i,j) > maxNum || inputMat(i,j) < minNum)
-				{
-					// 确保上一个不超出范围
-					if(inputMat(i-1,j) > minNum && inputMat(i-1,j) < maxNum )
-						inputMat(i,j) = inputMat(i-1,j);
-					else
-					{
-						double value = inputMat(i,j);
-						inputMat(i,j) = (maxNum - value) >  (value - minNum) ? minNum:maxNum;
-					}
-				}
-			}
-		}
-		// 【2】保存文件
-		QString saveFileName = "Clean_" + fileName.right(fileName.size() - fileName.lastIndexOf('/')-1);
-		bool b = JIO::save(saveFileName, inputMat);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("数据清洗 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
-	}
-}
-
-// 功能: 按窗口大小寻找某一序列的 最大值\最小值\平均值 集合
-// 参数: 输入向量, 窗口大小, 输出最大值向量, 输出最小值向量
-bool findTrendByWindow(QList<double> &input, int window, QList<double> &outMax, QList<double> &outMin, QList<double> &outAvg)
-{
-	double max = -100000000;
-	double min = 100000000;
-	double sum = 0;
-	for (int i = 0; i<input.size(); i = i + window)
-	{
-		int cnt = 0;
-		for (int j = 0; j< window; j++)
-		{
-			if ((i + j) >= input.size())
-			{
-				cnt = j;
-				break;
-			}
-			if (input[i + j] >max) max = input[i + j];
-			if (input[i + j] <min) min = input[i + j];
-			sum += input[i + j];
-			cnt = j + 1;
-		}
-		outMax.append(max);
-		outMin.append(min);
-		outAvg.append(sum / cnt);
-		//cout<<max<<" ";
-		//cout<<min<<" ";
-		max = -100000000;
-		min = 100000000;
-		sum = 0;
-	}
-	return true;
-}
-
-// 数据小处理-趋势预测
-void MainWindow::on_pushButton_DataTendency_clicked()
-{
-	QString fileName = QFileDialog::getOpenFileName(this, tr("趋势预测算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	if(!fileName.isEmpty())
-	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】趋势预测算法
-		int window = ui->lineEdit_DataWindow->text().toInt();
-		mat inputMat = JIO::readAMat(fileName);
-		mat matMaxOut;
-		mat matMinOut;
-		mat matAvgOut;
-		for(unsigned int j=0; j<inputMat.n_cols; ++j) // 列 0列到n列
-		{
-			QList<double> input;
-			QList<double> outMax;
-			QList<double> outMin;
-			QList<double> outAvg;
-			// 得到QList输入
-			for(unsigned int i=1; i<inputMat.n_rows; ++i) // 行
-			{
-				input.append(inputMat(i,j));
-			}
-			// 加窗滤波
-			findTrendByWindow(input, window, outMax, outMin, outAvg);
-			// 写入mat
-			mat matMax(outMax.size(),1);
-			mat matMin(outMin.size(),1);
-			mat matAvg(outAvg.size(),1);
-			for(unsigned int i=0; i<matMax.n_rows;++i)
-			{
-				matMax(i,0) = outMax[i];
-				matMin(i,0) = outMin[i];
-				matAvg(i,0) = outAvg[i];
-			}
-			// 合入大mat
-			matMaxOut = join_rows(matMaxOut, matMax);
-			matMinOut = join_rows(matMinOut, matMin);
-			matAvgOut = join_rows(matAvgOut, matAvg);
-		}
-		// 【2】保存文件
-		QString saveFileName1 = "TrendMax_" + fileName.right(fileName.size() - fileName.lastIndexOf('/')-1);
-		QString saveFileName2 = "TrendMin_" + fileName.right(fileName.size() - fileName.lastIndexOf('/')-1);
-		QString saveFileName3 = "TrendAvg_" + fileName.right(fileName.size() - fileName.lastIndexOf('/')-1);
-		bool b = JIO::save(saveFileName1, matMaxOut);
-		b = JIO::save(saveFileName2, matMinOut);
-		b = JIO::save(saveFileName3, matAvgOut);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("趋势预测 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
-	}
-}
-
-// 虚拟映射-数据通道映射为虚拟标准通道-FBG温度
-void MainWindow::on_pushButton_VirtualMap_T_clicked()
-{
-	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("虚拟映射-FBG温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	// 【0】计时开始
-	QTime time;time.start();
-	bool b = false;
-
-	for(QString fileName: fileNameList)
-	{
-		if(!fileName.isEmpty())
-		{
-			// 【1】虚拟映射算法
-			QStringList itemName;
-			QStringList timeName;
-			mat inputMat = JIO::readCsv(fileName, itemName, timeName);
-			mat outputMat;
-			for(int i=0; i<219; ++i) // FBG温度219个
-			{
-				outputMat = join_rows(outputMat, inputMat.col( VirtualMap_FBGT_Index[i] ));
-			}
-			// 【2】保存文件
-			QString saveFileName = getFileName(fileName);
-			saveFileName = saveFileName.left(10)+"_FBGT_Wave.csv";
-			b = JIO::save(saveFileName, VirtualMap_FBGT_Now, timeName, outputMat);
-
-		}
-	}
-
-	// 【4】计时结束
-	QString timecost = QString::number(time.elapsed()/1000.0);
-	if( b )
-		ui->label_msg->setText("虚拟映射 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-	else
-		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
-}
-
-
-// 虚拟映射-数据通道映射为虚拟标准通道-FBG应力
-void MainWindow::on_pushButton_VirtualMap_S_clicked()
-{
-	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("虚拟映射-FBG应力"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	// 【0】计时开始
-	QTime time;time.start();
-	bool b = false;
-
-	for(QString fileName: fileNameList)
-	{
-		if(!fileName.isEmpty())
-		{
-			// 【1】虚拟映射算法
-			QStringList itemName;
-			QStringList timeName;
-			mat inputMat = JIO::readCsv(fileName, itemName, timeName);
-			mat outputMat;
-			for(int i=0; i<90; ++i) // FBG应力90个
-			{
-				outputMat = join_rows(outputMat, inputMat.col( VirtualMap_FBGS_Index[i] ));
-			}
-			// 【2】保存文件
-			QString saveFileName = getFileName(fileName);
-			saveFileName = saveFileName.left(10)+"_FBGS_Wave.csv";
-			b = JIO::save(saveFileName, VirtualMap_FBGS_Now, timeName, outputMat);
-		}
-	}
-
-	// 【4】计时结束
-	QString timecost = QString::number(time.elapsed()/1000.0);
-	if( b )
-		ui->label_msg->setText("虚拟映射 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-	else
-		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
-}
-
-// 虚拟映射-数据通道映射为虚拟标准通道-电类温度
-void MainWindow::on_pushButton_VirtualMap_DS18_clicked()
-{
-	// 电类温度不需要交换位置，只需要改抬头
-	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("虚拟映射-电类温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	// 【0】计时开始
-	QTime time;time.start();
-	bool b = false;
-
-	for(QString fileName: fileNameList)
-	{
-		if(!fileName.isEmpty())
-		{
-			// 【1】虚拟映射算法
-			QStringList itemName;
-			QStringList timeName;
-			mat inputMat = JIO::readCsv(fileName, itemName, timeName);
-			// 【2】保存文件
-			QString saveFileName = getFileName(fileName);
-			saveFileName = saveFileName.left(10)+"_DS18_Temp.csv";
-			b = JIO::save(saveFileName, VirtualMap_DS18_Now, timeName, inputMat);
-		}
-
-	}
-
-	// 【4】计时结束
-	QString timecost = QString::number(time.elapsed()/1000.0);
-	if( b )
-		ui->label_msg->setText("虚拟映射 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-	else
-		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
-}
-
-// 数据小处理-按天拆分
-void MainWindow::on_pushButton_SplitByDate_clicked()
-{
-	QString fileName = QFileDialog::getOpenFileName(this, tr("虚拟映射-电类温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	if(!fileName.isEmpty())
-	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】虚拟映射算法
-		QStringList inputList = JIO::readFile(fileName);
-		QString itemName = inputList[0];
-		qDebug()<< "itemName" << itemName;
-		// 得到日期集合
-		QSet<QString> dateSet;
-		for(auto e: inputList)
-		{
-			if(e.left(4) != "Time") // 排除第一行
-				dateSet.insert(e.left(10));
-		}
-
-		// 【2】保存文件-保存"日期个数"个文件
-		bool b = true;
-		for(QString dateName: dateSet)
-		{
-			qDebug()<< dateName;
-			QString saveName = dateName+ "_" + getFileName(fileName);
-			QFile f(saveName);
-			qDebug()<< saveName;
-			if (!f.open(QIODevice::WriteOnly | QIODevice::Text))
-			{
-				qDebug() << "[on_pushButton_SplitByDate_clicked] Open failed.";
-				b = false;
-			}
-			QTextStream txtOutput(&f);
-			txtOutput << itemName << "\n";
-			for (auto e : inputList)
-			{
-				if(e.left(10) == dateName)
-					txtOutput << e.right(e.size() -11) << "\n"; // 去掉日期
-			}
-			f.close();
-		}
-
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("按天拆分 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
-	}
-}
-
-double VirtualCalibrationWave[219] = {1535.867297,1537.898297,1539.888297,1541.932297,1543.881297,1545.874297,1547.866297,1549.865297,1551.858297,1553.894297,1555.881297,1557.893297,1559.860297,1561.834297,1563.778297,1535.808297,1537.832297,1539.819297,1541.861297,1543.839297,1545.809297,1547.795297,1549.811297,1551.792297,1553.795297,1555.860297,1557.874297,1559.894297,1562.029297,1564.040297,1535.815297,1537.827297,1539.808297,1541.838297,1543.817297,1545.785297,1547.790297,1549.762297,1551.890297,1553.870297,1555.909297,1557.923297,1559.911297,1561.912297,1563.887297,1535.827297,1537.807297,1539.781297,1541.826297,1543.809297,1545.787297,1547.780297,1549.829297,1551.969297,1553.993297,1555.947297,1557.783297,1559.803297,1561.900297,1563.805297,1547.761297,1545.786297,1543.788297,1541.881297,1539.835297,1537.848297,1535.841297,1549.802297,1551.869297,1553.960297,1555.991297,1558.023297,1559.904297,1561.915297,1563.855297,1549.939297,1547.909297,1545.902297,1543.949297,1541.955297,1539.918297,1537.958297,1535.895297,1551.846297,1553.848297,1555.213297,1557.860297,1559.810297,1561.885297,1563.800297,1537.812297,1540.913297,1543.840297,1546.784297,1537.779297,1540.773297,1543.799297,1546.730297,1537.809297,1540.797297,1543.833297,1546.793297,1536.790297,1539.761297,1542.678297,1545.750297,1548.723297,1551.821297,1554.698297,1557.708297,1560.744297,1564.198297,1537.858297,1540.838297,1543.730297,1546.779297,1549.710297,1552.768297,1555.864297,1558.796297,1561.764297,1565.784297,1537.820297,1540.742297,1543.675297,1546.747297,1549.676297,1552.742297,1555.818297,1558.698297,1561.761297,1536.780297,1539.734297,1542.724297,1545.775297,1548.729297,1551.877297,1554.742297,1557.755297,1560.724297,1563.722297,1537.849297,1540.793297,1543.727297,1546.775297,1549.831297,1552.720297,1555.860297,1558.760297,1561.718297,1565.773297,1536.825297,1539.834297,1542.708297,1545.727297,1548.845297,1551.839297,1554.708297,1557.712297,1560.745297,1563.705297,1537.781297,1540.792297,1543.697297,1546.728297,1549.697297,1552.745297,1555.815297,1558.726297,1561.754297,1565.731297,1531.952654,1535.208654,1538.214654,1541.188654,1544.226654,1547.039654,1550.096654,1553.297654,1556.012654,1559.115654,1547.147654,1553.152654,1556.172654,1558.995654,1556.524654,1559.640654,1533.068654,1536.184654,1537.912654,1541.676654,1544.517654,1547.761654,1550.465654,1553.851654,1532.840654,1535.916654,1539.192654,1541.856654,1544.839654,1547.867654,1551.151654,1553.933654,1557.041654,1560.122654,1532.031654,1535.036654,1538.058654,1540.987654,1560.525654,1557.618654,1532.885654,1536.390654,1539.320654,1542.156654,1545.346654,1548.191654,1551.463654,1555.809654};
-//double VirtualCalibrationWave_201706[219] = {1535.904935,1537.922935,1539.914935,1541.995935,1543.939935,1545.929935,1547.917935,1549.916935,1551.879935,1553.920935,1555.913935,1557.932935,1559.930935,1561.887935,1563.856935,1535.783935,1537.795935,1539.763935,1541.805935,1543.773935,1545.736935,1547.697935,1549.711935,1551.760935,1553.772935,1555.841935,1557.852935,1559.863935,1561.968935,1563.999935,1535.852935,1537.867935,1539.850935,1541.882935,1543.860935,1545.827935,1547.825935,1549.812935,1551.853935,1553.842935,1555.902935,1557.921935,1559.905935,1561.909935,1563.913935,1535.791935,1537.761935,1539.746935,1541.788935,1543.745935,1545.730935,1547.735935,1549.788935,1552.028935,1554.061935,1555.993935,1557.867935,1559.806935,1561.855935,1563.784935,1547.716935,1545.720935,1543.722935,1541.811935,1539.771935,1537.780935,1535.763935,1549.749935,1551.824935,1553.993935,1555.987935,1558.002935,1559.960935,1561.964935,1563.892935,1549.960935,1547.924935,1545.928935,1543.978935,1541.981935,1539.946935,1537.987935,1535.928935,1551.842935,1553.897935,1555.927935,1557.933935,1559.824935,1561.886935,1563.786935,1557.851935,1559.829935,1561.837935,1563.828935,1550.810935,1552.817935,1554.887935,1556.910935,1543.797935,1545.859935,1547.875935,1549.796935,1536.743935,1540.147935,1542.658935,1545.708935,1548.680935,1551.780935,1554.632935,1557.651935,1560.703935,1564.232935,1537.753935,1540.718935,1543.647935,1546.681935,1549.628935,1552.695935,1555.798935,1558.743935,1561.680935,1565.721935,1537.769935,1540.692935,1543.631935,1546.709935,1549.651935,1552.693935,1555.738935,1558.603935,1561.651935,1536.721935,1539.699935,1542.679935,1545.708935,1548.706935,1551.839935,1554.688935,1557.713935,1560.654935,1563.670935,1537.821935,1540.737935,1543.674935,1546.708935,1549.791935,1552.672935,1555.814935,1558.717935,1561.664935,1565.729935,1536.788935,1539.784935,1542.675935,1545.679935,1548.782935,1551.798935,1554.594935,1557.643935,1560.681935,1563.663935,1537.735935,1540.747935,1543.651935,1546.684935,1549.648935,1552.670935,1555.756935,1558.674935,1561.698935,1565.608935,1531.866373,1535.110373,1538.124373,1541.071373,1544.176373,1546.921373,1549.987373,1553.191373,1555.912373,1558.908373,1547.044373,1553.051373,1556.093373,1558.908373,1556.423373,1559.579373,1532.957373,1536.057373,1537.853373,1541.592373,1544.438373,1547.669373,1550.410373,1553.785373,1532.746373,1535.805373,1539.120373,1541.770373,1544.770373,1547.781373,1551.103373,1553.864373,1556.931373,1560.063373,1531.926373,1534.915373,1537.948373,1540.873373,1560.314373,1557.431373,1532.791373,1536.333373,1539.324373,1542.104373,1545.254373,1548.088373,1551.417373,1554.201373};
-double VirtualCalibrationWave_201706[219] = {1535.904935,1537.922935,1539.914935,1541.995935,1543.939935,1545.929935,1547.917935,1549.916935,1551.879935,1553.920935,1555.913935,1557.932935,1559.930935,1561.887935,1563.856935,1535.783935,1537.795935,1539.763935,1541.805935,1543.773935,1545.736935,1547.697935,1549.711935,1551.760935,1553.772935,1555.841935,1557.852935,1559.863935,1561.968935,1563.999935,1535.852935,1537.867935,1539.850935,1541.882935,1543.860935,1545.827935,1547.825935,1549.812935,1551.853935,1553.842935,1555.902935,1557.921935,1559.905935,1561.909935,1563.913935,1535.791935,1537.761935,1539.746935,1541.788935,1543.745935,1545.730935,1547.735935,1549.788935,1552.028935,1554.061935,1555.993935,1557.867935,1559.806935,1561.855935,1563.784935,1547.716935,1545.720935,1543.722935,1541.811935,1539.771935,1537.780935,1535.763935,1549.749935,1551.824935,1553.993935,1555.987935,1558.002935,1559.960935,1561.964935,1563.892935,1549.960935,1547.924935,1545.928935,1543.978935,1541.981935,1539.946935,1537.987935,1535.928935,1551.842935,1553.897935,1555.927935,1557.933935,1559.824935,1561.886935,1563.786935,1541.799899,1557.854899,1559.842899,1561.890899,1550.810935,1552.817935,1554.887935,1556.910935,1543.797935,1545.859935,1547.875935,1549.796935,1536.743935,1540.147935,1542.658935,1545.708935,1548.680935,1551.780935,1554.632935,1557.651935,1560.703935,1564.232935,1537.753935,1540.718935,1543.647935,1546.681935,1549.628935,1552.695935,1555.798935,1558.743935,1561.680935,1565.721935,1537.769935,1540.692935,1543.631935,1546.709935,1549.651935,1552.693935,1555.738935,1558.603935,1561.651935,1536.721935,1539.699935,1542.679935,1545.708935,1548.706935,1551.839935,1554.688935,1557.713935,1560.654935,1563.670935,1537.821935,1540.737935,1543.674935,1546.708935,1549.791935,1552.672935,1555.814935,1558.717935,1561.664935,1565.729935,1536.788935,1539.784935,1542.675935,1545.679935,1548.782935,1551.798935,1554.594935,1557.643935,1560.681935,1563.663935,1537.735935,1540.747935,1543.651935,1546.684935,1549.648935,1552.670935,1555.756935,1558.674935,1561.698935,1565.608935,1531.866373,1535.110373,1538.124373,1541.071373,1544.176373,1546.921373,1549.987373,1553.191373,1555.912373,1558.908373,1547.044373,1553.051373,1556.093373,1558.908373,1556.423373,1559.579373,1532.957373,1536.057373,1537.853373,1541.592373,1544.438373,1547.669373,1550.410373,1553.785373,1532.746373,1535.805373,1539.120373,1541.770373,1544.770373,1547.781373,1551.103373,1553.864373,1556.931373,1560.063373,1531.926373,1534.915373,1537.948373,1540.873373,1560.314373,1557.431373,1532.791373,1536.333373,1539.324373,1542.104373,1545.254373,1548.088373,1551.417373,1554.201373};
-// 虚拟映射-映射的FBG温度传感器转温度值
-void MainWindow::on_pushButton_VirtualFBGtoTEMP_clicked()
-{
-	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("FBG转温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	// 【0】计时开始
-	QTime time;time.start();
-	bool b = false;
-
-	for(QString fileName: fileNameList)
-	{
-		if(!fileName.isEmpty())
-		{
-			// 【1】FBG转温度算法
-			QStringList itemName;
-			QStringList timeName;
-			mat inputMat = JIO::readCsv(fileName, itemName, timeName);
-			for(unsigned int j=0; j<inputMat.n_cols;++j)
-			{
-				for(unsigned int i=0; i<inputMat.n_rows;++i)
-				{
-					double value;
-					if(j<=170) // 0.0105 其它
-					{
-						value = 1.0/0.0105*(inputMat(i,j) - VirtualCalibrationWave_201706[j]);
-						if(value>=0 && value<=100)
-							inputMat(i,j) = value;
-						else
-							inputMat(i,j) = 0;
-					}
-					if(j>170) // 0.0400 立柱
-					{
-						value = 1.0/0.0400*(inputMat(i,j) - VirtualCalibrationWave_201706[j]);
-						if(value>=0 && value<=100)
-							inputMat(i,j) = value;
-						else
-							inputMat(i,j) = 0;
-					}
-				}
-			}
-			// 【2】保存文件
-			QString saveFileName = getFileName(fileName);
-			saveFileName = saveFileName.left(10)+"_FBGT_Temp.csv";
-			QString itemNameStr = itemName.join(",");
-			b = JIO::save(saveFileName, itemNameStr, timeName, inputMat);
-		}
-	}
-
-	// 【4】计时结束
-	QString timecost = QString::number(time.elapsed()/1000.0);
-	if( b )
-		ui->label_msg->setText("映射FBG转温度 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-	else
-		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
-}
-
-// 应力换算2017-02-27第一次次数据-以此为基准
-double FBGS_Wave[90] = {1536.538,1538.491,1540.669,1543.024,1545.057,1547.014,1549.062,1551.084,1552.100,1554.442,1556.414,1558.423,1560.364,1562.381,1564.149,1536.524,1538.377,1540.426,1542.449,1544.438,1546.725,1548.604,1552.087,1552.087,1554.266,1556.450,1558.222,1560.152,1562.522,1564.342,1536.611,1538.430,1540.360,1542.215,1544.126,1546.174,1548.263,1550.272,1552.234,1554.399,1556.324,1558.156,1560.258,1562.358,1564.019,1536.208,1538.193,1540.164,1542.220,1544.249,1546.220,1547.654,1550.319,1552.137,1554.136,1555.328,1558.223,1560.197,1561.972,1564.187,1548.145,1546.272,1544.277,1542.351,1540.403,1538.269,1536.357,1550.186,1552.186,1554.295,1556.523,1559.289,1560.399,1562.205,1564.002,0.000,0.000,0.000,0.000,0.000,0.000,1548.492,1550.196,1552.032,1554.376,1556.247,1558.303,1560.322,1562.776,1564.310};
-double FBGT_Wave[90] = {1536.001,1538.032,1540.022,1542.066,1544.015,1546.008,1548,1549.999,1551.992,1554.028,1556.015,1558.027,1559.994,1561.968,1563.912,1535.942,1537.966,1539.953,1541.995,1543.973,1545.943,1547.929,1549.945,1551.926,1553.929,1555.994,1558.008,1560.028,1562.163,1564.174,1535.949,1537.961,1539.942,1541.972,1543.951,1545.919,1547.924,1549.896,1552.024,1554.004,1556.043,1558.057,1560.045,1562.046,1564.021,1535.961,1537.941,1539.915,1541.96,1543.943,1545.921,1547.914,1549.963,1552.103,1554.127,1556.081,1557.917,1559.937,1562.034,1563.939,1547.895,1545.92,1543.922,1542.015,1539.969,1537.982,1535.975,1549.936,1552.003,1554.094,1556.125,1558.157,1560.038,1562.049,1563.989,1550.073,1548.043,1546.036,1544.083,1542.089,1540.052,1538.092,1536.029,1551.98,1553.982,1555.347,1557.994,1559.944,1562.019,1563.934};
-// 虚拟映射-映射的FBG应力传感器转应力
-void MainWindow::on_pushButton_VirtualFBGtoSTRESS_clicked()
-{
-	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("FBG转温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	// 【0】计时开始
-	QTime time;time.start();
-	bool b = false;
-
-	if(fileNameList.size() !=2 )
-	{
-		emit sendMsg("文件状态：未载入");
-		QMessageBox::critical(NULL, "注意", "请选择配套的应力、温度2个文件！", QMessageBox::Yes, QMessageBox::Yes);
-	}
-	else
-	{
-		QString fileNameTemp;
-		QString fileNameStress;
-		for(QString fileName: fileNameList)
-		{
-			if(fileName.right(10) == "T_Wave.csv")
-				fileNameTemp = fileName;
-			if(fileName.right(10) == "S_Wave.csv")
-				fileNameStress = fileName;
-		}
-
-		if(!fileNameTemp.isEmpty() && !fileNameStress.isEmpty() )
-		{
-			//【1】应力换算算法-两个数组
-			QStringList itemNameT;
-			QStringList timeNameT;
-			mat inputTempALL = JIO::readCsv(fileNameTemp, itemNameT, timeNameT);
-
-			QStringList itemNameS;
-			QStringList timeNameS;
-			mat inputStress = JIO::readCsv(fileNameStress, itemNameS, timeNameS);
-
-			// 套入公式
-			for(unsigned int j=0; j<inputStress.n_cols;++j)
-			{
-//				// 核心公式-相对于2月26日数据
-//				for(unsigned int i=0; i<inputStress.n_rows;++i)
-//				{
-//					inputStress(i,j) = ((inputStress(i,j)-FBGS_Wave[j])/FBGS_Wave[j]-0.920863*(inputTempALL(i,j)-FBGT_Wave[j])/FBGT_Wave[j])/0.776*1000000;
-//				}
-
-				// 核心公式-相对于第一条数据
-				for(unsigned int i=1; i<inputStress.n_rows;++i)
-				{
-					// 核心公式-相对于第一条数据
-					if(inputStress(0,j)!=0 && inputTempALL(0,j)!=0 )
-						inputStress(i,j) = ((inputStress(i,j)-inputStress(0,j))/inputStress(0,j)-0.920863*(inputTempALL(i,j)-inputTempALL(0,j))/inputTempALL(0,j))/0.776*1000000;
-					else
-						inputStress(i,j) = 0;
-				}
-				inputStress(0,j) = 0; // 每天相对则需要+这句
-
-			}
-			// 【2】保存文件
-			QString saveFileName = getFileName(fileNameStress);
-			saveFileName = saveFileName.left(10)+"_FBGS_Stress.csv";
-			QString itemNameStr = itemNameS.join(",");
-			b = JIO::save(saveFileName, itemNameStr, timeNameS, inputStress);
-		}
-
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("映射FBG转应力 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
-
-	}
-
-}
-
-// 一键环境温度数据映射
-void MainWindow::on_pushButton_OriENVtoVirtual_clicked()
-{
-	ui->label_msg->setText("文件状态：未载入");
-	EnvFileNameList = QFileDialog::getOpenFileNames(this, tr("打开环境温度txt"), workspacePath, tr("textfile(*.txt);"));
-	QTime time;time.start(); // 计时
-	bool b = false;
-	if(EnvFileNameList.size() != 4)
-	{
-		QMessageBox::critical(NULL, "注意", "请选择环境温度的4个txt文件！", QMessageBox::Yes, QMessageBox::Yes);
-		b = false;
-	}
-	else
-	{
-		// 读取txt文件
-		QString FileNameA;
-		QString FileNameB;
-		QString FileNameC;
-		QString FileNameD;
-		for(int i=0; i<EnvFileNameList.size(); i++)
-		{
-			QString FileName = EnvFileNameList[i];
-			QString ID = FileName.right(16).left(1); // 提取文件名中的ABCD以区分，例如“WHUT-A_2017-05-02.txt”
-			if(ID == "A") FileNameA = FileName;
-			if(ID == "B") FileNameB = FileName;
-			if(ID == "C") FileNameC = FileName;
-			if(ID == "D") FileNameD = FileName;
-		}
-		QList<QList<QString>>  Afile = JIO::readCsv( FileNameA, "\t");
-		QList<QList<QString>>  Bfile = JIO::readCsv( FileNameB, "\t");
-		QList<QList<QString>>  Cfile = JIO::readCsv( FileNameC, "\t");
-		QList<QList<QString>>  Dfile = JIO::readCsv( FileNameD, "\t");
-
-		// txt中读取文件到map
-		QMap<QString,float> mapA;
-		QMap<QString,float> mapB;
-		QMap<QString,float> mapC;
-		QMap<QString,float> mapD;
-		for(int i=8; i<Afile.size(); ++i)
-		{
-			mapA.insert(Afile[i][1].left(16), Afile[i][2].toFloat()); // .left(16)取时间到分钟
-		}
-		for(int i=8; i<Bfile.size(); ++i)
-		{
-			mapB.insert(Bfile[i][1].left(16), Bfile[i][2].toFloat());
-		}
-		for(int i=8; i<Cfile.size(); ++i)
-		{
-			mapC.insert(Cfile[i][1].left(16), Cfile[i][2].toFloat());
-		}
-		for(int i=8; i<Dfile.size(); ++i)
-		{
-			mapD.insert(Dfile[i][1].left(16), Dfile[i][2].toFloat());
-		}
-//		qDebug()<<"mapA.size："<<mapA.size();
-//		qDebug()<<"mapB.size："<<mapB.size();
-//		qDebug()<<"mapC.size："<<mapC.size();
-//		qDebug()<<"mapD.size："<<mapD.size();
-//		qDebug()<<"mapD.firstKey："<<mapD.firstKey();
-//		qDebug()<<"mapD.firstValue："<<mapD.value(mapD.firstKey());
-
-		// 找出共有的【最晚开始时间】和【最早结束时间】
-		QString startDate;
-		QString endDate;
-		QMap<QString, float>::const_iterator i;
-		for (i = mapA.constBegin(); i != mapA.constEnd(); ++i)
-		{
-			if( i == mapA.constBegin() )  startDate = i.key();
-			if( i+1 == mapA.constEnd() )  endDate   = i.key();
-		}
-		for (i = mapB.constBegin(); i != mapB.constEnd(); ++i)
-		{
-			if( i == mapB.constBegin() )  startDate = QString::compare(i.key(),startDate)>=0?i.key():startDate;
-			if( i+1 == mapB.constEnd() )  endDate   = QString::compare(i.key(),endDate  )<=0?i.key():endDate;
-		}
-		for (i = mapC.constBegin(); i != mapC.constEnd(); ++i)
-		{
-			if( i == mapC.constBegin() )  startDate = QString::compare(i.key(),startDate)>=0?i.key():startDate;
-			if( i+1 == mapC.constEnd() )  endDate   = QString::compare(i.key(),endDate  )<=0?i.key():endDate;
-		}
-		for (i = mapD.constBegin(); i != mapD.constEnd(); ++i)
-		{
-			if( i == mapD.constBegin() )  startDate = QString::compare(i.key(),startDate)>=0?i.key():startDate;
-			if( i+1 == mapD.constEnd() )  endDate   = QString::compare(i.key(),endDate  )<=0?i.key():endDate;
-		}
-		qDebug() <<"公共开始时间:" <<startDate << " 公共结束时间:" << endDate;
-
-		// 制作整合的数据（Key为时间，value为,分隔4个值）例如："2017-04-25 13:23"、"19.6,19.4,19.3,19.5"
-		QMap<QString,QString> mapAll;
-		for (i = mapA.constBegin(); i != mapA.constEnd(); ++i)
-		{
-			if( QString::compare(i.key(),startDate)>=0 && QString::compare(i.key(),endDate)<=0)
-			{
-				QString value = QString::number(i.value());
-				mapAll.insert(i.key(), value);
-			}
-		}
-		for (i = mapB.constBegin(); i != mapB.constEnd(); ++i)
-		{
-			if( QString::compare(i.key(),startDate)>=0 && QString::compare(i.key(),endDate)<=0)
-			{
-				QString value = "," + QString::number(i.value());
-				mapAll.insert(i.key(), mapAll[i.key()] + value);
-			}
-		}
-		for (i = mapC.constBegin(); i != mapC.constEnd(); ++i)
-		{
-			if( QString::compare(i.key(),startDate)>=0 && QString::compare(i.key(),endDate)<=0)
-			{
-				QString value = "," + QString::number(i.value());
-				mapAll.insert(i.key(), mapAll[i.key()] + value);
-			}
-		}
-		for (i = mapD.constBegin(); i != mapD.constEnd(); ++i)
-		{
-			if( QString::compare(i.key(),startDate)>=0 && QString::compare(i.key(),endDate)<=0)
-			{
-				QString value = "," + QString::number(i.value());
-				mapAll.insert(i.key(), mapAll[i.key()] + value);
-			}
-		}
-
-		// 保存文件
-		QString Text = "Time,Back,Right,Left,Front";
-		QString SaveFileName = startDate.left(10) +"~" + endDate.left(10) +"_ENV.csv";
-		QFile file(SaveFileName);
-		file.open(QIODevice::WriteOnly | QIODevice::Append); // 存在打开，不存在创建
-		// 写抬头
-		QTextStream txtOutput(&file);
-		txtOutput << Text << "\n";
-		// 写数据
-		for (auto ii = mapAll.constBegin(); ii != mapAll.constEnd(); ++ii)
-		{
-			Text = ii.key() + ":00," +ii.value();// 时间还原到秒
-			txtOutput << Text << "\n";
-//			qDebug()<< "Key:"<< ii.key() << " Value:" << ii.value();
-		}
-		file.close();
-		b = true;
-	}
-
-	// 【4】计时结束
-	QString timecost = QString::number(time.elapsed()/1000.0);
-	if( b )
-		ui->label_msg->setText("一键原始电类数据虚拟通道化 成功！ <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-	else
-		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
-}
-
-// 一键原始电类数据映射
-void MainWindow::on_pushButton_OriDS18toVirtual_clicked()
-{
-	ui->label_msg->setText("文件状态：未载入");
-	// 载入文件夹
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open DS18B20 Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-	// 载入成功操作
-	if(!dir.isEmpty())
-	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】获取CH通道对应文件
-		QStringList CH = get_DS18B20_csv(dir);
-		// 【2】数据标准化
-		QStringList Time;
-		Stand_DS18B20(CH, MatDS18B20, Time);// 各通道数据转Mat并排序
-		// 【3】保存文件-直接保存虚拟通道数据
-		QStringList timeName;
-		for(auto e = Time.begin(); e!=Time.end(); ++e)
-		{
-			timeName.append((*e).right(8)); // 只要时间12:13:14
-		}
-		QString saveFileName;
-		saveFileName = Time[0].left(10)+"_DS18_Temp.csv";
-		bool b = JIO::save(saveFileName, VirtualMap_DS18_Now, timeName, MatDS18B20);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("一键原始电类数据虚拟通道化 成功！ <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
-	}
-}
-
-
-// 一键原始FBG数据映射
-void MainWindow::on_pushButton_OriFBGtoVirtual_clicked()
-{
-	ui->label_msg->setText("文件状态：未载入");
-	// 载入文件夹
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open FBG Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-	// 载入成功操作
-	if(!dir.isEmpty())
-	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】获取CH通道对应文件
-		QStringList TCH = get_FBGT_csv(dir);
-		QStringList SCH = get_FBGS_csv(dir);
-		// 【2】数据标准化
-		QStringList Time;
-		Stand_FBGT_Fix(TCH, MatFBGT, Time);
-		Stand_FBGS_Fix(SCH, MatFBGS, Time);// 各通道数据转Mat并排序
-		// 【3】虚拟映射算法
-			//  温度
-		mat outputMatT;
-		for(int i=0; i<219; ++i) // FBG温度219个
-		{
-			outputMatT = join_rows(outputMatT, MatFBGT.col( VirtualMap_FBGT_Index[i] ));
-		}
-			//  应力
-		mat outputMatS;
-		for(int i=0; i<90; ++i) // FBG应力90个
-		{
-			outputMatS = join_rows(outputMatS, MatFBGS.col( VirtualMap_FBGS_Index[i] ));
-		}
-		// 【4】保存文件-波长数据
-		QStringList timeName;
-		for(auto e = Time.begin(); e!=Time.end(); ++e)
-		{
-			timeName.append((*e).right(8)); // 只要时间12:13:14
-		}
-
-		QString saveFileNameT,saveFileNameS;
-		saveFileNameT = Time[0].left(10)+"_FBGT_Wave.csv";
-		saveFileNameS = Time[0].left(10)+"_FBGS_Wave.csv";
-
-		bool bT = JIO::save(saveFileNameT, VirtualMap_FBGT_Now, timeName, outputMatT);
-		bool bS = JIO::save(saveFileNameS, VirtualMap_FBGS_Now, timeName, outputMatS);
-
-		// 【5.1】FBG转温度算法
-		mat outputMatTemp = outputMatT;
-		for(unsigned int j=0; j<outputMatTemp.n_cols;++j)
-		{
-			for(unsigned int i=0; i<outputMatTemp.n_rows;++i)
-			{
-				double value;
-				if(j<=170) // 0.0105 其它
-				{
-					value = 1.0/0.0105*(outputMatTemp(i,j) - VirtualCalibrationWave_201706[j]);
-					outputMatTemp(i,j) = value;
-				}
-				if(j>170) // 0.0400 立柱
-				{
-					value = 1.0/0.0400*(outputMatTemp(i,j) - VirtualCalibrationWave_201706[j]);
-					outputMatTemp(i,j) = value;
-				}
-			}
-		}
-		//【5.2】应力换算算法-两个数组
-		mat inputTempALL = outputMatT;
-		mat inputStress = outputMatS;
-		// 套入公式
-		for(unsigned int j=0; j<inputStress.n_cols;++j)
-		{
-			for(unsigned int i=1; i<inputStress.n_rows;++i)
-			{
-				// 核心公式
-				inputStress(i,j) = ((inputStress(i,j)-inputStress(0,j))/inputStress(0,j)-0.920863*(inputTempALL(i,j)-inputTempALL(0,j))/inputTempALL(0,j))/0.776*1000000;
-			}
-			inputStress(0,j) = 0;
-		}
-		// 【6】保存文件-温度、应力数据
-		saveFileNameT = Time[0].left(10)+"_FBGT_Temp.csv";
-		saveFileNameS = Time[0].left(10)+"_FBGS_Stress.csv";
-		bool bTemp = JIO::save  (saveFileNameT, VirtualMap_FBGT_Now, timeName, outputMatTemp);
-		bool bStress = JIO::save(saveFileNameS, VirtualMap_FBGS_Now, timeName, inputStress);
-
-		// 【5】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( bT && bS && bTemp && bStress )
-			emit sendMsg("一键原始FBG数据虚拟通道化 成功！ <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			emit sendMsg("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
-	}
-}
-
-
-// 数据小处理-csv合并
-void MainWindow::on_pushButton_CSVmerge_clicked()
-{
-	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("csv合并"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	QTime time;time.start();// 【0】计时开始
-	bool b = false;
-	if(fileNameList.size() <=1 )
-	{
-		QMessageBox::critical(NULL, "注意", "请选择2个或以上数目的文件！", QMessageBox::Yes, QMessageBox::Yes);
-	}
-	else
-	{
-		// 【1】第一个文件：追加写入
-		QFile f(fileNameList[0]);
-		if (!f.open(QIODevice::WriteOnly |  QIODevice::Append  | QIODevice::Text))
-		{
-			qDebug() << "[f.open] 打开失败！";
-			b = false;
-		}
-		QTextStream txtOutput(&f);
-
-		// 【2】从此读入第2、3...个文件，跳过“第1行”, 写入第一个文件
-		for(int i=1; i<fileNameList.size(); ++i)
-		{
-			QFile f2(fileNameList[i]);
-			if (!f2.open(QIODevice::ReadOnly | QIODevice::Text))
-			{
-				qDebug("[f2.open] 打开失败！");
-			}
-			QTextStream txtInput2(&f2);
-			int lineNum = 0;
-			while (!txtInput2.atEnd())
-			{
-				QString lineStr = txtInput2.readLine();
-				if(lineNum != 0) // 跳过“第1行”
-					txtOutput << lineStr << "\n";
-//				qDebug() << i  <<"   :" <<  lineNum  <<"   :"<<lineStr;
-				lineNum++;
-			}
-			f2.close();
-		}
-
-		// 第一个文件：关闭
-		f.close();
-		b = true;
-	}
-
-	// 【4】计时结束
-	QString timecost = QString::number(time.elapsed()/1000.0);
-	if( b )
-		ui->label_msg->setText("csv合并 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-	else
-		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
-}

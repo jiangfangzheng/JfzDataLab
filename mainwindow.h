@@ -106,6 +106,7 @@ private:
     QString standFBGFileName;// 标准FBG温度波长文件
     QString correlationFileName1;
     QString correlationFileName2;
+	QString ModelFile; // 模型文件
 	QList<QList<QString>> plotDataStrList; // 绘图载入原始数据
 	QList<double> ModelMatQList; // 模型参数文件
 	QString DataBaseType; // 数据库类型

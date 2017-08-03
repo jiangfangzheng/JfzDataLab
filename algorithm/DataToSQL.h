@@ -1,9 +1,11 @@
 ﻿#ifndef DATATOSQL_H
 #define DATATOSQL_H
 
+#include "tools/JSQL.h"
+#include "algorithm/DataProcessing.h"
 #include <QFileDialog>
 #include <QDebug>
-#include "tools/JSQL.h"
+
 
 QFileInfoList GetFileList(QString path);
 

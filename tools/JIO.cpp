@@ -1,4 +1,9 @@
-﻿#include "JIO.h"
+﻿// Copyright:	Jfz
+// Author:		Sandeepin
+// Date:		2017-07-23
+// Description:	蒋方正文件读取类
+
+#include "JIO.h"
 #include <qDebug>
 #include <QFile>
 
@@ -41,7 +46,7 @@ QList<QList<QString>> JIO::readCsv(QString fileName, QString fuhao)
 	// 先读取每行
 	QStringList outRow = readFile(fileName);
 	// 切片放入二维List
-	for (auto &e : outRow)
+	for (auto& e : outRow)
 	{
 		QList<QString> strList = e.split(fuhao);
 		out.append(strList);
@@ -50,7 +55,7 @@ QList<QList<QString>> JIO::readCsv(QString fileName, QString fuhao)
 }
 
 // 读取csv分别保存为项目名列表、时间列表、mat
-mat JIO::readCsv(QString fileName, QStringList &itemName, QStringList &timeName)
+mat JIO::readCsv(QString fileName, QStringList& itemName, QStringList& timeName)
 {
 	// 先读数据
 	QList<QList<QString>> outList = readCsv(fileName);
@@ -86,11 +91,11 @@ QList<QList<double>> JIO::readMat(QString fileName)
 	// 先读取每行
 	QStringList outRow = readFile(fileName);
 	// 转成double切片放入二维List
-	for (auto &e : outRow)
+	for (auto& e : outRow)
 	{
 		QList<QString> strList = e.split(",");
 		QList<double> dList;
-		for (auto &d : strList)
+		for (auto& d : strList)
 		{
 			dList.append(d.toDouble());
 		}
@@ -117,8 +122,8 @@ mat JIO::readAMat(QString fileName)
 		return out;
 	}
 	mat out(row, col);
-	for (unsigned int i = 0; i<row; ++i)
-		for (unsigned int j = 0; j<col; ++j)
+	for (unsigned int i = 0; i < row; ++i)
+		for (unsigned int j = 0; j < col; ++j)
 			out(i, j) = outList[i][j];
 	return out;
 }
@@ -164,7 +169,7 @@ bool JIO::save(QString fileName, mat matData)
 		return false;
 	}
 	QTextStream txtOutput(&f);
-	for (unsigned int i=0; i < matData.n_rows; ++i)
+	for (unsigned int i = 0; i < matData.n_rows; ++i)
 	{
 		QString tmp;
 		for (unsigned int j = 0; j < matData.n_cols; ++j)
@@ -213,6 +218,7 @@ bool JIO::save(QString fileName, QList<QList<double>> matData)
 bool JIO::save(QString fileName, QString itemName, QStringList timeName, mat matData)
 {
 	// TODO
+	// 小数点3位定死不好
 	// 写文件
 	QFile f(fileName);
 	if (!f.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -224,10 +230,10 @@ bool JIO::save(QString fileName, QString itemName, QStringList timeName, mat mat
 	// 写数据抬头
 	txtOutput << itemName << "\n";
 	// 写时间和mat
-	for (unsigned int i=0; i < matData.n_rows; ++i)
+	for (unsigned int i = 0; i < matData.n_rows; ++i)
 	{
 		// 写时间
-		txtOutput << timeName.at(i)<<",";
+		txtOutput << timeName.at(i) << ",";
 		// 写mat
 		QString tmp;
 		for (unsigned int j = 0; j < matData.n_cols; ++j)
@@ -247,17 +253,17 @@ bool JIO::save(QString fileName, QString itemName, QStringList timeName, mat mat
 
 void JIO::show(QStringList input)
 {
-	for (auto &e : input)
-		qDebug() << e;
+	for (auto& e : input)
+	qDebug() << e;
 	qDebug() << "";
 }
 
 void JIO::show(QList<QList<QString>> input)
 {
-	for (auto &e : input)
+	for (auto& e : input)
 	{
 		QString outLine;
-		for (auto &f : e)
+		for (auto& f : e)
 		{
 			outLine += f + " ";
 		}
@@ -268,10 +274,10 @@ void JIO::show(QList<QList<QString>> input)
 
 void JIO::show(QList<QList<double>> input)
 {
-	for (auto &e : input)
+	for (auto& e : input)
 	{
 		QString outLine;
-		for (auto &f : e)
+		for (auto& f : e)
 		{
 			outLine += QString::number(f) + " ";
 		}
@@ -280,9 +286,20 @@ void JIO::show(QList<QList<double>> input)
 	qDebug() << "";
 }
 
+void JIO::show(QList<double> input)
+{
+	QString outLine;
+	for (auto& f : input)
+	{
+		outLine += QString::number(f) + " ";
+	}
+	qDebug() << outLine;
+	qDebug() << "";
+}
+
 void JIO::show(mat input)
 {
-	for (unsigned int i=0; i < input.n_rows; ++i)
+	for (unsigned int i = 0; i < input.n_rows; ++i)
 	{
 		QString outLine;
 		for (unsigned int j = 0; j < input.n_cols; ++j)
@@ -303,7 +320,7 @@ void JIO::test()
 	JIO::show(strlist1);
 
 	qDebug() << "readCsv:";
-	QList<QList<QString>>  strlist2 = JIO::readCsv("In01.csv");
+	QList<QList<QString>> strlist2 = JIO::readCsv("In01.csv");
 	JIO::show(strlist2);
 
 	qDebug() << "readCsv2:";
@@ -316,15 +333,15 @@ void JIO::test()
 	JIO::show(mat1);
 
 	qDebug() << "readMat:";
-	QList<QList<double>>  dlist3 = JIO::readMat("In03.mat");
+	QList<QList<double>> dlist3 = JIO::readMat("In03.mat");
 	JIO::show(dlist3);
-	qDebug() << "readMat[2][3]:\n" << dlist3[2][3]<<"\n";
+	qDebug() << "readMat[2][3]:\n" << dlist3[2][3] << "\n";
 
 	qDebug() << "readAMat:";
 	mat mat2 = JIO::readAMat("In03.mat");
 	JIO::show(mat2);
 
-	JIO::save("mat2.csv",mat2);
+	JIO::save("mat2.csv", mat2);
 	JIO::save("dlist3.csv", dlist3);
 
 	qDebug() << "end";

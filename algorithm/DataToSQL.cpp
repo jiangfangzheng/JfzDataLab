@@ -1,6 +1,5 @@
 ﻿#include "DataToSQL.h"
 #include "tools/JIO.h"
-#include "algorithm/datatostand.h"
 #include <armadillo>
 using namespace arma;
 
