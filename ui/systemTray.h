@@ -1,6 +1,10 @@
 ﻿#ifndef SYSTEMTRAY_H
 #define SYSTEMTRAY_H
 
+#if _MSC_VER >= 1600
+	   #pragma execution_character_set("utf-8")
+#endif
+
 #include <QSystemTrayIcon>
 #include <QAction>
 #include <QApplication>
@@ -15,11 +19,11 @@ public:
 	void addAction();
 	void createAction();
 private:
-	QMenu   *myMenu;			//托盘菜单
-	QAction *restoreWinAction;	//还原
-	QAction *quitAction;		//退出
-	QAction *aboutUsAction;		//关于我们
-	QAction *updateAction;		//更新
+	QMenu   *myMenu;			// 托盘菜单
+	QAction *restoreWinAction;	// 还原
+	QAction *quitAction;		// 退出
+	QAction *aboutUsAction;		// 关于我们
+	QAction *updateAction;		// 更新
 private slots:
 	void showAboutUs();
 	void showUpdate();

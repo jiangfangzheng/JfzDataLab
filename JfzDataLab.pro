@@ -30,26 +30,28 @@ LIBS += D:\Library\Armadillo\lib_win32\blas_win32_MT.lib    \
 
 SOURCES += main.cpp\
     tools/EnvXlsReadThread.cpp \
-    mainwindow.cpp \
+    ui/mainwindow.cpp \
     algorithm/datadiagnosis.cpp \
     plugins/qcustomplot.cpp \
-    systemTray.cpp \
+    ui/systemTray.cpp \
     tools/JSQL.cpp \
-    algorithm/DataToSQL.cpp \
     algorithm/DataProcessing.cpp \
-    tools/JIO.cpp
+    tools/JIO.cpp \
+    tools/DataProcessingThread.cpp \
+    tools/DataSQLThread.cpp
 
-HEADERS  += mainwindow.h \
+HEADERS  += ui/mainwindow.h \
     tools/EnvXlsReadThread.h \
     skins/skins.h \
     algorithm/datadiagnosis.h \
     plugins/qcustomplot.h \
-    systemTray.h \
+    ui/systemTray.h \
     tools/JSQL.h \
-    algorithm/DataToSQL.h \
     tools/log.h \
     algorithm/DataProcessing.h \
-    tools/JIO.h
+    tools/JIO.h \
+    tools/DataProcessingThread.h \
+    tools/DataSQLThread.h
 
 FORMS    += mainwindow.ui
 

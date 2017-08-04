@@ -1,6 +1,10 @@
 ﻿#ifndef LOG_H
 #define LOG_H
 
+#if _MSC_VER >= 1600
+	   #pragma execution_character_set("utf-8")
+#endif
+
 /**
  * @brief 重定向QDebug输出到文件，并附上日期
  * @使用  不动态追加日期setDebugOutput( "log/all.log" );动态追加日期setDebugOutput( "log/%1.log", true );

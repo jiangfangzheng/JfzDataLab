@@ -1,27 +1,14 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QtNetwork>
 #include "skins/skins.h"
 #include "tools/JIO.h"
 #include "tools/JSQL.h"
+#include "tools/DataProcessingThread.h"
+#include "tools/DataSQLThread.h"
 #include "algorithm/DataProcessing.h"
-#include "algorithm/DataToSQL.h"
 #include "algorithm/datadiagnosis.h"
-
 #include "plugins/qcustomplot.h"
-
-
-//class JSkin
-//{
-//public:
-//	static void setStyle(const QString &style) {
-//		QFile qss(style);
-//		qss.open(QFile::ReadOnly);
-//		qApp->setStyleSheet(qss.readAll());
-//		qss.close();
-//	}
-//};
-//	JSkin::setStyle("white.qss");
+#include <QtNetwork>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -30,20 +17,20 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->setupUi(this);
 	// 工作区路径
 	workspacePath = "./workspace/";
-	// Skin
+	// 初始化Skin
 	this->initSkins();
-	// init qcustomplot
+	// 初始化qcustomplot
 	ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-	// 托盘
+	// 初始化托盘
 	myTray = new SystemTray(this);
-	connect(myTray,SIGNAL(showWidget()),this,SLOT(ShowWindow()));//关联信号和槽函数
+	connect(myTray, SIGNAL(showWidget()), this, SLOT(ShowWindow()));//关联信号和槽函数
 	connect(myTray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(SystemTrayActivated(QSystemTrayIcon::ActivationReason)));
-	// 最下方消息提醒
+	// 最下方-消息提醒
 	connect(this, SIGNAL(sendMsg(QString)), this, SLOT(showMsg(QString)));
-	// 最下方进度条
+	// 最下方-进度条
 	ui->progressBar->hide();
 	connect(this, &MainWindow::sendProgressBar, this, &MainWindow::updateProgressBar);
-	// 历史数据库下载
+	// 历史数据库下载相关
 	managerDatabase = new QNetworkAccessManager(this);
 	ui->progressBar_UpdateDatabase->hide();
 	connect(&runDatabaseProcess, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(runDatabaseProcessFinished(int, QProcess::ExitStatus)));
@@ -58,8 +45,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::showMsg(QString msg)
 {
-	qDebug()<<"[信息]:"<<msg;
 	ui->label_msg->setText(msg);
+	qDebug()<<"[showMsg]:"<<msg;
 }
 
 // 初始化皮肤
@@ -128,6 +115,12 @@ void MainWindow::SystemTrayActivated(QSystemTrayIcon::ActivationReason reason)
 // 最下方更新进度条
 void MainWindow::updateProgressBar(qint64 bytesRead, qint64 totalBytes)
 {
+	qDebug()<<"[Enter updateProgressBar]" << bytesRead << " "<< totalBytes;
+	if(bytesRead > 0)
+		ui->progressBar->show();
+//	if(bytesRead == totalBytes)
+//		ui->progressBar->hide();
+
 	ui->progressBar->setMaximum(totalBytes);
 	ui->progressBar->setValue(bytesRead);
 }
@@ -136,116 +129,64 @@ void MainWindow::updateProgressBar(qint64 bytesRead, qint64 totalBytes)
 // 电类标准化
 void MainWindow::on_pushButton_DS18B20_clicked()
 {
-	ui->label_msg->setText("文件状态：未载入");
 	// 载入文件夹
 	QString dir = QFileDialog::getExistingDirectory(this, tr("Open DS18B20 Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】数据标准化
-		bool b = standardDS18B20(dir);
-		// 【2】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("电类温度保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+		// 电类标准化 standardDS18B20
+		DataProcessingThread *dataPro = new DataProcessingThread(dir, standardDS18B20);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 	}
 }
 
 // CCD标准化
 void MainWindow::on_pushButton_CCD_clicked()
 {
-	ui->label_msg->setText("文件状态：未载入");
 	// 载入文件夹
 	QString dir = QFileDialog::getExistingDirectory(this, tr("Open CCD Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【2】数据标准化
-		bool b = standardCCD(dir);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("CCD位移保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+		// CCD标准化 standardCCD
+		DataProcessingThread *dataPro = new DataProcessingThread(dir, standardCCD);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 	}
-}
-
-// FBG温度标准化
-void MainWindow::on_pushButton_FBGT_clicked()
-{
-//	ui->label_msg->setText("文件状态：未载入");
-//	// 载入文件夹
-//	QString dir = QFileDialog::getExistingDirectory(this, tr("Open FBGT Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-//	// 载入成功操作
-//	if(!dir.isEmpty())
-//	{
-//		ui->label_msg->setText("FBG温度处理中！");
-//		// 【0】计时开始
-//		QTime time;time.start();
-//		// 【1】获取CH通道对应文件
-//		QStringList CH = get_FBGT_csv(dir);
-//		// 【2】数据标准化
-//		QStringList Time;
-//		Stand_FBGT(CH, MatFBGT, Time);
-//		// 【3】保存文件
-//		int b = saveStandData("Data-FBGTemperature",DataName_FBGT,Time, MatFBGT);
-//		// 【4】计时结束
-//		QString timecost = QString::number(time.elapsed()/1000.0);
-//		if( b == 0 )
-//			ui->label_msg->setText("FBG温度保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-//		else
-//			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
-//	}
 }
 
 // FBG温度标准化（预处理-波长修复）
 void MainWindow::on_pushButton_LoadFBGT_ALL_clicked()
 {
-	ui->label_msg->setText("文件状态：未载入");
 	// 载入文件夹
 	QString dir = QFileDialog::getExistingDirectory(this, tr("Open FBGT Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【2】数据标准化
-		bool b = standardFBGT(dir);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			emit sendMsg("FBG温度保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			emit sendMsg("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+		// FBG温度标准化（预处理-波长修复） standardFBGT
+		DataProcessingThread *dataPro = new DataProcessingThread(dir, standardFBGT);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 	}
 }
 
 // FBG应力标准化
 void MainWindow::on_pushButton_FBGS_clicked()
 {
-	ui->label_msg->setText("文件状态：未载入");
 	// 载入文件夹 ，填"/"跳到根目录， 填“”默认程序位置
 	QString dir = QFileDialog::getExistingDirectory(this, tr("Open FBGS Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【2】数据标准化
-		bool b = standardFBGS(dir);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("FBG应力保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+		// FBG应力标准化 standardFBGS
+		DataProcessingThread *dataPro = new DataProcessingThread(dir, standardFBGS);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 	}
 }
 
@@ -270,25 +211,20 @@ void MainWindow::on_pushButton_ENV_clicked()
 //		connect(readxls, &EnvXlsReadThread::sendProgressBar, this, &MainWindow::updateProgressBar);
 //		readxls->start();
 //	}
+
 }
 
 // FBG波长转温度
 void MainWindow::on_pushButton_LoadFBGT_clicked()
 {
-	standFBGFileName = QFileDialog::getOpenFileName(this, tr("打开标准FBG波长"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	if(!standFBGFileName.isEmpty())
+	QString fileName = QFileDialog::getOpenFileName(this, tr("打开标准FBG波长"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!fileName.isEmpty())
 	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】FBG波长转温度
-		bool b = FBGTtoTEMP(standFBGFileName);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("波长转温度成功!花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
-
+		// FBG波长转温度 FBGTtoTEMP
+		DataProcessingThread *dataPro = new DataProcessingThread(fileName, FBGTtoTEMP);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 	}
 }
 
@@ -326,36 +262,25 @@ void MainWindow::on_pushButton_File2_clicked()
 // 相关性分析
 void MainWindow::on_pushButton_covresult_clicked()
 {
-	ui->label_msg->setText("计算开始！");
-	// 【0】计时开始
-	QTime time;time.start();
-	// 【1】相关性计算
-	bool b = correlationAnalysis(correlationFileName1, correlationFileName2);
-	// 【3】计时结束
-	QString timecost = QString::number(time.elapsed()/1000.0);
-	if(b)
-		ui->label_msg->setText("保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-	else
-		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+	// 相关性分析 correlationAnalysis
+	DataProcessingThread *dataPro = new DataProcessingThread(correlationFileName1, correlationFileName2, correlationAnalysis);
+	dataPro->start();
+	connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+	connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 }
 
 // 多元线性回归
 void MainWindow::on_pushButton_LinearRegression_clicked()
 {
 	ui->label_msg->setText("未选择文件！");
-	QString inputFile = QFileDialog::getOpenFileName(this, tr("打开多元线性回归数据源"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	if(!inputFile.isEmpty())
+	QString fileName = QFileDialog::getOpenFileName(this, tr("打开多元线性回归数据源"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!fileName.isEmpty())
 	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】载入\计算 (多元线性回归核心算法)
-		bool b = LinearRegression(inputFile);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if(b)
-			ui->label_msg->setText("计算完毕！时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span> ");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+		// 多元线性回归 LinearRegression
+		DataProcessingThread *dataPro = new DataProcessingThread(fileName, LinearRegression);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 	}
 }
 
@@ -398,14 +323,13 @@ void MainWindow::on_pushButton_SelectData_clicked()
 		}
 		else
 		{
-			// 【0】计时开始
-			QTime time;time.start();
-			// 计算预测值
-			bool b = LinearRegressionPredict(ModelFile, DataFile);
-			// 【4】计时结束
-			QString timecost = QString::number(time.elapsed()/1000.0);
-			if(b)
-				emit sendMsg("预测完成！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+			// 清空比较数据
+			ModelMatQList.clear();
+			// 计算预测值 LinearRegressionPredict
+			DataProcessingThread *dataPro = new DataProcessingThread(ModelFile, DataFile, LinearRegressionPredict);
+			dataPro->start();
+			connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+			connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 		}
 	}
 }
@@ -416,16 +340,12 @@ void MainWindow::on_pushButton_DataZero_clicked()
 	QString fileName = QFileDialog::getOpenFileName(this, tr("初始值为0算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!fileName.isEmpty())
 	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】初始值为0算法
-		bool b = dataZero(fileName);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("初始值为0 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+		// 初始值为0算法 dataZero
+		DataProcessingThread *dataPro = new DataProcessingThread(fileName, dataZero);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
+		connect(dataPro, &DataProcessingThread::sendProgressBar, this, &MainWindow::updateProgressBar);
 	}
 }
 
@@ -435,42 +355,29 @@ void MainWindow::on_pushButton_DataDelta_clicked()
 	QString fileName = QFileDialog::getOpenFileName(this, tr("增量化算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!fileName.isEmpty())
 	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】增量化算法
-		bool b = dataDelta(fileName);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("增量化 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+		// 增量化算法 dataDelta
+		DataProcessingThread *dataPro = new DataProcessingThread(fileName, dataDelta);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 	}
 }
 
 // 数据小处理-压缩拉伸
 void MainWindow::on_pushButton_DataSampling_clicked()
 {
-//	qDebug()<<sampling(30, 13);
-//	qDebug()<<sampling(13, 30);
 	QString fileName = QFileDialog::getOpenFileName(this, tr("压缩拉伸算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!fileName.isEmpty())
 	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】压缩拉伸算法
 		int needNum = ui->lineEdit_DataSampling->text().toInt();
 		int nowNum = 0;
-		bool b = dataSampling(fileName, nowNum, needNum);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			if(nowNum >= needNum)
-				ui->label_msg->setText("压缩 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-			else
-				ui->label_msg->setText("拉伸 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+		// 参数绑定
+		auto dataSampling1 = std::bind(dataSampling, std::placeholders::_1, nowNum, needNum);
+		// 压缩拉伸算法 dataSampling
+		DataProcessingThread *dataPro = new DataProcessingThread(fileName, dataSampling1);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 	}
 }
 
@@ -480,18 +387,15 @@ void MainWindow::on_pushButton_DataClean_clicked()
 	QString fileName = QFileDialog::getOpenFileName(this, tr("数据清洗算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!fileName.isEmpty())
 	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】数据清洗算法
 		double maxNum = ui->lineEdit_DataCleanMax->text().toDouble();
 		double minNum = ui->lineEdit_DataCleanMin->text().toDouble();
-		bool b = dataClean(fileName, maxNum, minNum);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("数据清洗 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+		// 参数绑定
+		auto dataClean1 = std::bind(dataClean, std::placeholders::_1, maxNum, minNum);
+		// 数据清洗算法 dataClean
+		DataProcessingThread *dataPro = new DataProcessingThread(fileName, dataClean1);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 	}
 }
 
@@ -501,17 +405,14 @@ void MainWindow::on_pushButton_DataTendency_clicked()
 	QString fileName = QFileDialog::getOpenFileName(this, tr("趋势预测算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!fileName.isEmpty())
 	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】趋势预测算法
 		int window = ui->lineEdit_DataWindow->text().toInt();
-		bool b = dataTendency(fileName, window);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("趋势预测 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+		// 参数绑定
+		auto dataTendency1 = std::bind(dataTendency, std::placeholders::_1, window);
+		// 数据清洗算法 dataClean
+		DataProcessingThread *dataPro = new DataProcessingThread(fileName, dataTendency1);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 	}
 }
 
@@ -521,16 +422,11 @@ void MainWindow::on_pushButton_SplitByDate_clicked()
 	QString fileName = QFileDialog::getOpenFileName(this, tr("虚拟映射-电类温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!fileName.isEmpty())
 	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】按天拆分
-		bool b = dataSplitByDate(fileName);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("按天拆分 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+		// 按天拆分 dataSplitByDate
+		DataProcessingThread *dataPro = new DataProcessingThread(fileName, dataSplitByDate);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 	}
 }
 
@@ -538,55 +434,38 @@ void MainWindow::on_pushButton_SplitByDate_clicked()
 void MainWindow::on_pushButton_CSVmerge_clicked()
 {
 	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("csv合并"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	QTime time;time.start();// 【0】计时开始
-	bool b = false;
 	if(fileNameList.size() <=1 )
 	{
 		QMessageBox::critical(NULL, "注意", "请选择2个或以上数目的文件！", QMessageBox::Yes, QMessageBox::Yes);
 	}
 	else
 	{
-		// csv合并
-		b = csvMerge(fileNameList);
+		// csv合并 csvMerge
+		DataProcessingThread *dataPro = new DataProcessingThread(fileNameList, csvMerge);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 	}
-
-	// 【4】计时结束
-	QString timecost = QString::number(time.elapsed()/1000.0);
-	if( b )
-		ui->label_msg->setText("csv合并 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-	else
-		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
 }
 
 // 虚拟映射-数据通道映射为虚拟标准通道-FBG温度
 void MainWindow::on_pushButton_VirtualMap_T_clicked()
 {
 	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("虚拟映射-FBG温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	// 【0】计时开始
-	QTime time;time.start();
-	// 【0】算法
-	bool b = virtualMapFBGT(fileNameList);
-	// 【4】计时结束
-	QString timecost = QString::number(time.elapsed()/1000.0);
-	if( b )
-		ui->label_msg->setText("虚拟映射 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-	else
-		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	DataProcessingThread *dataPro = new DataProcessingThread(fileNameList, virtualMapFBGT);
+	dataPro->start();
+	connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+	connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 }
 
 // 虚拟映射-数据通道映射为虚拟标准通道-FBG应力
 void MainWindow::on_pushButton_VirtualMap_S_clicked()
 {
 	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("虚拟映射-FBG应力"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	// 【0】计时开始
-	QTime time;time.start();
-	bool b = virtualMapFBGS(fileNameList);
-	// 【4】计时结束
-	QString timecost = QString::number(time.elapsed()/1000.0);
-	if( b )
-		ui->label_msg->setText("虚拟映射 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-	else
-		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	DataProcessingThread *dataPro = new DataProcessingThread(fileNameList, virtualMapFBGS);
+	dataPro->start();
+	connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+	connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 }
 
 // 虚拟映射-数据通道映射为虚拟标准通道-电类温度
@@ -594,67 +473,47 @@ void MainWindow::on_pushButton_VirtualMap_DS18_clicked()
 {
 	// 电类温度不需要交换位置，只需要改抬头
 	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("虚拟映射-电类温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	// 【0】计时开始
-	QTime time;time.start();
-	bool b = virtualMapDS18(fileNameList);
-	// 【4】计时结束
-	QString timecost = QString::number(time.elapsed()/1000.0);
-	if( b )
-		ui->label_msg->setText("虚拟映射 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-	else
-		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	DataProcessingThread *dataPro = new DataProcessingThread(fileNameList, virtualMapDS18);
+	dataPro->start();
+	connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+	connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 }
 
 // 虚拟映射-映射的FBG温度传感器转温度值
 void MainWindow::on_pushButton_VirtualFBGtoTEMP_clicked()
 {
 	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("FBG转温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	// 【0】计时开始
-	QTime time;time.start();
-	bool b = virtualFBGtoTEMP(fileNameList);
-	// 【4】计时结束
-	QString timecost = QString::number(time.elapsed()/1000.0);
-	if( b )
-		ui->label_msg->setText("映射FBG转温度 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-	else
-		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	DataProcessingThread *dataPro = new DataProcessingThread(fileNameList, virtualFBGtoTEMP);
+	dataPro->start();
+	connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+	connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 }
 
 // 虚拟映射-映射的FBG应力传感器转应力
 void MainWindow::on_pushButton_VirtualFBGtoSTRESS_clicked()
 {
 	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("FBG转温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
-	// 【0】计时开始
-	QTime time;time.start();
-	bool b = virtualFBGtoSTRESS(fileNameList);
-	// 【4】计时结束
-	QString timecost = QString::number(time.elapsed()/1000.0);
-	if( b )
-		ui->label_msg->setText("映射FBG转应力 处理成功! <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-	else
-		ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'处理失败！</span>");
+	DataProcessingThread *dataPro = new DataProcessingThread(fileNameList, virtualFBGtoSTRESS);
+	dataPro->start();
+	connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+	connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 }
 
 // 一键环境温度数据映射
 void MainWindow::on_pushButton_OriENVtoVirtual_clicked()
 {
 	ui->label_msg->setText("文件状态：未载入");
-	EnvFileNameList = QFileDialog::getOpenFileNames(this, tr("打开环境温度txt"), workspacePath, tr("textfile(*.txt);"));
-	QTime time;time.start(); // 计时
-	bool b = false;
-	if(EnvFileNameList.size() != 4)
+	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("打开环境温度txt"), workspacePath, tr("textfile(*.txt);"));
+	if(fileNameList.size() != 4)
 	{
 		QMessageBox::critical(NULL, "注意", "请选择环境温度的4个txt文件！", QMessageBox::Yes, QMessageBox::Yes);
 	}
 	else
 	{
-		b = OriENVtoVirtual(EnvFileNameList);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("一键原始电类数据虚拟通道化 成功！ <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+		DataProcessingThread *dataPro = new DataProcessingThread(fileNameList, OriENVtoVirtual);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 	}
 }
 
@@ -667,16 +526,10 @@ void MainWindow::on_pushButton_OriDS18toVirtual_clicked()
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】获取CH通道对应文件
-		bool b = OriDS18toVirtual(dir);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if( b )
-			ui->label_msg->setText("一键原始电类数据虚拟通道化 成功！ <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+		DataProcessingThread *dataPro = new DataProcessingThread(dir, OriDS18toVirtual);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 	}
 }
 
@@ -689,19 +542,12 @@ void MainWindow::on_pushButton_OriFBGtoVirtual_clicked()
 	// 载入成功操作
 	if(!dir.isEmpty())
 	{
-		// 【0】计时开始
-		QTime time;time.start();
-		// 【1】获取CH通道对应文件
-		bool b = OriFBGtoVirtual(dir);
-		// 【5】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if(b)
-			emit sendMsg("一键原始FBG数据虚拟通道化 成功！ <span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			emit sendMsg("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
+		DataProcessingThread *dataPro = new DataProcessingThread(dir, OriFBGtoVirtual);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
 	}
 }
-
 
 
 /**************************************** 第2页 功能 ****************************************/
@@ -860,39 +706,18 @@ void MainWindow::on_pushButton_CCDinSQL_clicked()
 	if(ui->radioButton_MySQL->isChecked())
 		DataBaseType = "QMYSQL";
 	qDebug()<<"Using"<<DataBaseType;
-
-	ui->label_msg->setText("");
 	// 载入文件夹
 	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open CCD Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
-		QTime time;time.start();
-		// 【1】递归遍历子目录，得到所有*.csv文件路径
-		QFileInfoList file_list = GetFileList(strDir);
-		QStringList AllFileName;
-		for (int i = 0; i < file_list.size(); ++i)
-		{
-			QFileInfo fileInfo = file_list.at(i);
-			AllFileName.append(fileInfo.filePath());
-//			qDebug()<<QString("%1 %2").arg(fileInfo.size(), 10).arg(fileInfo.fileName());
-//			qDebug()<<QString("%1").arg(fileInfo.filePath());
-		}
-
-		// 【2】向SQL中插入数据
-		JSQL jsql("localhost","data_wuzhong","root","root",DataBaseType);
-		bool b = false;
-		for(auto filename : AllFileName)
-		{
-			b = CCDtoMYSQL(filename, jsql);
-		}
-
-		// 【3】显示花费时间
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if(b)
-			ui->label_msg->setText("花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'失败！</span>");
+		// CCD导入数据库
+		JSQL *jsql = new JSQL("localhost", "data_wuzhong", "root", "root", DataBaseType);
+		DataSQLThread *dataSQL = new DataSQLThread(strDir, jsql, "ccd", "in");
+		dataSQL->start();
+		connect(dataSQL, &DataSQLThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataSQL, &DataSQLThread::sendProgressBar, this, &MainWindow::updateProgressBar);
+		connect(dataSQL, &DataSQLThread::finished, dataSQL, &QObject::deleteLater);
 	}
 }
 
@@ -904,41 +729,18 @@ void MainWindow::on_pushButton_FBGinSQL_clicked()
 	if(ui->radioButton_MySQL->isChecked())
 		DataBaseType = "QMYSQL";
 	qDebug()<<"Using"<<DataBaseType;
-
-	ui->label_msg->setText("");
 	// 载入文件夹
 	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open FBG Directory"),"/data/fbg/",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
-		QTime time;time.start();
-		// 【1】递归遍历子目录，得到所有*.csv文件路径
-		// 遍历目录
-		QDir dir(strDir);
-		QFileInfoList folder_list = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-		QStringList AllDirsName;
-		for(int i = 0; i != folder_list.size(); i++)
-		{
-			 QString name = folder_list.at(i).absoluteFilePath();
-			 AllDirsName.append(name);
-		}
-
-		// 【2】遍历目录中的文件、向SQL中插入数据
-		JSQL jsql("localhost","data_wuzhong","root","root",DataBaseType);
-		bool b = false;
-		for(int i=0;i<AllDirsName.size();++i)
-		{
-			QStringList FBGChannelNames = FBGDir2FileName(AllDirsName[i]);
-			qDebug()<<FBGChannelNames[i];
-			b = FBGtoMYSQL(FBGChannelNames,jsql);
-		}
-
-		// 【3】显示花费时间
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if(b)
-			ui->label_msg->setText("花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'失败！</span>");
+		// FBG导入数据库
+		JSQL *jsql = new JSQL("localhost", "data_wuzhong", "root", "root", DataBaseType);
+		DataSQLThread *dataSQL = new DataSQLThread(strDir, jsql, "fbg", "in");
+		dataSQL->start();
+		connect(dataSQL, &DataSQLThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataSQL, &DataSQLThread::sendProgressBar, this, &MainWindow::updateProgressBar);
+		connect(dataSQL, &DataSQLThread::finished, dataSQL, &QObject::deleteLater);
 	}
 }
 
@@ -950,41 +752,18 @@ void MainWindow::on_pushButton_DS18BinSQL_clicked()
 	if(ui->radioButton_MySQL->isChecked())
 		DataBaseType = "QMYSQL";
 	qDebug()<<"Using"<<DataBaseType;
-
-	ui->label_msg->setText("");
 	// 载入文件夹
 	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open DS18B20 Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
-		QTime time;time.start();
-		// 【1】递归遍历子目录，得到所有*.csv文件路径
-		// 遍历目录
-		QDir dir(strDir);
-		QFileInfoList folder_list = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-		QStringList AllDirsName;
-		for(int i = 0; i != folder_list.size(); i++)
-		{
-			 QString name = folder_list.at(i).absoluteFilePath();
-			 AllDirsName.append(name);
-		}
-
-		// 【2】遍历目录中的文件、向SQL中插入数据
-		JSQL jsql("localhost","data_wuzhong","root","root",DataBaseType);
-		bool b = false;
-		for(int i=0;i<AllDirsName.size();++i)
-		{
-			QStringList DS18B20ChannelNames = DS18B20Dir2FileName(AllDirsName[i]);
-//			qDebug()<<DS18B20ChannelNames;
-			b = DS18B20toMYSQL(DS18B20ChannelNames,jsql);
-		}
-
-		// 【3】显示花费时间
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if(b)
-			ui->label_msg->setText("花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'失败！</span>");
+		// DS18B20导入数据库
+		JSQL *jsql = new JSQL("localhost", "data_wuzhong", "root", "root", DataBaseType);
+		DataSQLThread *dataSQL = new DataSQLThread(strDir, jsql, "ds18b20", "in");
+		dataSQL->start();
+		connect(dataSQL, &DataSQLThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataSQL, &DataSQLThread::sendProgressBar, this, &MainWindow::updateProgressBar);
+		connect(dataSQL, &DataSQLThread::finished, dataSQL, &QObject::deleteLater);
 	}
 }
 
@@ -996,39 +775,18 @@ void MainWindow::on_pushButton_ENVinSQL_clicked()
 	if(ui->radioButton_MySQL->isChecked())
 		DataBaseType = "QMYSQL";
 	qDebug()<<"Using"<<DataBaseType;
-
-	ui->label_msg->setText("");
 	// 载入文件夹
 	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open ENV Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
-		QTime time;time.start();
-		// 【1】递归遍历子目录，得到所有*.csv文件路径
-		QFileInfoList file_list = GetFileList(strDir); // 递归遍历子目录
-		QStringList AllFileName;
-		for (int i = 0; i < file_list.size(); ++i)
-		{
-			QFileInfo fileInfo = file_list.at(i);
-			AllFileName.append(fileInfo.filePath());
-//			qDebug()<<QString("%1 %2").arg(fileInfo.size(), 10).arg(fileInfo.fileName());
-//			qDebug()<<QString("%1").arg(fileInfo.filePath());
-		}
-
-		// 【2】向SQL中插入数据
-		JSQL jsql("localhost","data_wuzhong","root","root",DataBaseType);
-		bool b = false;
-		for(auto filename : AllFileName)
-		{
-			b = ENVtoMYSQL(filename, jsql);
-		}
-
-		// 【3】显示花费时间
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if(b)
-			ui->label_msg->setText("花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'失败！</span>");
+		// 环境温度导入数据库
+		JSQL *jsql = new JSQL("localhost", "data_wuzhong", "root", "root", DataBaseType);
+		DataSQLThread *dataSQL = new DataSQLThread(strDir, jsql, "environment", "in");
+		dataSQL->start();
+		connect(dataSQL, &DataSQLThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataSQL, &DataSQLThread::sendProgressBar, this, &MainWindow::updateProgressBar);
+		connect(dataSQL, &DataSQLThread::finished, dataSQL, &QObject::deleteLater);
 	}
 }
 
@@ -1040,44 +798,24 @@ void MainWindow::on_pushButton_CNCinSQL_clicked()
 	if(ui->radioButton_MySQL->isChecked())
 		DataBaseType = "QMYSQL";
 	qDebug()<<"Using"<<DataBaseType;
-
-	ui->label_msg->setText("");
 	// 载入文件夹
 	QString strDir = QFileDialog::getExistingDirectory(this, tr("Open CNC Directory"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	// 载入成功操作
 	if(!strDir.isEmpty())
 	{
-		QTime time;time.start();
-		// 【1】递归遍历子目录，得到所有*.csv文件路径
-		QFileInfoList file_list = GetFileList(strDir); // 递归遍历子目录
-		QStringList AllFileName;
-		for (int i = 0; i < file_list.size(); ++i)
-		{
-			QFileInfo fileInfo = file_list.at(i);
-			AllFileName.append(fileInfo.filePath());
-		}
-
-		// 【2】向SQL中插入数据
-		JSQL jsql("localhost","data_wuzhong","root","root",DataBaseType);
-		bool b = false;
-		for(auto filename : AllFileName)
-		{
-			b = CNCtoMYSQL(filename, jsql);
-		}
-
-		// 【3】显示花费时间
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if(b)
-			ui->label_msg->setText("花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'失败！</span>");
+		// 机床CNC内部数据导入数据库
+		JSQL *jsql = new JSQL("localhost", "data_wuzhong", "root", "root", DataBaseType);
+		DataSQLThread *dataSQL = new DataSQLThread(strDir, jsql, "cnc", "in");
+		dataSQL->start();
+		connect(dataSQL, &DataSQLThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataSQL, &DataSQLThread::sendProgressBar, this, &MainWindow::updateProgressBar);
+		connect(dataSQL, &DataSQLThread::finished, dataSQL, &QObject::deleteLater);
 	}
 }
 
 // 数据导出
 void MainWindow::on_pushButton_OutFromSQL_clicked()
 {
-	emit sendMsg("");
 	// 选择的数据库类型
 	if(ui->radioButton_SQLite->isChecked())
 		DataBaseType = "QSQLITE";
@@ -1095,182 +833,31 @@ void MainWindow::on_pushButton_OutFromSQL_clicked()
 	if(ui->radioButton_selectFBG    ->isChecked()) {tableName = "fbg";         itemName+=DataName_FBG;     itemNum=641;isStr=false;}
 	if(ui->radioButton_selectCNC    ->isChecked()) {tableName = "cnc";         itemName+=DataName_CNC;     itemNum=17; isStr=true; }
 
-	// 选择的时间
+	// 选择的时间-判别
 	QString startTime = ui->dateTimeEdit_Start->text();
 	QString endTime = ui->dateTimeEdit_End->text();
-	if(startTime>=endTime)
+	if(startTime >= endTime)
 	{
 		emit sendMsg("时间需要正序查询(开始时间比结束时间早)！");
-		return;
 	}
 
-	JSQL jsql("localhost","data_wuzhong","root","root",DataBaseType);
-	// 原始数据导出
+	//	原始数据、优化数据导出选择
+	bool isOri = false;
 	if(ui->radioButton_DataOri->isChecked())
-	{
-		QTime time;time.start();
-		QStringList out;
-		bool b0 = jsql.queryData(tableName, startTime, endTime, itemName, itemNum, isStr, out);
-		qDebug()<<"查询成功? "<<b0;
-		if(b0)
-		{
-		QString saveFileName;
-		startTime = TimeToTimeNum(startTime);
-		endTime   = TimeToTimeNum(endTime);
-		saveFileName = startTime +"~"+endTime +"_"+tableName+"_OriData.csv";
-		qDebug()<<"saveFileName "<<saveFileName;
-		bool b = JIO::save(saveFileName,out);
-		// 【4】计时结束
-		QString timecost = QString::number(time.elapsed()/1000.0);
-		if(b)
-			emit sendMsg("查询并保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-		else
-			emit sendMsg("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
-		}
-		else
-		{
-			emit sendMsg("<span style='color: rgb(255, 0, 0);'>数据库查询失败！</span>");
-		}
-	}
-
-	// 优化数据导出
+		isOri = true;
 	if(ui->radioButton_DataOpt->isChecked())
-	{
-		// 这三类数据不需要优化
-		if(tableName == "ccd" || tableName == "environment" || tableName == "cnc")
-		{
-			QTime time;time.start();
-			QStringList out;
-			bool b0 = jsql.queryData(tableName, startTime, endTime, itemName, itemNum, isStr, out);
-			qDebug()<<"查询成功? "<<b0;
-			if(b0)
-			{
-			QString saveFileName;
-			startTime = TimeToTimeNum(startTime);
-			endTime   = TimeToTimeNum(endTime);
-			saveFileName = startTime +"~"+endTime +"_"+tableName+"_OptData.csv";
-			qDebug()<<"saveFileName "<<saveFileName;
-			bool b = JIO::save(saveFileName,out);
-			// 【4】计时结束
-			QString timecost = QString::number(time.elapsed()/1000.0);
-			if(b)
-				emit sendMsg("查询并保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-			else
-				emit sendMsg("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
-			}
-			else
-			{
-				emit sendMsg("<span style='color: rgb(255, 0, 0);'>数据库查询失败！</span>");
-			}
-		}
-		// 电类数据除去最后为零的通道
-		if(tableName == "ds18b20")
-		{
-			QTime time;time.start();
-			QStringList out;
-			bool b0 = jsql.queryData(tableName, startTime, endTime, itemName, itemNum, isStr, out);
-			qDebug()<<"查询成功? "<< b0;
-			if(b0)
-			{
-			// 除去后续无用通道
-			for(auto &e: out)
-			{
-				QStringList templist;
-				templist = e.split(",");
-				for(int i=0;i<12;++i) // 空余的12个
-				{
-					templist.removeLast();
-				}
-				QString joinStr = templist.join(",");
-				e = joinStr;
-//				qDebug()<<e;
-			}
-			QString saveFileName;
-			startTime = TimeToTimeNum(startTime);
-			endTime   = TimeToTimeNum(endTime);
-			saveFileName = startTime +"~"+endTime +"_"+tableName+"_OptData.csv";
-			qDebug()<<"saveFileName "<<saveFileName;
-			bool b = JIO::save(saveFileName,out);
-			// 【4】计时结束
-			QString timecost = QString::number(time.elapsed()/1000.0);
-			if(b)
-				emit sendMsg("查询并保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-			else
-				emit sendMsg("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
-			}
-			else
-			{
-				emit sendMsg("<span style='color: rgb(255, 0, 0);'>数据库查询失败！</span>");
-			}
-		}
-		// fbg数据除去没记录的通道
-		if(tableName == "fbg")
-		{
-			QTime time;time.start();
-			QStringList out;
-			bool b0 = jsql.queryData(tableName, startTime, endTime, itemName, itemNum, isStr, out);
-			qDebug()<<"查询成功? "<< b0;
-			if(b0)
-			{
-				// 提取数据转mat矩阵
-				out.removeFirst(); // 去除抬头
-				mat inputMat(out.size(),640); // FBG矩阵
-				inputMat.fill(0.0);
-				int rows = 0;
-				for(auto &e: out)
-				{
-					QStringList templist;
-					templist = e.split(",");
-					for(int i=1; i<641; ++i) // 除去时间第一个，剩下640个
-					{
-						inputMat(rows,i-1) = templist[i].toDouble();
-					}
-					rows++;
-				}
-				// 全部mat数据优化成321个通道
-				mat outputMat;
-				bool b1 = ALLFBGto321FBG(inputMat, outputMat);
-				// 构造输出数据
-				QStringList outData;
-				rows = 0;
-				for(auto &e: out)
-				{
-					QStringList templist;
-					templist = e.split(",");
-					outData.append(templist[0]+",");
-					for(unsigned int i=0; i<outputMat.n_cols; ++i)
-					{
-						QString value;
-						value.sprintf("%.3lf",outputMat(rows,i));
-						if( i+1 != outputMat.n_cols)
-							outData[rows] += value + ",";
-						else
-							outData[rows] += value;
-					}
-					rows++;
-				}
-				outData.insert(0,"Time,"+DataName_FBGST);
+		isOri = false;
 
-				// 保存数据
-				QString saveFileName;
-				startTime = TimeToTimeNum(startTime);
-				endTime   = TimeToTimeNum(endTime);
-				saveFileName = startTime +"~"+endTime +"_"+tableName+"_OptData.csv";
-				qDebug()<<"saveFileName "<<saveFileName;
-				bool b = JIO::save(saveFileName,outData);
-				// 【4】计时结束
-				QString timecost = QString::number(time.elapsed()/1000.0);
-				if(b && b1)
-					emit sendMsg("查询并保存成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-				else
-					emit sendMsg("<span style='color: rgb(255, 0, 0);'保存失败！</span>");
-			}
-			else
-			{
-				emit sendMsg("<span style='color: rgb(255, 0, 0);'>数据库查询失败！</span>");
-			}
-		}
-	}
+	//	开启线程查询
+	JSQL *jsql = new JSQL("localhost", "data_wuzhong", "root", "root", DataBaseType);
+	connect(jsql, &JSQL::sendProgressBar, this, &MainWindow::updateProgressBar);
+
+	DataSQLThread *dataSQL = new DataSQLThread("no_use", jsql, "no_use", "out");
+	dataSQL->setQueryMsg(tableName, startTime, endTime, itemName, itemNum, isStr, isOri);
+	dataSQL->start();
+	connect(dataSQL, &DataSQLThread::sendMsg, this, &MainWindow::showMsg);
+	connect(dataSQL, &DataSQLThread::sendProgressBar, this, &MainWindow::updateProgressBar);
+	connect(dataSQL, &DataSQLThread::finished, dataSQL, &QObject::deleteLater);
 }
 
 // 本地历史数据库下载开始请求
@@ -1359,6 +946,6 @@ void MainWindow::checkDatabaseUpdateFinished(QNetworkReply *reply)
 // 更新本地历史数据库
 void MainWindow::on_pushButton_UpdateSQL_clicked()
 {
-	managerCheckDatabaseUpdate->get(QNetworkRequest(QUrl("http://blog.jfz.me/soft/JfzDataLabDatabaseUpdate.txt")));
+	managerCheckDatabaseUpdate->get(QNetworkRequest(QUrl("http://lgpfw.jfz.me/soft/JfzDataLabDatabaseUpdate.txt")));
 }
 

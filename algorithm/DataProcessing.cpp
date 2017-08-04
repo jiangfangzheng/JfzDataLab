@@ -832,8 +832,6 @@ mat Stand_DS18B20(QStringList &CH)
 	QString CH7 = CH[6];
 	QString CH8 = CH[7];
 
-	int InputFileRow = 0;
-	int InputFileCol = 0;
 	// 时间
 	QStringList XLabelName;
 	QStringList XLabelName2;
@@ -1070,8 +1068,6 @@ int Stand_FBGS(QStringList &CH, mat &All_Mat, QStringList &XLabelName)
 	QString CH6 = CH[5];
 	QString CH7 = CH[6];
 
-	int InputFileRow = 0;
-	int InputFileCol = 0;
 	// 时间
 	//QStringList XLabelName;
 	QStringList XLabelName2;
@@ -1131,8 +1127,6 @@ int Stand_FBGT(QStringList &CH, mat &All_Mat, QStringList &XLabelName)
 	QString CH31 = CH[23];
 	QString CH32 = CH[24];
 
-	int InputFileRow = 0;
-	int InputFileCol = 0;
 	// 时间
 	//QStringList XLabelName;
 	QStringList XLabelName2;
@@ -1247,8 +1241,6 @@ int Stand_FBGT_Fix(QStringList &CH, mat &All_Mat, QStringList &XLabelName)
 	QString CH31 = CH[23];
 	QString CH32 = CH[24];
 
-	int InputFileRow = 0;
-	int InputFileCol = 0;
 	// 时间
 	//QStringList XLabelName;
 	QStringList XLabelName2;
@@ -1403,8 +1395,6 @@ int Stand_FBGS_Fix(QStringList &CH, mat &All_Mat, QStringList &XLabelName)
 	QString CH6 = CH[5];
 	QString CH7 = CH[6];
 
-	int InputFileRow = 0;
-	int InputFileCol = 0;
 	// 时间
 	//QStringList XLabelName;
 	QStringList XLabelName2;
@@ -1482,8 +1472,6 @@ int Stand_FBGS_Fix(QStringList &CH, mat &All_Mat, QStringList &XLabelName)
 // 波长转温度算法-T=k(wave-Bwave)+Btemp
 mat FBGtoTEMP(QString &standFBGFileName, QStringList &XLabelName)
 {
-	int InputFileRow;
-	int InputFileCol;
 	QStringList DataName;
 	mat FBGWave = JIO::readCsv(standFBGFileName, DataName, XLabelName);
 	// 当前文件名
@@ -1551,8 +1539,6 @@ mat Stand_FBG(QStringList &CH)
 	QString CH31 = CH[30];
 	QString CH32 = CH[31];
 
-	int InputFileRow = 0;
-	int InputFileCol = 0;
 	// 时间
 	QStringList XLabelName;
 	QStringList XLabelName2;
@@ -1843,10 +1829,6 @@ bool saveStandDataNoTimeFix(QString Title, QString DataName, QString Date, QStri
 mat CorrelationAnalysis(const QString &correlationFileName1, const QString &correlationFileName2, QStringList &DataName1, QStringList &DataName2, QStringList &Time)
 {
 	// 读取两文件矩阵
-	int InputFileRow1;
-	int InputFileCol1;
-	int InputFileRow2;
-	int InputFileCol2;
 	mat File1 = JIO::readCsv(correlationFileName1, DataName1, Time);
 	mat File2 = JIO::readCsv(correlationFileName2, DataName2, Time);
 	//    qDebug()<<"File1(0,0)"<<File1(0,0);

@@ -41,72 +41,26 @@ public:
 private:
 	Ui::MainWindow *ui;
 
-// 托盘相关
+// 【自己写的】
 private:
-	SystemTray * myTray; //自定义系统托盘
-private slots:
-	void ShowWindow(); //处理还原操作
-	void SystemTrayActivated(QSystemTrayIcon::ActivationReason reason); //处理点击托盘操作
-
-// 数据处理相关
-private slots:
-    void on_pushButton_DS18B20_clicked();
-    void on_pushButton_CCD_clicked();
-    void on_pushButton_FBGT_clicked();
-    void on_pushButton_FBGS_clicked();
-
-    void on_pushButton_clicked();
-    void on_pushButton_2_clicked();
-
-    void on_pushButton_ENV_clicked();
-
-    void on_pushButton_LoadFBGT_clicked();
-
-//    void on_pushButton_wave2temp_clicked();
-
-    void on_pushButton_File1_clicked();
-
-    void on_pushButton_File2_clicked();
-
-    void on_pushButton_covresult_clicked();
-
-	void on_pushButton_LoadFBGT_ALL_clicked();
-
-	void on_comboBox_skin_currentIndexChanged(const QString &arg1);
-
-	void on_pushButton_LinearRegression_clicked();
-
-	void on_pushButton_LoadPlotData_clicked();
-
-	void on_comboBox_LoadPlotList_currentTextChanged(const QString &arg1);
-
-	void on_pushButton_CCDinSQL_clicked();
-
-	void on_pushButton_FBGinSQL_clicked();
-
-	void on_pushButton_DS18BinSQL_clicked();
-
-	void on_pushButton_ENVinSQL_clicked();
-
-	void on_pushButton_CNCinSQL_clicked();
-
-private:
+	//自定义系统托盘
+	SystemTray * myTray;
 	// 工作区路径
 	QString workspacePath;
 	// Skins
 	QMap<QString, QString> mapStyle;
 	void initSkins();
 	// Data
-    mat MatDS18B20;
-    mat MatCCD;
-    mat MatFBGT;
-    mat MatFBGS;
-    mat MatENV;
-    QStringList EnvFileNameList;
-    QString standFBGFileName;// 标准FBG温度波长文件
-    QString correlationFileName1;
-    QString correlationFileName2;
+	mat MatDS18B20;
+	mat MatCCD;
+	mat MatFBGT;
+	mat MatFBGS;
+	mat MatENV;
+
+	QString correlationFileName1;
+	QString correlationFileName2;
 	QString ModelFile; // 模型文件
+
 	QList<QList<QString>> plotDataStrList; // 绘图载入原始数据
 	QList<double> ModelMatQList; // 模型参数文件
 	QString DataBaseType; // 数据库类型
@@ -121,16 +75,15 @@ private:
 	QNetworkAccessManager *managerCheckDatabaseUpdate;
 	void startRequest(QUrl url);
 
-// 最下方显示信息标签
 signals:
+	// 最下方显示信息标签
 	void sendMsg(QString msg);
 	void sendProgressBar(qint64 already, qint64 total);
+
 private slots:
-	void showMsg(QString msg);
-	void on_pushButton_SelectModel_clicked();
-	void on_pushButton_SelectData_clicked();
-	void on_pushButton_OutFromSQL_clicked();
-	void on_pushButton_UpdateSQL_clicked();
+	// 托盘相关
+	void ShowWindow(); //处理还原操作
+	void SystemTrayActivated(QSystemTrayIcon::ActivationReason reason); //处理点击托盘操作
 	// 最下方进度条
 	void updateProgressBar(qint64, qint64);
 	// 历史数据库下载
@@ -139,6 +92,36 @@ private slots:
 	void updateDataReadProgress(qint64, qint64);
 	void runDatabaseProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
 	void checkDatabaseUpdateFinished(QNetworkReply *);
+	// 显示信息
+	void showMsg(QString msg);
+
+
+// 【系统生成的】
+private slots:
+	void on_pushButton_DS18B20_clicked();
+	void on_pushButton_CCD_clicked();
+	void on_pushButton_FBGS_clicked();
+	void on_pushButton_clicked();
+	void on_pushButton_2_clicked();
+	void on_pushButton_ENV_clicked();
+	void on_pushButton_LoadFBGT_clicked();
+	void on_pushButton_File1_clicked();
+	void on_pushButton_File2_clicked();
+	void on_pushButton_covresult_clicked();
+	void on_pushButton_LoadFBGT_ALL_clicked();
+	void on_comboBox_skin_currentIndexChanged(const	QString	&arg1);
+	void on_pushButton_LinearRegression_clicked();
+	void on_pushButton_LoadPlotData_clicked();
+	void on_comboBox_LoadPlotList_currentTextChanged(const QString &arg1);
+	void on_pushButton_CCDinSQL_clicked();
+	void on_pushButton_FBGinSQL_clicked();
+	void on_pushButton_DS18BinSQL_clicked();
+	void on_pushButton_ENVinSQL_clicked();
+	void on_pushButton_CNCinSQL_clicked();
+	void on_pushButton_SelectModel_clicked();
+	void on_pushButton_SelectData_clicked();
+	void on_pushButton_OutFromSQL_clicked();
+	void on_pushButton_UpdateSQL_clicked();
 	void on_pushButton_DataZero_clicked();
 	void on_pushButton_DataDelta_clicked();
 	void on_pushButton_DataSampling_clicked();

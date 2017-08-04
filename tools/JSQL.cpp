@@ -1,4 +1,5 @@
 ﻿#include "JSQL.h"
+#include <QSqlDriver>
 
 JSQL::JSQL(QString HostName_, QString DatabaseName_, QString UserName_ , QString Password_, QString DatabaseType_):HostName(HostName_), DatabaseName(DatabaseName_), UserName(UserName_), Password(Password_), DatabaseType(DatabaseType_)
 {
@@ -60,6 +61,22 @@ bool JSQL::queryData(QString tableName, QString startTime, QString endTime,QStri
 	}
 	else
 	{
+		// 先判断该数据库驱动是否支持QuerySize特性，如果支持，则可以使用size()函数
+		// 如果不支持，那么就使用其他方法来获取总行数
+		int numRows = 0;
+		if (db.driver()->hasFeature(QSqlDriver::QuerySize))
+		{
+			numRows = sql_query.size();
+			qDebug() << "[可以]用“显示查询大小”的特性：" << numRows;
+		}
+		else
+		{
+			sql_query.last();
+			numRows = sql_query.at() + 1;
+			qDebug() << "[不能]用“显示查询大小”的特性："<< numRows;
+		}
+
+		int cntProgress = 0;
 		while(sql_query.next())
 		{
 			QString lineData;
@@ -86,6 +103,9 @@ bool JSQL::queryData(QString tableName, QString startTime, QString endTime,QStri
 			lineData = lineData.left(lineData.lastIndexOf(',')); // 去掉最后的,
 			out.append(lineData);
 //			qDebug() << lineData;
+			// 显示进度
+			emit sendProgressBar(100.0/numRows*cntProgress, 100);
+			cntProgress++;
 		}
 //		qDebug() << out[0];
 //		qDebug() << out[1];
