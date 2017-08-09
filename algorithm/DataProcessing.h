@@ -8,6 +8,8 @@
 #include <armadillo>
 using namespace arma;
 
+extern QString saveFilePath;
+
 // 数据各项名
 extern QString DataName_DS18B20;
 extern QString DataName_DS18ALL;
@@ -18,6 +20,7 @@ extern QString DataName_CCD;
 extern QString DataName_ENV;
 extern QString DataName_CNC;
 extern QString DataName_FBGST;
+
 
 // 线性回归 输出: 字符串
 QString QLinearRegression(QString FileName, QString &strOutCsv);
@@ -57,19 +60,24 @@ bool LinearRegressionPredict(QString ModelFile, QString DataFile);
 bool csvStatisticAnalysis(QString InputFileName_str);
 
 // 数据小处理-初始值为0
-bool dataZero(QString fileName);
+bool dataZeroMat(QString fileName);
+bool dataZeroCsv(QString fileName);
 // 数据小处理-增量化（后一个数-前一个数）
-bool dataDelta(QString fileName);
+bool dataDeltaMat(QString fileName);
+bool dataDeltaCsv(QString fileName);
 // 数据小处理-压缩拉伸
-bool dataSampling(QString fileName, int &nowNum ,int needNum);
+bool dataSamplingMat(QString fileName, int &nowNum ,int needNum);
+bool dataSamplingCsv(QString fileName, int &nowNum ,int needNum);
 // 数据小处理-数据清洗(设定阈值内数据，前一个值覆盖后一个值)
-bool dataClean(QString fileName, double maxNum, double minNum);
+bool dataCleanMat(QString fileName, double maxNum, double minNum);
+bool dataCleanCsv(QString fileName, double maxNum, double minNum);
 // 数据小处理-趋势预测
-bool dataTendency(QString fileName, int window);
+bool dataTendencyMat(QString fileName, int window);
+bool dataTendencyCsv(QString fileName, int window);
 // 数据小处理-按天拆分
-bool dataSplitByDate(QString fileName);
+bool dataSplitByDateCsv(QString fileName);
 // 数据小处理-csv合并
-bool csvMerge(QStringList fileNameList);
+bool mergeCsv(QStringList fileNameList);
 
 // 虚拟映射-数据通道映射为虚拟标准通道-FBG温度
 bool virtualMapFBGT(QStringList fileNameList);
@@ -81,7 +89,7 @@ bool virtualMapDS18(QStringList fileNameList);
 bool virtualFBGtoTEMP(QStringList fileNameList);
 // 虚拟映射-映射的FBG应力传感器转应力
 bool virtualFBGtoSTRESS(QStringList fileNameList);
-// 一键环境温度数据映射
+// 虚拟映射-环境温度数据映射-txt版本
 bool OriENVtoVirtual(QStringList EnvFileNameList);
 // 一键原始电类数据映射
 bool OriDS18toVirtual(QString dir);

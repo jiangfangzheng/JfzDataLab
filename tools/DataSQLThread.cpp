@@ -165,7 +165,7 @@ bool DataSQLThread::DATAfromSQL()
 			endTime   = TimeToTimeNum(endTime);
 			saveFileName = startTime +"~"+endTime +"_"+tableName+"_OriData.csv";
 			qDebug()<<"saveFileName "<<saveFileName;
-			b = JIO::save(saveFileName,out);
+			b = JIO::save(saveFilePath + saveFileName,out);
 		}
 		else
 			b = false;
@@ -186,7 +186,7 @@ bool DataSQLThread::DATAfromSQL()
 				endTime   = TimeToTimeNum(endTime);
 				saveFileName = startTime +"~"+endTime +"_"+tableName+"_OptData.csv";
 				qDebug()<<"saveFileName "<<saveFileName;
-				b = JIO::save(saveFileName,out);
+				b = JIO::save(saveFilePath + saveFileName,out);
 			}
 			else
 				b = false;
@@ -217,7 +217,7 @@ bool DataSQLThread::DATAfromSQL()
 				endTime   = TimeToTimeNum(endTime);
 				saveFileName = startTime +"~"+endTime +"_"+tableName+"_OptData.csv";
 				qDebug()<<"saveFileName "<<saveFileName;
-				b = JIO::save(saveFileName,out);
+				b = JIO::save(saveFilePath + saveFileName,out);
 			}
 			else
 				b = false;
@@ -275,7 +275,7 @@ bool DataSQLThread::DATAfromSQL()
 				endTime   = TimeToTimeNum(endTime);
 				saveFileName = startTime +"~"+endTime +"_"+tableName+"_OptData.csv";
 				qDebug()<<"saveFileName "<<saveFileName;
-				b = JIO::save(saveFileName,outData);
+				b = JIO::save(saveFilePath + saveFileName,outData);
 				if(b && b1)
 					b = true;
 			}

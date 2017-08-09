@@ -16,6 +16,7 @@
 #include <math.h>
 #include "tools/EnvXlsReadThread.h"
 #include "plugins/qcustomplot.h"
+#include "About.h"
 #include "systemTray.h"
 
 class QNetworkReply;
@@ -43,28 +44,23 @@ private:
 
 // 【自己写的】
 private:
-	//自定义系统托盘
+	About aboutUI;
+	// 自定义系统托盘
 	SystemTray * myTray;
 	// 工作区路径
 	QString workspacePath;
 	// Skins
 	QMap<QString, QString> mapStyle;
 	void initSkins();
-	// Data
-	mat MatDS18B20;
-	mat MatCCD;
-	mat MatFBGT;
-	mat MatFBGS;
-	mat MatENV;
-
+	// 数据处理相关
+	int dataProType; // 数据处理类型
 	QString correlationFileName1;
 	QString correlationFileName2;
 	QString ModelFile; // 模型文件
-
-	QList<QList<QString>> plotDataStrList; // 绘图载入原始数据
 	QList<double> ModelMatQList; // 模型参数文件
 	QString DataBaseType; // 数据库类型
-	// JPlot
+	// 绘图相关
+	QList<QList<QString>> plotDataStrList; // 绘图载入原始数据
 	void JfzPlot(QVector<double> MatData, QString PicName, int TuNum, QColor Colorstyle, double ymax, double ymin);
 	// 历史数据库下载
 	QNetworkAccessManager *managerDatabase;
@@ -137,6 +133,10 @@ private slots:
 	void on_pushButton_OriENVtoVirtual_clicked();
 	void on_pushButton_OriFBGtoVirtual_clicked();
 	void on_pushButton_CSVmerge_clicked();
+	void on_radioButton_DataType_CSV_clicked(bool checked);
+	void on_radioButton_DataType_MAT_clicked(bool checked);
+	void on_pushButton_TimeStand_clicked();
+	void on_pushButton_DS18_ENVtoVirtual_clicked();
 };
 
 #endif // MAINWINDOW_H

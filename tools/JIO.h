@@ -25,6 +25,7 @@ public:
 	static bool save(QString fileName, mat matData);
 	static bool save(QString fileName, QList<QList<double>> matData);
 	static bool save(QString fileName, QString itemName, QStringList timeName, mat matData);
+	static bool save(QString fileName, QStringList itemName, QStringList timeName, mat matData);
 	// 显示
 	static void show(QStringList input);
 	static void show(QList<QList<QString>> input);

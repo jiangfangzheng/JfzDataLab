@@ -10,13 +10,19 @@
 #include "plugins/qcustomplot.h"
 #include <QtNetwork>
 
+// 保存文件路径
+QString saveFilePath;
+
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
-	// 工作区路径
+	// 工作区\存文件 路径
 	workspacePath = "./workspace/";
+	saveFilePath =  "E:/[Data]/output/";
+	// 数据处理类型 csv（0）  mat（1）
+	dataProType = 0;
 	// 初始化Skin
 	this->initSkins();
 	// 初始化qcustomplot
@@ -341,7 +347,11 @@ void MainWindow::on_pushButton_DataZero_clicked()
 	if(!fileName.isEmpty())
 	{
 		// 初始值为0算法 dataZero
-		DataProcessingThread *dataPro = new DataProcessingThread(fileName, dataZero);
+		DataProcessingThread *dataPro = nullptr;
+		if(dataProType == 0)
+			dataPro = new DataProcessingThread(fileName, dataZeroCsv);
+		if(dataProType == 1)
+			dataPro = new DataProcessingThread(fileName, dataZeroMat);
 		dataPro->start();
 		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
 		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
@@ -356,7 +366,11 @@ void MainWindow::on_pushButton_DataDelta_clicked()
 	if(!fileName.isEmpty())
 	{
 		// 增量化算法 dataDelta
-		DataProcessingThread *dataPro = new DataProcessingThread(fileName, dataDelta);
+		DataProcessingThread *dataPro = nullptr;
+		if(dataProType == 0)
+			dataPro = new DataProcessingThread(fileName, dataDeltaCsv);
+		if(dataProType == 1)
+			dataPro = new DataProcessingThread(fileName, dataDeltaMat);
 		dataPro->start();
 		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
 		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
@@ -372,9 +386,14 @@ void MainWindow::on_pushButton_DataSampling_clicked()
 		int needNum = ui->lineEdit_DataSampling->text().toInt();
 		int nowNum = 0;
 		// 参数绑定
-		auto dataSampling1 = std::bind(dataSampling, std::placeholders::_1, nowNum, needNum);
+		auto dataSampling1 = std::bind(dataSamplingMat, std::placeholders::_1, nowNum, needNum);
+		auto dataSampling1Csv = std::bind(dataSamplingCsv, std::placeholders::_1, nowNum, needNum);
 		// 压缩拉伸算法 dataSampling
-		DataProcessingThread *dataPro = new DataProcessingThread(fileName, dataSampling1);
+		DataProcessingThread *dataPro = nullptr;
+		if(dataProType == 0)
+			dataPro = new DataProcessingThread(fileName, dataSampling1Csv);
+		if(dataProType == 1)
+			dataPro = new DataProcessingThread(fileName, dataSampling1);
 		dataPro->start();
 		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
 		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
@@ -390,9 +409,14 @@ void MainWindow::on_pushButton_DataClean_clicked()
 		double maxNum = ui->lineEdit_DataCleanMax->text().toDouble();
 		double minNum = ui->lineEdit_DataCleanMin->text().toDouble();
 		// 参数绑定
-		auto dataClean1 = std::bind(dataClean, std::placeholders::_1, maxNum, minNum);
+		auto dataClean1 = std::bind(dataCleanMat, std::placeholders::_1, maxNum, minNum);
+		auto dataClean1Csv = std::bind(dataCleanCsv, std::placeholders::_1, maxNum, minNum);
 		// 数据清洗算法 dataClean
-		DataProcessingThread *dataPro = new DataProcessingThread(fileName, dataClean1);
+		DataProcessingThread *dataPro = nullptr;
+		if(dataProType == 0)
+			dataPro = new DataProcessingThread(fileName, dataClean1Csv);
+		if(dataProType == 1)
+			dataPro = new DataProcessingThread(fileName, dataClean1);
 		dataPro->start();
 		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
 		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
@@ -407,9 +431,14 @@ void MainWindow::on_pushButton_DataTendency_clicked()
 	{
 		int window = ui->lineEdit_DataWindow->text().toInt();
 		// 参数绑定
-		auto dataTendency1 = std::bind(dataTendency, std::placeholders::_1, window);
+		auto dataTendency1 = std::bind(dataTendencyMat, std::placeholders::_1, window);
+		auto dataTendency1Csv = std::bind(dataTendencyCsv, std::placeholders::_1, window);
 		// 数据清洗算法 dataClean
-		DataProcessingThread *dataPro = new DataProcessingThread(fileName, dataTendency1);
+		DataProcessingThread *dataPro = nullptr;
+		if(dataProType == 0)
+			dataPro = new DataProcessingThread(fileName, dataTendency1Csv);
+		if(dataProType == 1)
+			dataPro = new DataProcessingThread(fileName, dataTendency1);
 		dataPro->start();
 		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
 		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
@@ -423,7 +452,7 @@ void MainWindow::on_pushButton_SplitByDate_clicked()
 	if(!fileName.isEmpty())
 	{
 		// 按天拆分 dataSplitByDate
-		DataProcessingThread *dataPro = new DataProcessingThread(fileName, dataSplitByDate);
+		DataProcessingThread *dataPro = new DataProcessingThread(fileName, dataSplitByDateCsv);
 		dataPro->start();
 		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
 		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
@@ -441,7 +470,7 @@ void MainWindow::on_pushButton_CSVmerge_clicked()
 	else
 	{
 		// csv合并 csvMerge
-		DataProcessingThread *dataPro = new DataProcessingThread(fileNameList, csvMerge);
+		DataProcessingThread *dataPro = new DataProcessingThread(fileNameList, mergeCsv);
 		dataPro->start();
 		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
 		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
@@ -497,6 +526,12 @@ void MainWindow::on_pushButton_VirtualFBGtoSTRESS_clicked()
 	dataPro->start();
 	connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
 	connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
+}
+
+// 虚拟映射-电类环境温度4个
+void MainWindow::on_pushButton_DS18_ENVtoVirtual_clicked()
+{
+
 }
 
 // 一键环境温度数据映射
@@ -947,5 +982,42 @@ void MainWindow::checkDatabaseUpdateFinished(QNetworkReply *reply)
 void MainWindow::on_pushButton_UpdateSQL_clicked()
 {
 	managerCheckDatabaseUpdate->get(QNetworkRequest(QUrl("http://lgpfw.jfz.me/soft/JfzDataLabDatabaseUpdate.txt")));
+}
+
+
+void MainWindow::on_radioButton_DataType_CSV_clicked(bool checked)
+{
+	if(checked)
+		dataProType = 0;  // csv
+	qDebug()<<"dataProType"<<dataProType;
+	// 能用
+	ui->pushButton_SplitByDate->setEnabled(true);
+	ui->pushButton_CSVmerge->setEnabled(true);
+	ui->pushButton_TimeStand->setEnabled(true);
+	ui->pushButton_File1->setEnabled(true);
+	ui->pushButton_File2->setEnabled(true);
+	// 不能用
+	ui->pushButton_LinearRegression->setEnabled(false);
+}
+
+void MainWindow::on_radioButton_DataType_MAT_clicked(bool checked)
+{
+	if(checked)
+		dataProType = 1; // mat
+	qDebug()<<"dataProType"<<dataProType;
+	// 能用
+	ui->pushButton_LinearRegression->setEnabled(true);
+	// 不能用
+	ui->pushButton_SplitByDate->setEnabled(false);
+	ui->pushButton_CSVmerge->setEnabled(false);
+	ui->pushButton_TimeStand->setEnabled(false);
+	ui->pushButton_File1->setEnabled(false);
+	ui->pushButton_File2->setEnabled(false);
+
+}
+
+void MainWindow::on_pushButton_TimeStand_clicked()
+{
+	aboutUI.show();
 }
 

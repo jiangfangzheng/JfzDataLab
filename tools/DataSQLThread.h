@@ -19,17 +19,17 @@ public:
 	void setQueryMsg(QString tableName, QString startTime, QString endTime, QString itemName, int itemNum, bool isStr,bool isOri);
 	void run();
 private:
-	QString dir;
-	JSQL *jsql; // 数据库类地址
-	QString dataType;
-	QString processingType;
-	QString tableName;
-	QString startTime;
-	QString endTime;
-	QString itemName;
-	int itemNum;
-	bool isStr;
-	bool isOri;
+	QString dir;			// 文件路径
+	JSQL *jsql;				// 数据库类地址
+	QString dataType;		// 数据类型
+	QString processingType;	// 处理类型
+	QString tableName;		// 表名
+	QString startTime;		// 开始时间
+	QString endTime;		// 结束时间
+	QString itemName;		// 数据项名字
+	int itemNum;			// 数据项的列数
+	bool isStr;				// 是否是字符串数据
+	bool isOri;				// 是否导出原始数据 否则导出优化数据
 	// 对外接口
 	bool CCDtoSQL(QString &dir);
 	bool DS1toSQL(QString &dir);

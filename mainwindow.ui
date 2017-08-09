@@ -122,7 +122,7 @@
       <widget class="QPushButton" name="pushButton_SelectModel">
        <property name="geometry">
         <rect>
-         <x>430</x>
+         <x>350</x>
          <y>200</y>
          <width>70</width>
          <height>28</height>
@@ -138,7 +138,7 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>430</x>
          <y>200</y>
          <width>70</width>
          <height>28</height>
@@ -616,7 +616,7 @@
         <property name="geometry">
          <rect>
           <x>120</x>
-          <y>20</y>
+          <y>60</y>
           <width>90</width>
           <height>28</height>
          </rect>
@@ -632,7 +632,7 @@
         <property name="geometry">
          <rect>
           <x>120</x>
-          <y>60</y>
+          <y>100</y>
           <width>90</width>
           <height>28</height>
          </rect>
@@ -723,6 +723,22 @@
         </property>
         <property name="text">
          <string>映射转应力</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_DS18_ENVtoVirtual">
+        <property name="geometry">
+         <rect>
+          <x>120</x>
+          <y>20</y>
+          <width>90</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>电类环境</string>
         </property>
        </widget>
       </widget>

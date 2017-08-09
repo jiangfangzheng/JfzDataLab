@@ -38,7 +38,8 @@ SOURCES += main.cpp\
     algorithm/DataProcessing.cpp \
     tools/JIO.cpp \
     tools/DataProcessingThread.cpp \
-    tools/DataSQLThread.cpp
+    tools/DataSQLThread.cpp \
+    ui/About.cpp
 
 HEADERS  += ui/mainwindow.h \
     tools/EnvXlsReadThread.h \
@@ -51,9 +52,11 @@ HEADERS  += ui/mainwindow.h \
     algorithm/DataProcessing.h \
     tools/JIO.h \
     tools/DataProcessingThread.h \
-    tools/DataSQLThread.h
+    tools/DataSQLThread.h \
+    ui/About.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    ui/About.ui
 
 RESOURCES += \
     skins/skins.qrc

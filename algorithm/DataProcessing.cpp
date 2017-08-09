@@ -3,6 +3,10 @@
 // Date:		2017-07-23
 // Description:	武重数据标准化算法
 
+#if _MSC_VER >= 1600
+	   #pragma execution_character_set("utf-8")
+#endif
+
 #include "DataProcessing.h"
 #include "tools/JIO.h"
 #include <vector>
@@ -1770,7 +1774,7 @@ bool saveStandData(QString Title, QString DataName, QStringList Time, mat Mat)
 {
 	QString Text = Title + "," + DataName + "\r\n";
 	// 写抬头
-	QString SaveFileName = Time[0].left(10) + Title + ".csv";
+	QString SaveFileName = saveFilePath + Time[0].left(10) + Title + ".csv";
 	QFile file(SaveFileName); // 实例 QFile
 	file.open(QIODevice::ReadWrite | QIODevice::Append); // 存在打开，不存在创建
 	QByteArray str = Text.toUtf8();// 写入内容，这里需要转码，否则报错。
@@ -1800,7 +1804,7 @@ bool saveStandDataNoTimeFix(QString Title, QString DataName, QString Date, QStri
 {
 	QString Text = Title + "," + DataName + "\r\n";
 	// 写抬头
-	QString SaveFileName = Date + Title + ".csv";
+	QString SaveFileName = saveFilePath + Date + Title + ".csv";
 	QFile file(SaveFileName); // 实例 QFile
 	file.open(QIODevice::ReadWrite | QIODevice::Append); // 存在打开，不存在创建
 	QByteArray str = Text.toUtf8();// 写入内容，这里需要转码，否则报错。
@@ -2269,12 +2273,12 @@ bool LinearRegression(QString inputFile)
 	outFileName = outFileName.left(outFileName.lastIndexOf('.'));
 	outFileName += "-LRparameters.csv";
 	//qDebug()<<"outFileName"<<outFileName;
-	bool b = JIO::save(outFileName, strOutCsv);
+	bool b = JIO::save(saveFilePath + outFileName, strOutCsv);
 	// 保存C语言风格的数组
 	QString CStyleArrayStr{ "double Answerx[cols]={" };
 	CStyleArrayStr += strOutCsv + "};";
 	outFileName.replace(QRegExp("\\.csv"), ".cpp");
-	JIO::save("Code_" + outFileName, CStyleArrayStr);
+	JIO::save(saveFilePath + "Code_" + outFileName, CStyleArrayStr);
 	return b;
 }
 
@@ -2331,7 +2335,7 @@ bool LinearRegressionPredict(QString ModelFile, QString DataFile)
 		QString outFileName = DataFile.right(DataFile.size() - DataFile.lastIndexOf('/') - 1);
 		outFileName = outFileName.left(outFileName.lastIndexOf('.'));
 		outFileName += "-predictedResult.csv";
-		JIO::save(outFileName, DataFileMat);
+		JIO::save(saveFilePath + outFileName, DataFileMat);
 		b = true;
 	}
 	return b;
@@ -2370,7 +2374,7 @@ bool csvStatisticAnalysis(QString InputFileName_str)
 }
 
 // 数据小处理-初始值为0
-bool dataZero(QString fileName)
+bool dataZeroMat(QString fileName)
 {
 	// 【1】初始值为0算法
 	mat inputMat = JIO::readAMat(fileName);
@@ -2384,12 +2388,32 @@ bool dataZero(QString fileName)
 	}
 	// 【2】保存文件
 	QString saveFileName = "Zero_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
-	bool b = JIO::save(saveFileName, inputMat);
+	bool b = JIO::save(saveFilePath + saveFileName, inputMat);
+	return b;
+}
+
+bool dataZeroCsv(QString fileName)
+{
+	// 【1】初始值为0算法
+	QStringList itemName;
+	QStringList timeName;
+	mat inputMat = JIO::readCsv(fileName, itemName, timeName);
+	for (unsigned int j = 0; j < inputMat.n_cols; ++j) // 列
+	{
+		double oneLineValue = inputMat(0, j);
+		for (unsigned int i = 0; i < inputMat.n_rows; ++i) // 遍历行，减第一行的值
+		{
+			inputMat(i, j) = inputMat(i, j) - oneLineValue;
+		}
+	}
+	// 【2】保存文件
+	QString saveFileName = "Zero_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
+	bool b = JIO::save(saveFilePath + saveFileName, itemName, timeName, inputMat);
 	return b;
 }
 
 // 数据小处理-增量化（后一个数-前一个数）
-bool dataDelta(QString fileName)
+bool dataDeltaMat(QString fileName)
 {
 	// 【1】增量化算法
 	mat inputMat = JIO::readAMat(fileName);
@@ -2402,12 +2426,31 @@ bool dataDelta(QString fileName)
 	}
 	// 【2】保存文件
 	QString saveFileName = "Delta_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
-	bool b = JIO::save(saveFileName, inputMat);
+	bool b = JIO::save(saveFilePath + saveFileName, inputMat);
+	return b;
+}
+
+bool dataDeltaCsv(QString fileName)
+{
+	// 【1】增量化算法
+	QStringList itemName;
+	QStringList timeName;
+	mat inputMat = JIO::readCsv(fileName, itemName, timeName);
+	for (unsigned int j = 0; j < inputMat.n_cols; ++j) // 列 0列到n列
+	{
+		for (int i = inputMat.n_rows - 1; i > 0; --i) // 行n行到1行-倒序
+		{
+			inputMat(i, j) = inputMat(i, j) - inputMat(i - 1, j);
+		}
+	}
+	// 【2】保存文件
+	QString saveFileName = "Delta_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
+	bool b = JIO::save(saveFilePath + saveFileName, itemName, timeName, inputMat);
 	return b;
 }
 
 // 数据小处理-压缩拉伸
-bool dataSampling(QString fileName, int &nowNum ,int needNum)
+bool dataSamplingMat(QString fileName, int &nowNum ,int needNum)
 {
 	// 【1】压缩拉伸算法
 	mat inputMat = JIO::readAMat(fileName);
@@ -2428,7 +2471,39 @@ bool dataSampling(QString fileName, int &nowNum ,int needNum)
 		saveFileName = "Minus_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
 	else
 		saveFileName = "Add_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
-	bool b = JIO::save(saveFileName, out);
+	bool b = JIO::save(saveFilePath + saveFileName, out);
+	if (b)
+		if (nowNum >= needNum)
+			qDebug("压缩 处理成功!");
+		else
+			qDebug("拉伸 处理成功!");
+	return b;
+}
+
+bool dataSamplingCsv(QString fileName, int &nowNum ,int needNum)
+{
+	// 【1】压缩拉伸算法
+	QStringList itemName;
+	QStringList timeName;
+	mat inputMat = JIO::readCsv(fileName, itemName, timeName);
+	nowNum = inputMat.n_rows;
+	QList<int> needLine = sampling(nowNum, needNum);
+	mat out(needLine.size(), inputMat.n_cols);
+	out.fill(0);
+	for (unsigned int j = 0; j < inputMat.n_cols; ++j) // 列 0列到n列
+	{
+		for (int i = 0; i < needLine.size(); ++i) // 行
+		{
+			out(i, j) = inputMat(needLine[i], j);
+		}
+	}
+	// 【2】保存文件
+	QString saveFileName;
+	if (nowNum >= needNum)
+		saveFileName = "Minus_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
+	else
+		saveFileName = "Add_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
+	bool b = JIO::save(saveFilePath + saveFileName, itemName, timeName, out);
 	if (b)
 		if (nowNum >= needNum)
 			qDebug("压缩 处理成功!");
@@ -2438,7 +2513,7 @@ bool dataSampling(QString fileName, int &nowNum ,int needNum)
 }
 
 // 数据小处理-数据清洗(设定阈值内数据，前一个值覆盖后一个值)
-bool dataClean(QString fileName, double maxNum, double minNum)
+bool dataCleanMat(QString fileName, double maxNum, double minNum)
 {
 	// 【1】数据清洗算法
 	mat inputMat = JIO::readAMat(fileName);
@@ -2464,12 +2539,44 @@ bool dataClean(QString fileName, double maxNum, double minNum)
 	}
 	// 【2】保存文件
 	QString saveFileName = "Clean_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
-	bool b = JIO::save(saveFileName, inputMat);
+	bool b = JIO::save(saveFilePath + saveFileName, inputMat);
+	return b;
+}
+
+bool dataCleanCsv(QString fileName, double maxNum, double minNum)
+{
+	// 【1】数据清洗算法
+	QStringList itemName;
+	QStringList timeName;
+	mat inputMat = JIO::readCsv(fileName, itemName, timeName);
+	for (unsigned int j = 0; j < inputMat.n_cols; ++j) // 列 0列到n列
+	{
+		for (unsigned int i = 1; i < inputMat.n_rows; ++i) // 行
+		{
+			double value = inputMat(0, j);
+			inputMat(0, j) = (maxNum - value) > (value - minNum) ? minNum : maxNum;
+			// 超出范围执行
+			if (inputMat(i, j) > maxNum || inputMat(i, j) < minNum)
+			{
+				// 确保上一个不超出范围
+				if (inputMat(i - 1, j) > minNum && inputMat(i - 1, j) < maxNum)
+					inputMat(i, j) = inputMat(i - 1, j);
+				else
+				{
+					auto val = inputMat(i, j);
+					inputMat(i, j) = (maxNum - val) > (val - minNum) ? minNum : maxNum;
+				}
+			}
+		}
+	}
+	// 【2】保存文件
+	QString saveFileName = "Clean_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
+	bool b = JIO::save(saveFilePath + saveFileName, itemName, timeName, inputMat);
 	return b;
 }
 
 // 数据小处理-趋势预测
-bool dataTendency(QString fileName, int window)
+bool dataTendencyMat(QString fileName, int window)
 {
 	// 【1】趋势预测算法
 	mat inputMat = JIO::readAMat(fileName);
@@ -2508,14 +2615,61 @@ bool dataTendency(QString fileName, int window)
 	QString saveFileName1 = "TrendMax_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
 	QString saveFileName2 = "TrendMin_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
 	QString saveFileName3 = "TrendAvg_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
-	bool b1 = JIO::save(saveFileName1, matMaxOut);
-	bool b2 = JIO::save(saveFileName2, matMinOut);
-	bool b3 = JIO::save(saveFileName3, matAvgOut);
+	bool b1 = JIO::save(saveFilePath + saveFileName1, matMaxOut);
+	bool b2 = JIO::save(saveFilePath + saveFileName2, matMinOut);
+	bool b3 = JIO::save(saveFilePath + saveFileName3, matAvgOut);
+	return b1 && b2 && b3;
+}
+
+bool dataTendencyCsv(QString fileName, int window)
+{
+	// 【1】趋势预测算法
+	QStringList itemName;
+	QStringList timeName;
+	mat inputMat = JIO::readCsv(fileName, itemName, timeName);
+	mat matMaxOut;
+	mat matMinOut;
+	mat matAvgOut;
+	for (unsigned int j = 0; j < inputMat.n_cols; ++j) // 列 0列到n列
+	{
+		QList<double> input;
+		QList<double> outMax;
+		QList<double> outMin;
+		QList<double> outAvg;
+		// 得到QList输入
+		for (unsigned int i = 1; i < inputMat.n_rows; ++i) // 行
+		{
+			input.append(inputMat(i, j));
+		}
+		// 加窗滤波
+		findTrendByWindow(input, window, outMax, outMin, outAvg);
+		// 写入mat
+		mat matMax(outMax.size(), 1);
+		mat matMin(outMin.size(), 1);
+		mat matAvg(outAvg.size(), 1);
+		for (unsigned int i = 0; i < matMax.n_rows; ++i)
+		{
+			matMax(i, 0) = outMax[i];
+			matMin(i, 0) = outMin[i];
+			matAvg(i, 0) = outAvg[i];
+		}
+		// 合入大mat
+		matMaxOut = join_rows(matMaxOut, matMax);
+		matMinOut = join_rows(matMinOut, matMin);
+		matAvgOut = join_rows(matAvgOut, matAvg);
+	}
+	// 【2】保存文件
+	QString saveFileName1 = "TrendMax_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
+	QString saveFileName2 = "TrendMin_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
+	QString saveFileName3 = "TrendAvg_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
+	bool b1 = JIO::save(saveFilePath + saveFileName1, itemName, timeName, matMaxOut);
+	bool b2 = JIO::save(saveFilePath + saveFileName2, itemName, timeName, matMinOut);
+	bool b3 = JIO::save(saveFilePath + saveFileName3, itemName, timeName, matAvgOut);
 	return b1 && b2 && b3;
 }
 
 // 数据小处理-按天拆分
-bool dataSplitByDate(QString fileName)
+bool dataSplitByDateCsv(QString fileName)
 {
 	// 【1】虚拟映射算法
 	QStringList inputList = JIO::readFile(fileName);
@@ -2534,7 +2688,7 @@ bool dataSplitByDate(QString fileName)
 	for (QString dateName : dateSet)
 	{
 		qDebug() << dateName;
-		QString saveName = dateName + "_" + getFileName(fileName);
+		QString saveName = saveFilePath + dateName + "_" + getFileName(fileName);
 		QFile f(saveName);
 		qDebug() << saveName;
 		if (!f.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -2555,7 +2709,7 @@ bool dataSplitByDate(QString fileName)
 }
 
 // 数据小处理-csv合并
-bool csvMerge(QStringList fileNameList)
+bool mergeCsv(QStringList fileNameList)
 {
 	bool b = false;
 	if (fileNameList.size() <= 1)
@@ -2622,7 +2776,7 @@ bool virtualMapFBGT(QStringList fileNameList)
 			// 【2】保存文件
 			QString saveFileName = getFileName(fileName);
 			saveFileName = saveFileName.left(10) + "_FBGT_Wave.csv";
-			b = JIO::save(saveFileName, VirtualMap_FBGT_Now, timeName, outputMat);
+			b = JIO::save(saveFilePath + saveFileName, VirtualMap_FBGT_Now, timeName, outputMat);
 		}
 	}
 	return b;
@@ -2648,7 +2802,7 @@ bool virtualMapFBGS(QStringList fileNameList)
 			// 【2】保存文件
 			QString saveFileName = getFileName(fileName);
 			saveFileName = saveFileName.left(10) + "_FBGS_Wave.csv";
-			b = JIO::save(saveFileName, VirtualMap_FBGS_Now, timeName, outputMat);
+			b = JIO::save(saveFilePath + saveFileName, VirtualMap_FBGS_Now, timeName, outputMat);
 		}
 	}
 	return b;
@@ -2670,7 +2824,7 @@ bool virtualMapDS18(QStringList fileNameList)
 			// 【2】保存文件
 			QString saveFileName = getFileName(fileName);
 			saveFileName = saveFileName.left(10) + "_DS18_Temp.csv";
-			b = JIO::save(saveFileName, VirtualMap_DS18_Now, timeName, inputMat);
+			b = JIO::save(saveFilePath + saveFileName, VirtualMap_DS18_Now, timeName, inputMat);
 		}
 	}
 	return b;
@@ -2718,7 +2872,7 @@ bool virtualFBGtoTEMP(QStringList fileNameList)
 			QString saveFileName = getFileName(fileName);
 			saveFileName = saveFileName.left(10) + "_FBGT_Temp.csv";
 			QString itemNameStr = itemName.join(",");
-			b = JIO::save(saveFileName, itemNameStr, timeName, inputMat);
+			b = JIO::save(saveFilePath + saveFileName, itemNameStr, timeName, inputMat);
 		}
 	}
 	return b;
@@ -2785,7 +2939,7 @@ bool virtualFBGtoSTRESS(QStringList fileNameList)
 			QString saveFileName = getFileName(fileNameStress);
 			saveFileName = saveFileName.left(10) + "_FBGS_Stress.csv";
 			QString itemNameStr = itemNameS.join(",");
-			b = JIO::save(saveFileName, itemNameStr, timeNameS, inputStress);
+			b = JIO::save(saveFilePath + saveFileName, itemNameStr, timeNameS, inputStress);
 		}
 	}
 	return b;
@@ -2913,7 +3067,7 @@ bool OriENVtoVirtual(QStringList EnvFileNameList)
 		// 保存文件
 		QString Text = "Time,Back,Right,Left,Front";
 		QString SaveFileName = startDate.left(10) + "~" + endDate.left(10) + "_ENV.csv";
-		QFile file(SaveFileName);
+		QFile file(saveFilePath + SaveFileName);
 		file.open(QIODevice::WriteOnly | QIODevice::Append); // 存在打开，不存在创建
 															 // 写抬头
 		QTextStream txtOutput(&file);
@@ -2948,7 +3102,7 @@ bool OriDS18toVirtual(QString dir)
 	}
 	QString saveFileName;
 	saveFileName = Time[0].left(10) + "_DS18_Temp.csv";
-	bool b = JIO::save(saveFileName, VirtualMap_DS18_Now, timeName, MatDS18B20);
+	bool b = JIO::save(saveFilePath + saveFileName, VirtualMap_DS18_Now, timeName, MatDS18B20);
 	return b;
 }
 
@@ -2988,8 +3142,8 @@ bool OriFBGtoVirtual(QString dir)
 	saveFileNameT = Time[0].left(10) + "_FBGT_Wave.csv";
 	saveFileNameS = Time[0].left(10) + "_FBGS_Wave.csv";
 
-	bool bT = JIO::save(saveFileNameT, VirtualMap_FBGT_Now, timeName, outputMatT);
-	bool bS = JIO::save(saveFileNameS, VirtualMap_FBGS_Now, timeName, outputMatS);
+	bool bT = JIO::save(saveFilePath + saveFileNameT, VirtualMap_FBGT_Now, timeName, outputMatT);
+	bool bS = JIO::save(saveFilePath + saveFileNameS, VirtualMap_FBGS_Now, timeName, outputMatS);
 
 	// 【5.1】FBG转温度算法
 	mat outputMatTemp = outputMatT;
@@ -3026,7 +3180,9 @@ bool OriFBGtoVirtual(QString dir)
 	// 【6】保存文件-温度、应力数据
 	saveFileNameT = Time[0].left(10) + "_FBGT_Temp.csv";
 	saveFileNameS = Time[0].left(10) + "_FBGS_Stress.csv";
-	bool bTemp = JIO::save(saveFileNameT, VirtualMap_FBGT_Now, timeName, outputMatTemp);
-	bool bStress = JIO::save(saveFileNameS, VirtualMap_FBGS_Now, timeName, inputStress);
+	bool bTemp = JIO::save(saveFilePath + saveFileNameT, VirtualMap_FBGT_Now, timeName, outputMatTemp);
+	bool bStress = JIO::save(saveFilePath + saveFileNameS, VirtualMap_FBGS_Now, timeName, inputStress);
 	return bT && bS && bTemp && bStress;
 }
+
+
