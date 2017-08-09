@@ -2,7 +2,7 @@
 异想家数据处理实验室
 
 截图：
-![](http://blog.jfz.me/1.png)
+![](http://file.jfz.me/1.png)
 
 #### 2017-08-09
 
