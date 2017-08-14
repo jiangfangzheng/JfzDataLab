@@ -78,6 +78,8 @@ bool dataTendencyCsv(QString fileName, int window);
 bool dataSplitByDateCsv(QString fileName);
 // 数据小处理-csv合并
 bool mergeCsv(QStringList fileNameList);
+// 数据小处理-时间规范化
+bool timeStandCsv(QString fileName);
 
 // 虚拟映射-数据通道映射为虚拟标准通道-FBG温度
 bool virtualMapFBGT(QStringList fileNameList);

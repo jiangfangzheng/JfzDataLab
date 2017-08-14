@@ -16,7 +16,6 @@
 #include <math.h>
 #include "tools/EnvXlsReadThread.h"
 #include "plugins/qcustomplot.h"
-#include "About.h"
 #include "systemTray.h"
 
 class QNetworkReply;
@@ -44,7 +43,6 @@ private:
 
 // 【自己写的】
 private:
-	About aboutUI;
 	// 自定义系统托盘
 	SystemTray * myTray;
 	// 工作区路径
@@ -137,6 +135,8 @@ private slots:
 	void on_radioButton_DataType_MAT_clicked(bool checked);
 	void on_pushButton_TimeStand_clicked();
 	void on_pushButton_DS18_ENVtoVirtual_clicked();
+	void on_pushButton_openOutputDir_clicked();
+	void on_pushButton_openInputDir_clicked();
 };
 
 #endif // MAINWINDOW_H

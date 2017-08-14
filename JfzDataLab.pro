@@ -39,7 +39,8 @@ SOURCES += main.cpp\
     tools/JIO.cpp \
     tools/DataProcessingThread.cpp \
     tools/DataSQLThread.cpp \
-    ui/About.cpp
+    ui/SetUI.cpp \
+    ui/AboutUI.cpp
 
 HEADERS  += ui/mainwindow.h \
     tools/EnvXlsReadThread.h \
@@ -53,10 +54,12 @@ HEADERS  += ui/mainwindow.h \
     tools/JIO.h \
     tools/DataProcessingThread.h \
     tools/DataSQLThread.h \
-    ui/About.h
+    ui/SetUI.h \
+    ui/AboutUI.h
 
 FORMS    += mainwindow.ui \
-    ui/About.ui
+    ui/SetUI.ui \
+    ui/AboutUI.ui
 
 RESOURCES += \
     skins/skins.qrc

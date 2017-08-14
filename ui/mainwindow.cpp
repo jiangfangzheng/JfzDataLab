@@ -8,6 +8,7 @@
 #include "algorithm/DataProcessing.h"
 #include "algorithm/datadiagnosis.h"
 #include "plugins/qcustomplot.h"
+#include "SetUI.h"
 #include <QtNetwork>
 
 // 保存文件路径
@@ -19,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 	// 工作区\存文件 路径
-	workspacePath = "./workspace/";
+	workspacePath = QDir::currentPath() + "/workspace/";
 	saveFilePath =  "E:/[Data]/output/";
 	// 数据处理类型 csv（0）  mat（1）
 	dataProType = 0;
@@ -42,6 +43,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(&runDatabaseProcess, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(runDatabaseProcessFinished(int, QProcess::ExitStatus)));
 	managerCheckDatabaseUpdate = new QNetworkAccessManager(this);
 	connect(managerCheckDatabaseUpdate, &QNetworkAccessManager::finished, this, &MainWindow::checkDatabaseUpdateFinished);
+	// tableWidget默认隐藏;
+//	ui->tableWidget->hide();
 }
 
 MainWindow::~MainWindow()
@@ -343,7 +346,7 @@ void MainWindow::on_pushButton_SelectData_clicked()
 // 数据小处理-初始值为0
 void MainWindow::on_pushButton_DataZero_clicked()
 {
-	QString fileName = QFileDialog::getOpenFileName(this, tr("初始值为0算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	QString fileName = QFileDialog::getOpenFileName(this, tr("数据小处理-初始值为0"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!fileName.isEmpty())
 	{
 		// 初始值为0算法 dataZero
@@ -362,7 +365,7 @@ void MainWindow::on_pushButton_DataZero_clicked()
 // 数据小处理-增量化（后一个数-前一个数）
 void MainWindow::on_pushButton_DataDelta_clicked()
 {
-	QString fileName = QFileDialog::getOpenFileName(this, tr("增量化算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	QString fileName = QFileDialog::getOpenFileName(this, tr("数据小处理-增量化"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!fileName.isEmpty())
 	{
 		// 增量化算法 dataDelta
@@ -380,7 +383,7 @@ void MainWindow::on_pushButton_DataDelta_clicked()
 // 数据小处理-压缩拉伸
 void MainWindow::on_pushButton_DataSampling_clicked()
 {
-	QString fileName = QFileDialog::getOpenFileName(this, tr("压缩拉伸算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	QString fileName = QFileDialog::getOpenFileName(this, tr("数据小处理-压缩拉伸"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!fileName.isEmpty())
 	{
 		int needNum = ui->lineEdit_DataSampling->text().toInt();
@@ -403,7 +406,7 @@ void MainWindow::on_pushButton_DataSampling_clicked()
 // 数据小处理-数据清洗(设定阈值内数据，前一个值覆盖后一个值)
 void MainWindow::on_pushButton_DataClean_clicked()
 {
-	QString fileName = QFileDialog::getOpenFileName(this, tr("数据清洗算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	QString fileName = QFileDialog::getOpenFileName(this, tr("数据小处理-数据清洗"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!fileName.isEmpty())
 	{
 		double maxNum = ui->lineEdit_DataCleanMax->text().toDouble();
@@ -426,7 +429,7 @@ void MainWindow::on_pushButton_DataClean_clicked()
 // 数据小处理-趋势预测
 void MainWindow::on_pushButton_DataTendency_clicked()
 {
-	QString fileName = QFileDialog::getOpenFileName(this, tr("趋势预测算法"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	QString fileName = QFileDialog::getOpenFileName(this, tr("数据小处理-趋势预测"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!fileName.isEmpty())
 	{
 		int window = ui->lineEdit_DataWindow->text().toInt();
@@ -448,7 +451,7 @@ void MainWindow::on_pushButton_DataTendency_clicked()
 // 数据小处理-按天拆分
 void MainWindow::on_pushButton_SplitByDate_clicked()
 {
-	QString fileName = QFileDialog::getOpenFileName(this, tr("虚拟映射-电类温度"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	QString fileName = QFileDialog::getOpenFileName(this, tr("数据小处理-按天拆分"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(!fileName.isEmpty())
 	{
 		// 按天拆分 dataSplitByDate
@@ -462,7 +465,7 @@ void MainWindow::on_pushButton_SplitByDate_clicked()
 // 数据小处理-csv合并
 void MainWindow::on_pushButton_CSVmerge_clicked()
 {
-	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("csv合并"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("数据小处理-csv合并"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
 	if(fileNameList.size() <=1 )
 	{
 		QMessageBox::critical(NULL, "注意", "请选择2个或以上数目的文件！", QMessageBox::Yes, QMessageBox::Yes);
@@ -471,6 +474,20 @@ void MainWindow::on_pushButton_CSVmerge_clicked()
 	{
 		// csv合并 csvMerge
 		DataProcessingThread *dataPro = new DataProcessingThread(fileNameList, mergeCsv);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
+	}
+}
+
+// 数据小处理-时间规范化
+void MainWindow::on_pushButton_TimeStand_clicked()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, tr("数据小处理-时间规范化"), workspacePath, tr("textfile(*.csv*);;Allfile(*.*)"));
+	if(!fileName.isEmpty())
+	{
+		// 时间规范化 timeStandCsv
+		DataProcessingThread *dataPro = new DataProcessingThread(fileName, timeStandCsv);
 		dataPro->start();
 		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
 		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
@@ -590,48 +607,84 @@ void MainWindow::on_pushButton_OriFBGtoVirtual_clicked()
 // 数据概览-载入数据
 void MainWindow::on_pushButton_clicked()
 {
-//	ui->textEdit->clear();
-//	// 载入文件
-//	QString InputFileName_str = QFileDialog::getOpenFileName(this,"载入数据", workspacePath,"textfile(*.csv);;All file(*.*)");
-//	qDebug()<<InputFileName_str;  // 文件名
+	ui->tableWidget->clearContents();
+	// 载入文件
+	QString fileName = QFileDialog::getOpenFileName(this,"数据概览-载入数据", workspacePath, "textfile(*.csv);;All file(*.*)");
+	if(!fileName.isEmpty())
+	{
+		// 需要变量
+		QStringList itemName;
+		QStringList timeName;
+		// 【0】计时开始
+		QTime time;time.start();
+		// 【2】数据概览-总体统计
+		mat input = JIO::readCsv(fileName, itemName, timeName);
+		ui->label_2->setText("数据行列：" + QString::number(input.n_rows)+ " x "+ QString::number(input.n_cols) );
+		ui->label_4->setText("数据名字：" + fileName.right(fileName.size() - fileName.lastIndexOf("/")-1) );
+		ui->label_5->setText("数据总和：" + QString::number(accu(input)) );
+		ui->label_6->setText("数据平均：" + QString::number((accu(input))/(input.n_rows * input.n_cols)) );
+		ui->label_7->setText("数据最大：" + QString::number(max(max(input))) );
+//		ui->label_8->setText("数据最小：" + QString::number(min(min(input))) );
+		// 【3】数据概览-面向列的统计
+		// 数据基本信息-处理
+		mat colSumMat = sum(input);			// 每一列的总和
+		mat maxMat = max(input);			// 每一列的最大值
+		mat minMat = min(input);			// 每一列的最小值
+		mat maxAbsMat = max(abs(input));	// 每一列的最大值(绝对值)
+		mat minAbsMat = min(abs(input));	// 每一列的最小值(绝对值)
+		mat avgMat(1, colSumMat.n_cols);	// 算术平均值
+		avgMat.fill(0);
+		for(auto i=0; i<avgMat.n_cols; ++i)
+		{
+			avgMat(0,i) = colSumMat(i)/(input.n_rows);
+		}
 
-//	if(!InputFileName_str.isEmpty())
-//	{
-//		// 需要变量
-//		QStringList DataName; // 数据各项名
-//		QString strMatRow;
-//		QString strMatCol;
-//		QString strTitle;
-//		QString strMatSum;
-//		QString strMatArit;
-//		QString strMatMax;
-//		QString strMatMin;
-//		// 【0】计时开始
-//		QTime time;time.start();
-//		// 【1】数据分析
-//		mat Mat = DataAnalysis(InputFileName_str, DataName, strMatRow, strMatCol, strTitle, strMatSum, strMatArit, strMatMax, strMatMin);
-//		// 【2】数据概览-处理
-//		ui->label_2->setText("数据行列：" + strMatRow+ " x "+ strMatCol );
-//		ui->label_4->setText("数据名字：" + strTitle );
-//		ui->label_5->setText("数据总和：" + strMatSum );
-//		ui->label_6->setText("数据平均：" + strMatArit );
-//		ui->label_7->setText("数据最大：" + strMatMax );
-//		ui->label_8->setText("数据最小：" + strMatMin );
-//		// 【3】数据诊断
-//		bool b = DataDiagnosis(InputFileName_str, Mat, DataName, ui);
-//		// 【4】计时结束
-//		QString timecost = QString::number(time.elapsed()/1000.0);
-//		if(b)
-//			ui->label_msg->setText("分析成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
-//		else
-//			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'分析失败！</span>");
-//	}
+		// tableWidget控件显示
+		QStringList header;
+		header<<"数据名"<<"和"<<"最大值"<<"最大值(绝对值)"<<"最小值"<<"最小值(绝对值)"<<"算术平均值"<<"数据检查";
+		ui->tableWidget->setRowCount(input.n_cols); // 数据项数目的表行
+		ui->tableWidget->setColumnCount(header.size());
+		ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers); // 不可编辑
+		ui->tableWidget->setHorizontalHeaderLabels(header);
+
+		for(auto i=0; i<input.n_cols; ++i )
+		{
+			QTableWidgetItem *Item1 =new QTableWidgetItem( itemName[i+1]                  );
+			QTableWidgetItem *Item2 =new QTableWidgetItem( QString::number(colSumMat(i))  );
+			QTableWidgetItem *Item3 =new QTableWidgetItem( QString::number(maxMat(i))     );
+			QTableWidgetItem *Item4 =new QTableWidgetItem( QString::number(maxAbsMat(i))  );
+			QTableWidgetItem *Item5 =new QTableWidgetItem( QString::number(minMat(i))     );
+			QTableWidgetItem *Item6 =new QTableWidgetItem( QString::number(minAbsMat(i))  );
+			QTableWidgetItem *Item7 =new QTableWidgetItem( QString::number(avgMat(i))     );
+			QTableWidgetItem *Item8 =new QTableWidgetItem( QString::number(avgMat(i))     );
+
+			//		Item1->setTextAlignment(Qt::AlignHCenter);
+
+			ui->tableWidget->setItem(i,0,Item1); // 数据名，+1 跳过时间项
+			ui->tableWidget->setItem(i,1,Item2); // 和
+			ui->tableWidget->setItem(i,2,Item3); // 最大值
+			ui->tableWidget->setItem(i,3,Item4); // 最大值(绝对值)
+			ui->tableWidget->setItem(i,4,Item5); // 最小值
+			ui->tableWidget->setItem(i,5,Item6); // 最小值(绝对值)
+			ui->tableWidget->setItem(i,6,Item7); // 算术平均值
+			ui->tableWidget->setItem(i,7,Item8); // 数据检查
+		}
+		ui->tableWidget->show();
+
+		bool b = true;
+		// 【4】计时结束
+		QString timecost = QString::number(time.elapsed()/1000.0);
+		if(b)
+			ui->label_msg->setText("分析成功！花费时间：<span style='color: rgb(255, 0, 0);'>" + timecost + "秒</span>");
+		else
+			ui->label_msg->setText("<span style='color: rgb(255, 0, 0);'分析失败！</span>");
+	}
 }
 
 // 数据概览-清空全部
 void MainWindow::on_pushButton_2_clicked()
 {
-	ui->textEdit->clear();
+	ui->tableWidget->clearContents();
 	ui->label_2->setText("数据行列：");
 	ui->label_4->setText("数据名字：");
 	ui->label_5->setText("数据总和：");
@@ -1016,8 +1069,22 @@ void MainWindow::on_radioButton_DataType_MAT_clicked(bool checked)
 
 }
 
-void MainWindow::on_pushButton_TimeStand_clicked()
+// 打开输出目录
+void MainWindow::on_pushButton_openOutputDir_clicked()
 {
-	aboutUI.show();
+//	QString path=QDir::currentPath();	// 获取程序当前目录
+//	path.replace("/","\\");				// 将地址中的"/"替换为"\"，因为在Windows下使用的是"\"。
+//	qDebug()<<path;
+//	QProcess::startDetached("explorer "+path);	// 打开上面获取的目录
+	// 另一种方法
+	QDesktopServices::openUrl(QUrl("E:/[Data]/output", QUrl::TolerantMode));
 }
 
+// 打开工作目录
+void MainWindow::on_pushButton_openInputDir_clicked()
+{
+	QString path = workspacePath;
+	path.replace("/","\\");
+	qDebug()<<path;
+	QProcess::startDetached("explorer " + path);
+}

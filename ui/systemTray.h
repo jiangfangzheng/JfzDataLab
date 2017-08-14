@@ -20,6 +20,7 @@ public:
 	void createAction();
 private:
 	QMenu   *myMenu;			// 托盘菜单
+	QAction *setAction;			// 设置
 	QAction *restoreWinAction;	// 还原
 	QAction *quitAction;		// 退出
 	QAction *aboutUsAction;		// 关于我们
@@ -27,6 +28,7 @@ private:
 private slots:
 	void showAboutUs();
 	void showUpdate();
+	void showSetUI();
 signals:
 	void showWidget();
 };

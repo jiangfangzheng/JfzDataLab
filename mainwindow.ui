@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>600</height>
+    <height>620</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>1000</width>
-    <height>600</height>
+    <height>620</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>1000</width>
-    <height>600</height>
+    <height>620</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -32,11 +32,11 @@
       <x>0</x>
       <y>0</y>
       <width>1000</width>
-      <height>571</height>
+      <height>591</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
@@ -494,6 +494,32 @@
        </property>
        <property name="text">
         <string>输入+输出(最后1列)</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_openOutputDir">
+       <property name="geometry">
+        <rect>
+         <x>350</x>
+         <y>20</y>
+         <width>121</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>打开输出目录</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_openInputDir">
+       <property name="geometry">
+        <rect>
+         <x>210</x>
+         <y>20</y>
+         <width>121</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>打开工作目录</string>
        </property>
       </widget>
      </widget>
@@ -1169,9 +1195,9 @@
      <widget class="QGroupBox" name="groupBox">
       <property name="geometry">
        <rect>
-        <x>110</x>
+        <x>310</x>
         <y>10</y>
-        <width>881</width>
+        <width>681</width>
         <height>71</height>
        </rect>
       </property>
@@ -1263,10 +1289,7 @@
       <property name="title">
        <string>数据基本信息</string>
       </property>
-      <widget class="QTextEdit" name="textEdit">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
+      <widget class="QTableWidget" name="tableWidget">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -1274,14 +1297,6 @@
          <width>961</width>
          <height>421</height>
         </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Consolas</family>
-        </font>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
        </property>
       </widget>
      </widget>
@@ -1360,7 +1375,7 @@
     <property name="geometry">
      <rect>
       <x>900</x>
-      <y>575</y>
+      <y>595</y>
       <width>91</width>
       <height>20</height>
      </rect>
@@ -1373,8 +1388,8 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>575</y>
-      <width>611</width>
+      <y>595</y>
+      <width>300</width>
       <height>20</height>
      </rect>
     </property>
@@ -1386,7 +1401,7 @@
     <property name="geometry">
      <rect>
       <x>810</x>
-      <y>575</y>
+      <y>595</y>
       <width>80</width>
       <height>22</height>
      </rect>
@@ -1395,8 +1410,8 @@
    <widget class="QProgressBar" name="progressBar">
     <property name="geometry">
      <rect>
-      <x>627</x>
-      <y>575</y>
+      <x>320</x>
+      <y>595</y>
       <width>171</width>
       <height>23</height>
      </rect>
