@@ -2256,8 +2256,14 @@ bool correlationAnalysis(QString correlationFileName1, QString correlationFileNa
 	QStringList Time;
 	// 【1】相关性计算
 	mat corMatneed = CorrelationAnalysis(correlationFileName1, correlationFileName2, DataName1, DataName2, Time);
+	JIO::show(corMatneed);
+	qDebug() << DataName1;
+	qDebug() << DataName2;
 	// 【2】保存文件
-	bool b = saveCorrelationAnalysisCSV(correlationFileName1, correlationFileName2, DataName1, DataName2, corMatneed);
+	DataName1[0] = "相关性分析";
+	DataName2.removeFirst();
+	bool b = JIO::save(saveFilePath + "CorrelationAnalysis.csv", DataName1, DataName2, corMatneed);
+//	bool b = saveCorrelationAnalysisCSV(correlationFileName1, correlationFileName2, DataName1, DataName2, corMatneed);
 	return b;
 }
 
@@ -2498,12 +2504,18 @@ bool dataSamplingCsv(QString fileName, int &nowNum ,int needNum)
 		}
 	}
 	// 【2】保存文件
+	// 时间列也需要抽样
+	QStringList timeNameNeed;
+	for(auto i=0; i<needLine.size(); ++i)
+	{
+		timeNameNeed.append( timeName.at( needLine[i]) );
+	}
 	QString saveFileName;
 	if (nowNum >= needNum)
 		saveFileName = "Minus_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
 	else
 		saveFileName = "Add_" + fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
-	bool b = JIO::save(saveFilePath + saveFileName, itemName, timeName, out);
+	bool b = JIO::save(saveFilePath + saveFileName, itemName, timeNameNeed, out);
 	if (b)
 		if (nowNum >= needNum)
 			qDebug("压缩 处理成功!");
@@ -3127,6 +3139,57 @@ bool OriENVtoVirtual(QStringList EnvFileNameList)
 		file.close();
 		b = true;
 	}
+	return b;
+}
+
+// 虚拟映射-电类环境温度数据映射
+bool OriDS18ENVtoVirtual(QString dir)
+{
+	QString CH1 = dir + "/通道1.csv";
+	QString CH2 = dir + "/通道2.csv";
+	QStringList itemName1,itemName2;
+	QStringList timeName,timeName_;
+	mat input1 = JIO::readCsv(CH1, itemName1, timeName);
+	mat input2 = JIO::readCsv(CH2, itemName2, timeName_);
+	mat output(input1.n_rows,4);
+	output.fill(0);
+
+	QStringList ID1{"ID:28ffe7cc001604cf", "ID:28f3deee050000a0"};
+	QStringList ID2{"ID:28ff2cf700160441", "ID:28ff7cff001604c8"};
+
+
+	itemName1.removeFirst();
+	itemName2.removeFirst();
+
+	for(auto i=0; i<2; ++i)
+	{
+		for(auto j=0; j<ID1.size(); ++j)
+		{
+			if(itemName1[i] == ID1[j])
+			{
+				output.col(i+2) = input1.col(j);
+			}
+		}
+	}
+	for(auto i=0; i<2; ++i)
+	{
+		for(auto j=0; j<ID2.size(); ++j)
+		{
+			if(itemName2[i] == ID2[j])
+			{
+				output.col(i) = input2.col(j);
+			}
+		}
+	}
+	// 时间变成 时：分：秒
+	QString Date;
+	Date = timeName[0].left(10);
+	for(auto &e: timeName)
+	{
+		e = e.right(8);
+	}
+	QStringList itemName{"Time", "LeftTop", "LeftBottom", "RightTop", "RightBottom"};
+	bool b = JIO::save(saveFilePath + Date +"_ENVDS18.csv", itemName, timeName, output);
 	return b;
 }
 

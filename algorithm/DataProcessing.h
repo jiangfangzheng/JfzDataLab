@@ -57,7 +57,9 @@ bool LinearRegression(QString inputFile);
 bool LinearRegressionPredict(QString ModelFile, QString DataFile);
 
 // 数据概览-csv文件基本统计分析
-bool csvStatisticAnalysis(QString InputFileName_str);
+//bool csvStatisticAnalysis(QString InputFileName_str);
+// 数据分析-诊断
+//bool DataDiagnosis(QString &InputFileName_str, mat &Mat, QStringList &DataName);
 
 // 数据小处理-初始值为0
 bool dataZeroMat(QString fileName);
@@ -93,6 +95,8 @@ bool virtualFBGtoTEMP(QStringList fileNameList);
 bool virtualFBGtoSTRESS(QStringList fileNameList);
 // 虚拟映射-环境温度数据映射-txt版本
 bool OriENVtoVirtual(QStringList EnvFileNameList);
+// 虚拟映射-电类环境温度数据映射
+bool OriDS18ENVtoVirtual(QString dir);
 // 一键原始电类数据映射
 bool OriDS18toVirtual(QString dir);
 // 一键原始FBG数据映射

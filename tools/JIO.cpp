@@ -48,8 +48,7 @@ QList<QList<QString>> JIO::readCsv(QString fileName, QString fuhao)
 	// 切片放入二维List
 	for (auto& e : outRow)
 	{
-		QList<QString> strList = e.split(fuhao);
-		out.append(strList);
+		out.append(e.split(fuhao));
 	}
 	return out;
 }

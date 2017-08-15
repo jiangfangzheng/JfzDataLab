@@ -4,12 +4,14 @@
 	   #pragma execution_character_set("utf-8")
 #endif
 
+#include <QObject>
 #include <QStringList>
 #include <armadillo>
 using namespace arma;
 
-class JIO
+class JIO : public QObject
 {
+	Q_OBJECT
 public:
 	JIO();
 	~JIO();
@@ -34,5 +36,8 @@ public:
 	static void show(mat input);
 	// 测试
 	static void test();
+signals:
+	void sendMsg(QString msg);							// 显示消息
+	void sendProgressBar(qint64 already, qint64 total); // 显示进度
 };
 

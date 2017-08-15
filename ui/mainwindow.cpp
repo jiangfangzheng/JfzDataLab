@@ -548,7 +548,16 @@ void MainWindow::on_pushButton_VirtualFBGtoSTRESS_clicked()
 // 虚拟映射-电类环境温度4个
 void MainWindow::on_pushButton_DS18_ENVtoVirtual_clicked()
 {
-
+	QString dir = QFileDialog::getExistingDirectory(this, tr("虚拟映射-电类环境温度4个"), workspacePath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	// 载入成功操作
+	if(!dir.isEmpty())
+	{
+		// 电类环境温度4个 OriDS18ENVtoVirtual
+		DataProcessingThread *dataPro = new DataProcessingThread(dir, OriDS18ENVtoVirtual);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &QObject::deleteLater);
+	}
 }
 
 // 一键环境温度数据映射
@@ -613,19 +622,22 @@ void MainWindow::on_pushButton_clicked()
 	if(!fileName.isEmpty())
 	{
 		// 需要变量
+		QString value; // 用于数字转字符串显示
 		QStringList itemName;
 		QStringList timeName;
 		// 【0】计时开始
 		QTime time;time.start();
-		// 【2】数据概览-总体统计
+
+		// 【1】数据概览-总体统计
 		mat input = JIO::readCsv(fileName, itemName, timeName);
+		qDebug()<<"读文件时间 "<< QString::number(time.elapsed()/1000.0);
 		ui->label_2->setText("数据行列：" + QString::number(input.n_rows)+ " x "+ QString::number(input.n_cols) );
 		ui->label_4->setText("数据名字：" + fileName.right(fileName.size() - fileName.lastIndexOf("/")-1) );
-		ui->label_5->setText("数据总和：" + QString::number(accu(input)) );
-		ui->label_6->setText("数据平均：" + QString::number((accu(input))/(input.n_rows * input.n_cols)) );
-		ui->label_7->setText("数据最大：" + QString::number(max(max(input))) );
-//		ui->label_8->setText("数据最小：" + QString::number(min(min(input))) );
-		// 【3】数据概览-面向列的统计
+		ui->label_5->setText("数据总和：" + value.sprintf("%.3lf", accu(input)) );
+		ui->label_6->setText("数据平均：" + value.sprintf("%.3lf", (accu(input))/(input.n_rows * input.n_cols)) );
+		ui->label_7->setText("数据最大：" + value.sprintf("%.3lf", max(max(input))) );
+		ui->label_8->setText("数据最小：" + value.sprintf("%.3lf", min(min(input))) );
+		// 【2】数据概览-面向列的统计
 		// 数据基本信息-处理
 		mat colSumMat = sum(input);			// 每一列的总和
 		mat maxMat = max(input);			// 每一列的最大值
@@ -638,27 +650,86 @@ void MainWindow::on_pushButton_clicked()
 		{
 			avgMat(0,i) = colSumMat(i)/(input.n_rows);
 		}
+		// 【3】tableWidget控件显示
+		ui->tableWidget->horizontalHeader()->setStretchLastSection(true); // 设置表格是否充满，即行末不留空
 
-		// tableWidget控件显示
+		/*QHeaderView* headerView = ui->tableWidget->horizontalHeader();
+		headerView->setSectionResizeMode(QHeaderView::Stretch);
+		*/
+		ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch); // 设置tablewidget等宽
 		QStringList header;
 		header<<"数据名"<<"和"<<"最大值"<<"最大值(绝对值)"<<"最小值"<<"最小值(绝对值)"<<"算术平均值"<<"数据检查";
 		ui->tableWidget->setRowCount(input.n_cols); // 数据项数目的表行
 		ui->tableWidget->setColumnCount(header.size());
 		ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers); // 不可编辑
 		ui->tableWidget->setHorizontalHeaderLabels(header);
-
 		for(auto i=0; i<input.n_cols; ++i )
 		{
 			QTableWidgetItem *Item1 =new QTableWidgetItem( itemName[i+1]                  );
-			QTableWidgetItem *Item2 =new QTableWidgetItem( QString::number(colSumMat(i))  );
-			QTableWidgetItem *Item3 =new QTableWidgetItem( QString::number(maxMat(i))     );
-			QTableWidgetItem *Item4 =new QTableWidgetItem( QString::number(maxAbsMat(i))  );
-			QTableWidgetItem *Item5 =new QTableWidgetItem( QString::number(minMat(i))     );
-			QTableWidgetItem *Item6 =new QTableWidgetItem( QString::number(minAbsMat(i))  );
-			QTableWidgetItem *Item7 =new QTableWidgetItem( QString::number(avgMat(i))     );
-			QTableWidgetItem *Item8 =new QTableWidgetItem( QString::number(avgMat(i))     );
-
 			//		Item1->setTextAlignment(Qt::AlignHCenter);
+			QTableWidgetItem *Item2 =new QTableWidgetItem( value.sprintf("%.3lf",colSumMat(i)) );
+			QTableWidgetItem *Item3 =new QTableWidgetItem( value.sprintf("%.3lf",maxMat(i))    );
+			QTableWidgetItem *Item4 =new QTableWidgetItem( value.sprintf("%.3lf",maxAbsMat(i)) );
+			QTableWidgetItem *Item5 =new QTableWidgetItem( value.sprintf("%.3lf",minMat(i))    );
+			QTableWidgetItem *Item6 =new QTableWidgetItem( value.sprintf("%.3lf",minAbsMat(i)) );
+			QTableWidgetItem *Item7 =new QTableWidgetItem( value.sprintf("%.3lf",avgMat(i))    );
+
+			// 【4】宏观诊断
+			QString diagnosisMsg;
+			// 宏观诊断-温度数据
+			if(ui->radioButton_TempCheck->isChecked())
+			{
+				if (maxMat(i) - minMat(i) < 15 && avgMat(i) > 0 && avgMat(i) < 50)
+					diagnosisMsg = "正常";
+				else
+				{
+					if (fabs(avgMat(i)) < 0.00001)
+					{
+						diagnosisMsg = "未采集";
+					}
+					else
+					{
+						diagnosisMsg = "异常";
+					}
+				}
+			}
+			// 宏观诊断-波长
+			else if(ui->radioButton_WaveCheck->isChecked())
+			{
+
+				if (maxMat(i) - minMat(i) < 3 && avgMat(i) != 0)
+					diagnosisMsg = "正常";
+				else
+				{
+					if (fabs(avgMat(i)) < 0.00001)
+					{
+						diagnosisMsg = "未采集";
+					}
+					else
+					{
+						diagnosisMsg = "异常";
+					}
+				}
+			}
+			// 宏观诊断-ccd
+			else if(ui->radioButton_CCDCheck->isChecked())
+			{
+
+				if (fabs(avgMat(i)) < 0.2)
+					diagnosisMsg = "正常";
+				else
+				{
+					diagnosisMsg = "漂移过大";
+				}
+			}
+			else if(ui->radioButton_NoCheck->isChecked())
+				diagnosisMsg = "";
+			QTableWidgetItem *Item8 =new QTableWidgetItem(diagnosisMsg);
+			if(diagnosisMsg != "正常")
+			{
+				Item8->setBackgroundColor(QColor(255, 255, 205)); // 设置单元格背景颜色
+				Item8->setTextColor(QColor(255,0,0));		      // 设置文字颜色
+			}
 
 			ui->tableWidget->setItem(i,0,Item1); // 数据名，+1 跳过时间项
 			ui->tableWidget->setItem(i,1,Item2); // 和
@@ -670,7 +741,6 @@ void MainWindow::on_pushButton_clicked()
 			ui->tableWidget->setItem(i,7,Item8); // 数据检查
 		}
 		ui->tableWidget->show();
-
 		bool b = true;
 		// 【4】计时结束
 		QString timecost = QString::number(time.elapsed()/1000.0);
