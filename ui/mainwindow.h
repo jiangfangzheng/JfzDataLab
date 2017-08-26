@@ -14,7 +14,6 @@
 #include <QTime>
 #include <QUrl>
 #include <math.h>
-#include "tools/EnvXlsReadThread.h"
 #include "plugins/qcustomplot.h"
 #include "systemTray.h"
 

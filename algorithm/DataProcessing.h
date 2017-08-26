@@ -43,6 +43,10 @@ mat Stand_DS18B20(QStringList &CH);
 bool standardDS18B20(QString dir);
 // 数据标准化-CCD-部署通道排序
 bool standardCCD(QString dir);
+// xls文件读取
+bool readXlsFile(QString FileName, QMap<QString,float> &map);
+// 数据标准化-ENV-xls文件处理
+bool standardENV(QStringList EnvFileNameList);
 // 数据标准化-FBGT(预处理-波长修复)-部署通道排序
 bool standardFBGT(QString dir);
 // 数据标准化-FBGS(没有修复)-部署通道排序

@@ -13,6 +13,8 @@
 #include <QDebug>
 #include <armadillo>
 #include <QFile>
+#include <QAxObject>
+
 using namespace arma;
 using namespace std;
 
@@ -3293,6 +3295,165 @@ bool OriFBGtoVirtual(QString dir)
 	return bT && bS && bTemp && bStress;
 }
 
+bool readXlsFile(QString FileName, QMap<QString, float> &map)
+{
+	QAxObject *excel = NULL;
+	QAxObject *workbooks = NULL;
+	QAxObject *workbook = NULL;
+	excel = new QAxObject("Excel.Application");
+	if (!excel)
+	{
+		qDebug() << "EXCEL对象丢失，读取xls文件需要您电脑安装Excel！";
+		return false;
+	}
+	excel->dynamicCall("SetVisible(bool)", false);
+	workbooks = excel->querySubObject("WorkBooks");
+	workbook = workbooks->querySubObject("Open(QString, QVariant)", FileName);
+	QAxObject * worksheet = workbook->querySubObject("WorkSheets(int)", 1);//打开第一个sheet
+	QAxObject * usedrange = worksheet->querySubObject("UsedRange");//获取该sheet的使用范围对象
+	QAxObject * rows = usedrange->querySubObject("Rows");
+	QAxObject * columns = usedrange->querySubObject("Columns");
+	int intRows = rows->property("Count").toInt();
+	int intCols = columns->property("Count").toInt();
+	qDebug() << "xls行数："<<intRows;
+	qDebug() << "xls列数："<<intCols;
+
+	//    QAxObject * range = worksheet->querySubObject("Cells(int,int)", 13, 2 );
+	//    qDebug() << range->property("Value").toString();
+
+	// 批量载入数据
+	QString Range = "B13:C" +QString::number(intRows);
+	QAxObject *allEnvData = worksheet->querySubObject("Range(QString)", Range);
+	QVariant allEnvDataQVariant = allEnvData->property("Value");
+	QVariantList allEnvDataList = allEnvDataQVariant.toList();
+
+	for(int i=0; i<= intRows-13; i++)
+	{
+		QVariantList allEnvDataList_i =  allEnvDataList[i].toList() ;
+		//qDebug()<< allEnvDataList_i[0].toString()<< allEnvDataList_i[1].toFloat();
+		QString DateM = allEnvDataList_i[0].toString().left(16);// 精确到分钟就行了
+		float value = allEnvDataList_i[1].toFloat();
+		map.insert(DateM,value);
+	}
+
+	// 释放，但是会降低速度
+	workbooks->dynamicCall("Close()");
+	delete(allEnvData);
+	delete(columns);
+	delete(rows);
+	delete(usedrange);
+	delete(worksheet);
+	delete(workbook);
+	delete(workbooks);
+	delete(excel);
+
+	return true;
+}
 
 
+// 数据标准化-ENV-xls文件处理
+bool standardENV(QStringList EnvFileNameList)
+{
+	// 从xls中读取文件到map
+	QMap<QString,float> mapA;
+	QMap<QString,float> mapB;
+	QMap<QString,float> mapC;
+	QMap<QString,float> mapD;
 
+	for(int i=0; i<EnvFileNameList.size(); i++)
+	{
+		QString FileName = EnvFileNameList[i];
+		QString ID = FileName.right(16).left(1); // 提取文件名中的ABCD以区分，例如“WHUT-A_2017-05-02.xls”
+		if(ID == "A") readXlsFile(FileName, mapA);
+		if(ID == "B") readXlsFile(FileName, mapB);
+		if(ID == "C") readXlsFile(FileName, mapC);
+		if(ID == "D") readXlsFile(FileName, mapD);
+	}
+	//        qDebug()<<"mapA.size："<<mapA.size();
+	//        qDebug()<<"mapB.size："<<mapB.size();
+	//        qDebug()<<"mapC.size："<<mapC.size();
+	//        qDebug()<<"mapD.size："<<mapD.size();
+
+	// 找出共有的【最晚开始时间】和【最早结束时间】
+	QString startDate;
+	QString endDate;
+	QMap<QString, float>::const_iterator i;
+	for (i = mapA.constBegin(); i != mapA.constEnd(); ++i)
+	{
+		if( i == mapA.constBegin() )  startDate = i.key();
+		if( i+1 == mapA.constEnd() )  endDate   = i.key();
+	}
+	for (i = mapB.constBegin(); i != mapB.constEnd(); ++i)
+	{
+		if( i == mapB.constBegin() )  startDate = QString::compare(i.key(),startDate)>=0?i.key():startDate;
+		if( i+1 == mapB.constEnd() )  endDate   = QString::compare(i.key(),endDate  )<=0?i.key():endDate;
+	}
+	for (i = mapC.constBegin(); i != mapC.constEnd(); ++i)
+	{
+		if( i == mapC.constBegin() )  startDate = QString::compare(i.key(),startDate)>=0?i.key():startDate;
+		if( i+1 == mapC.constEnd() )  endDate   = QString::compare(i.key(),endDate  )<=0?i.key():endDate;
+	}
+	for (i = mapD.constBegin(); i != mapD.constEnd(); ++i)
+	{
+		if( i == mapD.constBegin() )  startDate = QString::compare(i.key(),startDate)>=0?i.key():startDate;
+		if( i+1 == mapD.constEnd() )  endDate   = QString::compare(i.key(),endDate  )<=0?i.key():endDate;
+	}
+	qDebug() <<"公共开始时间:" <<startDate << " 公共结束时间:" << endDate;
+
+	// 制作整合的数据（Key为时间，value为,分隔4个值）例如："2017-04-25 13:23"、"19.6,19.4,19.3,19.5"
+	QMap<QString,QString> mapAll;
+	for (i = mapA.constBegin(); i != mapA.constEnd(); ++i)
+	{
+		if( QString::compare(i.key(),startDate)>=0 && QString::compare(i.key(),endDate)<=0)
+		{
+			QString value = QString::number(i.value());
+			mapAll.insert(i.key(), value);
+		}
+	}
+	for (i = mapB.constBegin(); i != mapB.constEnd(); ++i)
+	{
+		if( QString::compare(i.key(),startDate)>=0 && QString::compare(i.key(),endDate)<=0)
+		{
+			QString value = "," + QString::number(i.value());
+			mapAll.insert(i.key(), mapAll[i.key()] + value);
+		}
+	}
+	for (i = mapC.constBegin(); i != mapC.constEnd(); ++i)
+	{
+		if( QString::compare(i.key(),startDate)>=0 && QString::compare(i.key(),endDate)<=0)
+		{
+			QString value = "," + QString::number(i.value());
+			mapAll.insert(i.key(), mapAll[i.key()] + value);
+		}
+	}
+	for (i = mapD.constBegin(); i != mapD.constEnd(); ++i)
+	{
+		if( QString::compare(i.key(),startDate)>=0 && QString::compare(i.key(),endDate)<=0)
+		{
+			QString value = "," + QString::number(i.value());
+			mapAll.insert(i.key(), mapAll[i.key()] + value);
+		}
+	}
+
+	// 保存文件
+	QString Text = "Time,Back,Right,Left,Front\n";
+	QString SaveFileName = saveFilePath + startDate.left(10) +"~" + endDate.left(10) +"-Data-EnvTemperature.csv";
+	//QString SaveFileName = "Data-EnvTemperature.csv";
+	QFile file(SaveFileName); // 实例 QFile
+	file.open(QIODevice::ReadWrite | QIODevice::Append); // 存在打开，不存在创建
+	// 写抬头
+	QByteArray str = Text.toUtf8();// 写入内容，这里需要转码，否则报错。
+	file.write(str); // 写入内容,这里需要转码，否则报错。
+	// 写数据
+	Text = "";
+	QMap<QString, QString>::const_iterator ii;
+	for (ii = mapAll.constBegin(); ii != mapAll.constEnd(); ++ii)
+	{
+		Text = ii.key() + ":00," +ii.value() + "\n";// 时间还原到秒
+		str = Text.toUtf8();
+		file.write(str);
+		//qDebug()<< "Key:"<< ii.key() << " Value:" << ii.value();
+	}
+	file.close();
+	return true;
+}

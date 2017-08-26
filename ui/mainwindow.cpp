@@ -6,7 +6,6 @@
 #include "tools/DataProcessingThread.h"
 #include "tools/DataSQLThread.h"
 #include "algorithm/DataProcessing.h"
-#include "algorithm/datadiagnosis.h"
 #include "plugins/qcustomplot.h"
 #include "SetUI.h"
 #include <QtNetwork>
@@ -202,25 +201,21 @@ void MainWindow::on_pushButton_FBGS_clicked()
 // 环境温度标准化
 void MainWindow::on_pushButton_ENV_clicked()
 {
-//	ui->label_msg->setText("...");
-//	ui->progressBar->show();
-////	ui->pushButton_ENV->setEnabled(false);
-//	EnvFileNameList = QFileDialog::getOpenFileNames(this, tr("打开环境温度数据"), workspacePath, tr("textfile(*.xls);"));
-//	if(EnvFileNameList.size() != 4)
-//	{
-//		emit sendMsg("文件状态：未载入");
-//		QMessageBox::critical(NULL, "注意", "请选择环境温度的4个文件！", QMessageBox::Yes, QMessageBox::Yes);
-////		ui->pushButton_ENV->setEnabled(true);
-//	}
-//	else
-//	{
-//		// 开启线程处理xls文件，防止界面卡死
-//		EnvXlsReadThread *readxls = new EnvXlsReadThread(EnvFileNameList);
-//		connect(readxls, &EnvXlsReadThread::sendMsg, this, &MainWindow::showMsg);
-//		connect(readxls, &EnvXlsReadThread::sendProgressBar, this, &MainWindow::updateProgressBar);
-//		readxls->start();
-//	}
-
+	QStringList fileNameList = QFileDialog::getOpenFileNames(this, tr("打开环境温度数据"), workspacePath, tr("textfile(*.xls);"));
+	if(fileNameList.size() != 4)
+	{
+		emit sendMsg("文件状态：未载入");
+		QMessageBox::critical(NULL, "注意", "请选择环境温度的4个文件！", QMessageBox::Yes, QMessageBox::Yes);
+	}
+	else
+	{
+		// 环境温度标准化 standardENV
+		DataProcessingThread *dataPro = new DataProcessingThread(fileNameList, standardENV);
+		dataPro->start();
+		connect(dataPro, &DataProcessingThread::sendMsg, this, &MainWindow::showMsg);
+		connect(dataPro, &DataProcessingThread::sendProgressBar, this, &MainWindow::updateProgressBar);
+		connect(dataPro, &DataProcessingThread::finished, dataPro, &DataProcessingThread::deleteLater);
+	}
 }
 
 // FBG波长转温度

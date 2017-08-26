@@ -29,9 +29,7 @@ LIBS += D:\Library\Armadillo\lib_win32\blas_win32_MT.lib    \
         D:\Library\Armadillo\lib_win64\lapack_win64_MT.lib  \
 
 SOURCES += main.cpp\
-    tools/EnvXlsReadThread.cpp \
     ui/mainwindow.cpp \
-    algorithm/datadiagnosis.cpp \
     plugins/qcustomplot.cpp \
     ui/systemTray.cpp \
     tools/JSQL.cpp \
@@ -43,9 +41,7 @@ SOURCES += main.cpp\
     ui/AboutUI.cpp
 
 HEADERS  += ui/mainwindow.h \
-    tools/EnvXlsReadThread.h \
     skins/skins.h \
-    algorithm/datadiagnosis.h \
     plugins/qcustomplot.h \
     ui/systemTray.h \
     tools/JSQL.h \

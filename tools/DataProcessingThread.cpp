@@ -71,3 +71,4 @@ void DataProcessingThread::run()
 	emit sendProgressBar(100, 100);
 	qDebug()<<"[DataProcessingThread end]";
 }
+
