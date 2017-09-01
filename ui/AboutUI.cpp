@@ -12,6 +12,11 @@ AboutUI::AboutUI(QWidget *parent) :
 	ui->label_4->setText("Qt Framework \nQCustomPlot \nArmadillo、Blas、Lapack \n");
 	ui->label_5->setText("sandeepin");
 	ui->label_6->setText("mother");
+	ui->label_7->setPixmap(QPixmap(":/jfz.png"));
+	ui->label_7->setScaledContents(true);
+//	QImage *image= new QImage(":/jfz.png");
+//    ui->label_6->setPixmap(QPixmap::fromImage(image));
+//    ui->label_6->load(":/jfz.png");
 
 }
 
